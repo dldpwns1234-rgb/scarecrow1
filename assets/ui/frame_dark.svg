@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 9칸 늘림 '어둠의 판' (어둠의 나무 칸, 방장 2026-10-15 "스킬트리 공간에 구분감"): 나무 틀 안에 보랏빛 밤하늘. 가장자리 24px(틀)은 그대로, 가운데는 되풀이된다 -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1530"/>
+      <stop offset="1" stop-color="#140f22"/>
+    </linearGradient>
+  </defs>
+  <!-- 바깥 어두운 테와 나무 틀 -->
+  <rect x="1" y="1" width="94" height="94" rx="10" fill="#1d120a"/>
+  <rect x="4" y="4" width="88" height="88" rx="8" fill="#5a3d26"/>
+  <path d="M9 6.5 H87" stroke="#9f86b8" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+  <path d="M9 90 H87" stroke="#24160c" stroke-width="2.5" opacity="0.7" stroke-linecap="round"/>
+  <!-- 안쪽 밤하늘 (단색: 되풀이될 때 띠가 보이지 않게) -->
+  <rect x="14" y="14" width="68" height="68" rx="4" fill="#24160c"/>
+  <rect x="16" y="16" width="64" height="64" rx="3" fill="#17112a"/>
+  <!-- 희미한 별 몇 개 (가운데가 되풀이되며 흩어진다) -->
+  <g fill="#cfc4ee">
+    <circle cx="30" cy="28" r="1" opacity="0.5"/>
+    <circle cx="62" cy="40" r="1.2" opacity="0.4"/>
+    <circle cx="44" cy="62" r="0.9" opacity="0.45"/>
+    <circle cx="70" cy="70" r="0.8" opacity="0.35"/>
+    <circle cx="24" cy="54" r="0.8" opacity="0.3"/>
+  </g>
+  <!-- 모서리 못 -->
+  <g fill="#c9b48a" stroke="#1d120a" stroke-width="1">
+    <circle cx="9" cy="9" r="2.4"/>
+    <circle cx="87" cy="9" r="2.4"/>
+    <circle cx="9" cy="87" r="2.4"/>
+    <circle cx="87" cy="87" r="2.4"/>
+  </g>
+</svg>

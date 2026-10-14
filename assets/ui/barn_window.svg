@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="150" viewBox="0 0 160 150">
+  <!-- 헛간 창: 오후 하늘과 먼 밭. 낮 화면 초상화(portrait.gd)가 짚돌이 뒤에 붙여 그린다 (배경에 두면 화면 비율에 따라 글과 겹쳤다) -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fb6d8"/>
+      <stop offset="1" stop-color="#e9d9b0"/>
+    </linearGradient>
+  </defs>
+  <rect x="5" y="2" width="150" height="136" rx="6" fill="#1a110a"/>
+  <rect x="13" y="10" width="134" height="120" fill="url(#sky)"/>
+  <path d="M13 102 Q55 84 95 96 T147 90 V130 H13 Z" fill="#7c9a5a"/>
+  <path d="M13 112 Q65 102 147 110 V130 H13 Z" fill="#c9ad5c"/>
+  <path d="M80 10 V130 M13 70 H147" stroke="#1a110a" stroke-width="7"/>
+  <rect x="1" y="134" width="158" height="10" rx="3" fill="#22170f"/>
+</svg>

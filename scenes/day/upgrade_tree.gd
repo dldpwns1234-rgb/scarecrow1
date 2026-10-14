@@ -45,10 +45,13 @@ func _ready() -> void:
 	recenter.custom_minimum_size = CENTER_BUTTON_SIZE
 	recenter.pressed.connect(_recenter)
 	top.add_child(recenter)
+	var frame := PanelContainer.new()  # 나무 틀 안 밤하늘: 헛간 벽과 갈라 보이게 (방장 2026-10-15)
+	frame.theme_type_variation = "DarkBoard"
+	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(frame)
 	_board = TreeBoard.new()
-	_board.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_board.selected.connect(_select)
-	add_child(_board)
+	frame.add_child(_board)
 	_selected = _board.center_index  # 데이터에 어둠의 계약이 있으면 그 줄, 없으면 -1
 	add_child(_make_detail())
 	Game.vitality_changed.connect(_gate.queue)

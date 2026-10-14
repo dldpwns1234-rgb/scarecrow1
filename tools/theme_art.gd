@@ -1,7 +1,8 @@
 extends SceneTree
 ## 테마 생성기 1부: 그림 틀 (방장 2026-10-15 '진짜 게임처럼', 아트 방향 '달빛 동화 그림책풍'). tools/make_theme.gd가 상속해 마지막에 _dress()를 부른다.
 ## 납작한 단색 상자 대신 SVG 9칸 늘림 그림을 입힌다: 단추는 볏짚 끈 나무판(눌리면 내려앉음), 주요 단추는 금칠 판, 패널은 바느질한 삼베.
-## 타입 변형 WoodPanel(볏짚 끈 나무판: 결과 알림·확인 창·설정), Parchment(낡은 종이: 이야기 카드·다시 읽기, 글은 짙은 갈색은 화면이 정한다).
+## 타입 변형 WoodPanel(볏짚 끈 나무판: 결과 알림·확인 창·설정), Parchment(낡은 종이: 이야기 카드·다시 읽기, 글은 짙은 갈색은 화면이 정한다),
+## DarkBoard(나무 틀 안 보랏빛 밤하늘: 어둠의 나무 칸을 헛간 벽과 갈라 보이게, 방장 2026-10-15).
 ## 글꼴은 주아체 Jua(둥글고 굵음, OFL, 방장 2026-10-15 고름). 주아체에 없는 드문 글자는 Noto Sans KR이 대신 그린다.
 ## 그림은 assets/ui/*.svg (손으로 그린 SVG가 원본). 9칸 늘림이라 가장자리 폭(margin)만큼은 그대로, 가운데는 늘어난다
 
@@ -11,6 +12,8 @@ const GOLD := "res://assets/ui/button_gold.svg"
 const BURLAP := "res://assets/ui/frame_burlap.svg"
 const WOOD_FRAME := "res://assets/ui/frame_wood.svg"
 const PARCHMENT := "res://assets/ui/frame_parchment.svg"
+const DARK_BOARD := "res://assets/ui/frame_dark.svg"
+const BOARD_EDGE: int = 24          # 어둠의 판 나무 틀 폭
 const JUA := "res://assets/fonts/Jua-Regular.ttf"
 const NOTO := "res://assets/fonts/NotoSansKR-Regular.ttf"
 const BUTTON_EDGE: int = 16          # 단추 그림의 가장자리 폭
@@ -66,6 +69,12 @@ func _dress(theme: Theme) -> void:
 	theme.add_type("Parchment")
 	theme.set_type_variation("Parchment", "PanelContainer")
 	theme.set_stylebox("panel", "Parchment", _box(PARCHMENT, FRAME_EDGE, FRAME_TEXT))
+	theme.add_type("DarkBoard")
+	theme.set_type_variation("DarkBoard", "PanelContainer")
+	var board := _box(DARK_BOARD, BOARD_EDGE, Vector2(BOARD_EDGE - 6, BOARD_EDGE - 6))
+	board.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	board.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	theme.set_stylebox("panel", "DarkBoard", board)
 
 
 ## 9칸 늘림 상자: edge는 그림의 가장자리 폭, text는 글 여백, shadow는 아래 그늘만큼 글을 위로, sink는 눌렸을 때 글을 아래로
