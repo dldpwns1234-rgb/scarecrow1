@@ -49,8 +49,8 @@ func _test_plant() -> void:
 	_close(Night.max_hp[wheat], Balance.crop_hp(Balance.Crop.WHEAT, 1), "밀 체력")
 	_close(Balance.crop_hp(Balance.Crop.WHEAT, 3), 10.0 * pow(Balance.FIELD_HP_GROWTH, 2), "밭 단계마다 체력 ×성장")
 	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 2), 25.0 * Balance.FIELD_VITALITY_GROWTH, "밭 단계마다 생기 ×성장")
-	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * 1.6 * 1.6, "비옥한 어둠: 체력 ×1.6씩")
-	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), 4.0, "비옥한 어둠: 생기 ×2씩")
+	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * 1.5 * 1.5, "비옥한 어둠: 체력 ×1.5씩")
+	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), 1.7 * 1.7, "비옥한 어둠: 생기 ×1.7씩")
 	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 25.0 * 2.0, "탐스러운 호박: 호박 생기 +25%씩")
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0, "탐스러운 호박은 밀에는 안 듣는다")
 	for level: int in [1, 5, 100]:
@@ -132,7 +132,7 @@ func _test_crow() -> void:
 
 func _test_regrow() -> void:
 	_close(Balance.regrow_delay(0), 0.0, "다시 자라는 뿌리가 없으면 안 자란다")
-	_close(Balance.regrow_delay(3), 12.0 * 0.85 * 0.85, "레벨마다 15% 빨리")
+	_close(Balance.regrow_delay(3), 15.0 * 0.9 * 0.9, "레벨마다 10% 빨리")
 	_start()
 	var cell := _first_crop()
 	Night._damage(cell, 1e9)
@@ -161,16 +161,15 @@ func _test_clear() -> void:
 	var levels: Array[int] = []
 	var on_clear := func(level: int) -> void: levels.append(level)
 	Night.field_cleared.connect(on_clear)
-	var floor_left := floori(Night.first_planted * (1.0 - Balance.CLEAR_RATIO))
 	for i in Night.cell_count():
-		if Night.alive_count() <= floor_left + 1:
+		if Night.withered >= Night.clear_target() - 1:
 			break
 		if Night.is_alive(i):
 			Night._damage(i, 1e9)
 	_equal(Night.active, true, "정복 직전까지는 밤이 이어진다")
 	Night._damage(_first_crop(), 1e9)
 	Night.field_cleared.disconnect(on_clear)
-	_equal(levels, [1], "남은 작물이 10% 아래면 정복")
+	_equal(levels, [1], "시든 수가 처음 심은 수의 90%면 정복")
 	_equal(Night.alive_count(), 0, "남은 작물이 저절로 쓰러진다")
 	_equal(Night.active, false, "밤이 끝난다")
 	_equal(Game.is_night(), false, "낮으로 돌아온다")

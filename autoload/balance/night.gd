@@ -6,7 +6,7 @@ extends "res://autoload/balance/upgrades.gd"
 const FIELD_SIZE: int = 12             # 밭 12 × 12칸
 const BASE_FILL: float = 0.3           # 첫 밭은 듬성듬성 (방장 2026-10-14: 구름을 어디로 끌지 고르는 재미)
 const FILL_PER_LEVEL: float = 0.07     # 빽빽한 밭: 레벨당 심는 비율 +7%p (10레벨이면 꽉 찬다)
-const CLEAR_RATIO: float = 0.9         # 처음 심은 작물의 이만큼이 시들어 남은 작물이 10% 아래면 밭 정복 (다시 자란 작물도 남은 수에 든다)
+const CLEAR_RATIO: float = 0.9         # 시든 작물이 처음 심은 수의 이만큼에 닿으면 밭 정복 (다시 자란 작물이 시든 것도 친다. 남은 수로 재면 다시 자라기가 정복을 막았다)
 const MAX_FIELD_LEVEL: int = 200
 
 enum Crop { WHEAT, CORN, PUMPKIN }
@@ -21,10 +21,10 @@ const CROP_SHIFT: float = 0.04
 const MIN_WHEAT_WEIGHT: float = 0.2
 const PUMPKIN_WEIGHT_PER_LEVEL: float = 0.02  # 탐스러운 호박: 레벨당 호박 비율 +2%p (밀에서 덜어 온다)
 const PUMPKIN_VITALITY_PER_LEVEL: float = 0.25  # 탐스러운 호박: 레벨당 호박 생기 +25%
-const FIELD_HP_GROWTH: float = 2.8     # 밭 단계마다 작물 체력 ×2.8
-const FIELD_VITALITY_GROWTH: float = 1.9  # 밭 단계마다 생기 ×1.9 (체력보다 덜 올라 업그레이드가 필요하다)
-const FERTILE_HP: float = 1.6          # 비옥한 어둠(상대 스펙): 레벨당 작물 체력 ×1.6, 생기 ×2 (복리)
-const FERTILE_VITALITY: float = 2.0
+const FIELD_HP_GROWTH: float = 2.2     # 밭 단계마다 작물 체력 ×2.2
+const FIELD_VITALITY_GROWTH: float = 1.8  # 밭 단계마다 생기 ×1.8 (체력보다 덜 올라 업그레이드가 필요하다. docs/BALANCE_SIM.md)
+const FERTILE_HP: float = 1.5          # 비옥한 어둠(상대 스펙): 레벨당 작물 체력 ×1.5, 생기 ×1.7 (복리). ×1.6·×2는 다시 자라기와 겹쳐 수입이 폭발했다
+const FERTILE_VITALITY: float = 1.7
 
 const CLOUD_TICK: float = 0.5          # 구름은 이 간격(초)마다 원 안의 작물을 한꺼번에 친다 (곡괭이질처럼 박자가 보이게)
 const DUSK_TICK_CUT: float = 0.05      # 어스름: 레벨당 박자 간격 −5%
@@ -42,8 +42,8 @@ const CROW_PECK_SHARE: float = 2.0     # 한 번 쪼는 피해 = 구름 피해(�
 const BEAK_PER_LEVEL: float = 0.5
 const FEATHER_PER_LEVEL: float = 0.15  # 검은 깃털: 쪼인 작물이 번짐에 걸릴 확률 +15%p
 
-const REGROW_BASE_DELAY: float = 12.0  # 다시 자라는 뿌리: 시든 칸에 이만큼(초) 뒤 새 작물 (레벨마다 ×0.85)
-const REGROW_DELAY_STEP: float = 0.85
+const REGROW_BASE_DELAY: float = 15.0  # 다시 자라는 뿌리: 시든 칸에 이만큼(초) 뒤 새 작물 (레벨마다 ×0.9)
+const REGROW_DELAY_STEP: float = 0.9
 const VITALITY_PER_LEVEL: float = 0.2  # 썩은 냄새: 레벨당 생기 +20% (더하기. 복리로 두면 독한 포자와 함께 수입이 비용을 앞질러 벽이 사라졌다)
 
 

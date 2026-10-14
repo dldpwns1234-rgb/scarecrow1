@@ -8,7 +8,7 @@ func run() -> void:
 	var T: int = Balance.Upgrade.TOXIN
 	var N: int = Balance.Upgrade.LONG_NIGHT
 	_close(Balance.upgrade_cost(R, 0), 10.0, "넓은 구름 첫 비용")
-	_close(Balance.upgrade_cost(R, 1), 16.0, "다음 비용은 ×1.6")
+	_close(Balance.upgrade_cost(R, 1), 22.0, "다음 비용은 ×2.2")
 	_equal(Upgrades.is_unlocked(R), true, "뿌리는 처음부터 열림")
 	_equal(Upgrades.is_unlocked(N), true, "긴 밤도 뿌리 (왼쪽 갈래)")
 	_equal(Upgrades.is_unlocked(T), false, "독한 포자는 넓은 구름이 있어야")

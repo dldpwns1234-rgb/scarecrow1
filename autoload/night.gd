@@ -132,7 +132,7 @@ func _damage(index: int, amount: float) -> void:
 		_wither(index, true)
 
 
-## 시듦: 생기를 주고 옆 칸으로 번지고, 다시 자라는 뿌리가 있으면 시계를 건다. 남은 작물이 처음 심은 수의 10% 아래면 밭 정복
+## 시듦: 생기를 주고 옆 칸으로 번지고, 다시 자라는 뿌리가 있으면 시계를 건다. 시든 수가 처음 심은 수의 90%에 닿으면 밭 정복
 func _wither(index: int, spread: bool) -> void:
 	hp[index] = 0.0
 	infected[index] = 0
@@ -145,8 +145,13 @@ func _wither(index: int, spread: bool) -> void:
 	regrow_left[index] = Balance.regrow_delay(Upgrades.level(Balance.Upgrade.REGROW))
 	if spread:
 		_spread_from(index)
-	if alive_count() <= floori(first_planted * (1.0 - Balance.CLEAR_RATIO)):
+	if withered >= clear_target():
 		_clear()
+
+
+## 밭 정복에 필요한 시든 작물 수
+func clear_target() -> int:
+	return ceili(first_planted * Balance.CLEAR_RATIO)
 
 
 func _spread_from(index: int) -> void:

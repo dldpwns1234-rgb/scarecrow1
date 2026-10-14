@@ -1,10 +1,11 @@
 extends Node
 ## 밤 시뮬레이션 (GDD 4절, 밸런스용). 실제 Balance·Upgrades·Game·Night 코드를 화면 없이 그대로 돌린다.
 ##
-##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1]
+##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2]
 ##
 ## 사람 흉내: 밤에는 구름을 '값어치가 가장 몰린 자리'로 옮긴다 (원 안 작물의 생기 ÷ 남은 체력 합이 가장 큰 작물 자리, 0.25초마다 다시 고름).
 ## 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
+## 가장 높은 단계를 못 깼으면 사람처럼 한 단계 아래에서 retry밤 동안 모은 뒤 다시 도전한다 (못 깨는 밭만 붙들면 수입이 바닥이라 벽이 실제보다 가팔라 보였다).
 ## 낮에 쓰는 시간(day초)을 밤 길이에 더해 실제 시간을 어림한다. 결과는 docs/BALANCE_SIM.md에 적는다
 
 const DT: float = 0.05
@@ -13,6 +14,8 @@ const RETARGET: float = 0.25
 var _speed: float = 12.0
 var _day: float = 15.0
 var _log: bool = true
+var _retry: int = 2
+var _farm_left: int = 0  # 한 단계 아래에서 더 모을 밤 수
 
 
 func _ready() -> void:
@@ -22,6 +25,7 @@ func _ready() -> void:
 	_speed = float(args.get("speed", "12"))
 	_day = float(args.get("day", "15"))
 	_log = args.get("log", "1") == "1"
+	_retry = int(args.get("retry", "2"))
 	var seed := int(args.get("seed", "1"))
 	Upgrades.reset()
 	Game.reset()
@@ -31,12 +35,15 @@ func _ready() -> void:
 	var firsts: Dictionary = {}
 	for n in nights:
 		var bought := _shop()
+		_pick_level()
 		var level := Night.field_level
 		Game.start_night()
 		Night.begin(seed * 1000 + n)
 		var seconds := _play()
 		clock += seconds + _day
 		var cleared := Night.cleared
+		if not cleared and level == Night.best_level and level > 1:
+			_farm_left = _retry
 		if cleared and not firsts.has(level):
 			firsts[level] = [n + 1, clock / 60.0]
 		if _log:
@@ -46,6 +53,15 @@ func _ready() -> void:
 	print("단계 첫 정복: ", _firsts_text(firsts))
 	print("업그레이드: ", _levels_text())
 	get_tree().quit()
+
+
+## 못 깬 뒤 retry밤은 한 단계 아래, 그 밖에는 가장 높은 단계
+func _pick_level() -> void:
+	if _farm_left > 0:
+		_farm_left -= 1
+		Night.choose_level(Night.best_level - 1)
+	else:
+		Night.choose_level(Night.best_level)
 
 
 ## 밤 한 판을 끝까지 돈다. 걸린 시간(초)을 돌려준다
