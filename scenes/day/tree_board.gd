@@ -20,6 +20,8 @@ const CENTER_RING := Color("9d7bd8")
 const SELECT_COLOR := Color("e9c46a")
 const SELECT_MARGIN: float = 5.0
 const REVEAL_SECONDS: float = 0.35
+const CARD_TEXT_PADDING: float = 40.0  # 카드 안 좌우 여백 (테마 버튼 여백 포함)
+const MIN_CARD_FONT: int = 13
 
 var pan: Vector2 = Vector2.ZERO   # 가운데 노드가 판 가운데에서 얼마나 옮겨졌는지
 var selected_index: int = -1
@@ -74,7 +76,9 @@ func card(index: int) -> Button:
 func refresh(texts: PackedStringArray, styles: PackedStringArray, tints: Array[Color]) -> void:
 	for i in _cards.size():
 		var card := _cards[i]
-		card.text = texts[i]
+		if card.text != texts[i]:
+			card.text = texts[i]
+			_fit_font(card)
 		card.theme_type_variation = styles[i]
 		card.self_modulate = tints[i]
 		var show := _is_revealed(i) and i != center_index  # 가운데 줄은 원으로 그린다
@@ -83,6 +87,19 @@ func refresh(texts: PackedStringArray, styles: PackedStringArray, tints: Array[C
 		card.visible = show
 		_shown[i] = show
 	_place()
+
+
+## 가장 긴 줄(대개 이름)이 카드 폭을 넘으면 그 카드만 글을 줄인다 ("새벽 전 몰아치기"가 잘렸다)
+func _fit_font(card: Button) -> void:
+	card.remove_theme_font_size_override("font_size")
+	var font := card.get_theme_font("font")
+	var base := card.get_theme_font_size("font_size")
+	var widest := 0.0
+	for line in card.text.split("\n"):
+		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, base).x)
+	var room := CARD_SIZE.x - CARD_TEXT_PADDING
+	if widest > room:
+		card.add_theme_font_size_override("font_size", maxi(floori(base * room / widest), MIN_CARD_FONT))
 
 
 ## 뿌리는 처음부터, 나머지는 앞 업그레이드를 1레벨 이상 샀을 때 나타난다
