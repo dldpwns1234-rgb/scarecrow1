@@ -1,0 +1,47 @@
+; Engine configuration file.
+; 허수아비는 쉬고 싶다 (가제) — 웹용 가로 화면 인크리멘탈 게임 (CLAUDE.md 기술 스택)
+
+config_version=5
+
+[application]
+
+config/name="허수아비는 쉬고 싶다"
+config/description="백 년 지친 허수아비가 밭에 역병을 뿌려 흉년을 일으키는 인크리멘탈 게임"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.109804, 0.12549, 0.164706, 1)
+
+[autoload]
+
+; 순서가 곧 초기화 순서. Balance는 다른 모든 오토로드가 참조하므로 맨 앞이다
+Balance="*res://autoload/balance.gd"
+Num="*res://autoload/num.gd"
+Upgrades="*res://autoload/upgrades.gd"
+Game="*res://autoload/game.gd"
+; 저장은 위 오토로드를 모두 불러오므로 맨 뒤에
+Save="*res://autoload/save.gd"
+
+[display]
+
+; 기준 해상도 1280×720 가로 (방장 결정 2026-10-14). 남는 쪽은 늘려서 채운다
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/handheld/orientation=0
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[gui]
+
+; tools/make_theme.gd가 만든 전체 테마
+theme/custom="res://assets/ui/theme.tres"
+; 고도 기본 폰트에는 한글이 없다. 웹에서는 시스템 폰트 대체도 안 되므로 직접 넣는다
+theme/custom_font="res://assets/fonts/NotoSansKR-Regular.ttf"
+
+[rendering]
+
+; 밤 하늘 바탕색. 테마(tools/make_theme.gd)의 BACKGROUND와 맞춘다
+environment/defaults/default_clear_color=Color(0.109804, 0.12549, 0.164706, 1)
+; Compatibility 렌더러: 웹 익스포트 조건
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

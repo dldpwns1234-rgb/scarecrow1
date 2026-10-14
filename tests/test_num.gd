@@ -1,0 +1,27 @@
+extends "res://tests/test_case.gd"
+## Num.format: 한국식 숫자 표기 (회귀 용사에서 옮겨 온 그대로)
+
+
+func run() -> void:
+	_equal(Num.format(0.0), "0", "0")
+	_equal(Num.format(0.67), "0", "1 미만은 0")
+	_equal(Num.format(9999.0), "9999", "1만 미만 정수")
+	_equal(Num.format(9999.9), "9999", "1만 미만은 버림")
+	_equal(Num.format(10000.0), "1.00만", "1만")
+	_equal(Num.format(12345.0), "1.23만", "1.23만")
+	_equal(Num.format(12399.0), "1.23만", "소수 둘째 자리 버림")
+	_equal(Num.format(456000.0), "45.6만", "45.6만")
+	_equal(Num.format(4560000000.0), "45.6억", "45.6억")
+	_equal(Num.format(99999999.0), "9999만", "9999만")
+	_equal(Num.format(100000000.0), "1.00억", "1억")
+	_equal(Num.format(7.89e14), "789조", "789조")
+	_equal(Num.format(1.234e19), "1234경", "1234경")
+	_equal(Num.format(1e20), "1.00해", "1해")
+	_equal(Num.format(1e68), "1.00무량대수", "1무량대수")
+	_equal(Num.format(9.99e71), "9990무량대수", "9990무량대수")
+	_equal(Num.format(99999.0), "9.99만", "9.99만 (10만 바로 아래)")
+	_equal(Num.format(999999.0), "99.9만", "99.9만 (100만 바로 아래)")
+	_equal(Num.format(9999999.0), "999만", "999만")
+	_equal(Num.format(1e72), "1.00e72", "10^72는 과학적 표기")
+	_equal(Num.format(1.23456e80), "1.23e80", "과학적 표기 버림")
+	_equal(Num.format(-12345.0), "-1.23만", "음수")

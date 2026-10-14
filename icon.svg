@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- 짚돌이: 지친 허수아비. 굵은 외곽선과 단색 면 (회귀 용사와 같은 그림체) -->
+  <g stroke="#2b2416" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- 장대 -->
+    <rect x="120" y="150" width="16" height="100" fill="#8a5a2b"/>
+    <!-- 팔 막대와 삐져나온 짚 -->
+    <rect x="22" y="138" width="212" height="14" rx="6" fill="#8a5a2b"/>
+    <path d="M24 145 L8 132 M24 145 L6 150 M24 145 L12 164 M232 145 L248 132 M232 145 L250 150 M232 145 L244 164" fill="none" stroke="#e9c46a" stroke-width="7"/>
+    <!-- 기운 셔츠 -->
+    <path d="M70 132 L186 132 L176 210 L80 210 Z" fill="#5b7fa6"/>
+    <rect x="96" y="160" width="26" height="24" fill="#c9784b"/>
+    <path d="M128 132 L128 210" fill="none" stroke-width="4"/>
+    <!-- 자루 머리 -->
+    <ellipse cx="128" cy="96" rx="50" ry="46" fill="#d9b880"/>
+    <!-- 지친 눈 (반쯤 감김)과 바느질 입 -->
+    <path d="M100 92 Q110 86 120 92 M136 92 Q146 86 156 92" fill="none" stroke-width="5"/>
+    <path d="M104 98 L116 98 M140 98 L152 98" fill="none" stroke-width="4"/>
+    <path d="M106 118 Q128 110 150 118" fill="none" stroke-width="4"/>
+    <path d="M112 112 L114 122 M124 110 L124 120 M136 110 L136 120 M146 112 L144 122" fill="none" stroke-width="3"/>
+    <!-- 밀짚모자 -->
+    <ellipse cx="128" cy="58" rx="78" ry="16" fill="#e9c46a"/>
+    <path d="M90 58 Q94 18 128 16 Q162 18 166 58 Z" fill="#e9c46a"/>
+    <path d="M92 50 L164 50" fill="none" stroke="#b5462f" stroke-width="8"/>
+  </g>
+</svg>
