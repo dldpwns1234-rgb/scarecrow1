@@ -50,5 +50,5 @@ func _refresh() -> void:
 	_down.disabled = level <= 1
 	_up.disabled = level >= Night.best_level
 	var hp := Balance.crop_hp(0, level) / Balance.crop_hp(0, 1)
-	var rest := Balance.crop_rest(0, level) / Balance.crop_rest(0, 1)
-	_note.text = "작물 체력 %s  ·  생기 %s  ·  열린 단계 %d" % [Num.multiplier(hp), Num.multiplier(rest), Night.best_level]
+	var vitality := Balance.crop_vitality(0, level) / Balance.crop_vitality(0, 1)
+	_note.text = "작물 체력 %s  ·  생기 %s  ·  열린 단계 %d" % [Num.multiplier(hp), Num.multiplier(vitality), Night.best_level]

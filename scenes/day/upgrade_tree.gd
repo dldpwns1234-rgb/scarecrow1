@@ -46,7 +46,7 @@ func _ready() -> void:
 	add_child(_board)
 	_selected = _board.center_index  # 데이터에 어둠의 계약이 있으면 그 줄, 없으면 -1
 	add_child(_make_detail())
-	Game.rest_changed.connect(_gate.queue)
+	Game.vitality_changed.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)
 	_refresh()
 

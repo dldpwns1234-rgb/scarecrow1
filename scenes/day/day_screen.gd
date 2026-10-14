@@ -1,5 +1,5 @@
 extends MarginContainer
-## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·생기·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
+## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·생기·약속된 휴식·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
 ## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 상수는 배치용이다.
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -18,10 +18,13 @@ const REST_COLOR := Color("9ad14f")
 const NOTE_COLOR := Color("b8bcc8")
 const REST_FONT_SIZE: int = 40
 const TITLE_FONT_SIZE: int = 28
+const DAY_SECONDS: float = 86400.0
+const YEAR_SECONDS: float = 31536000.0
 const SOUND_BUTTON_SIZE := Vector2(110, 48)
 
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
 var _rest: Label
+var _promise: Label  # 바친 생기로 어둠이 약속한 휴식 (Game.promised_rest_seconds)
 var _record: Label
 var _night_button: Button
 var _sound: Button  # 효과음 켬/끔 (Prefs)
@@ -39,7 +42,7 @@ func _ready() -> void:
 	var list := UpgradeTree.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(list)
-	Game.rest_changed.connect(_gate.queue)
+	Game.vitality_changed.connect(_gate.queue)
 	Game.night_finished.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)
 	Night.field_level_changed.connect(_gate.queue)
@@ -68,6 +71,8 @@ func _make_left() -> VBoxContainer:
 	column.add_child(portrait)
 	_rest = _label("", REST_FONT_SIZE, REST_COLOR)
 	column.add_child(_rest)
+	_promise = _label("", 0, TITLE_COLOR)
+	column.add_child(_promise)
 	_record = _label("", 0, NOTE_COLOR)
 	_record.custom_minimum_size = Vector2(0.0, RECORD_HEIGHT)
 	column.add_child(_record)
@@ -94,10 +99,20 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 
 
 func _refresh() -> void:
-	_rest.text = "생기 %s" % Num.format(Game.rest)
+	_rest.text = "생기 %s" % Num.format(Game.vitality)
+	_promise.text = "약속된 휴식  %s" % _long_duration(Game.promised_rest_seconds())
 	if Game.nights == 0:
 		_record.text = "까마귀가 속삭였다.\n\"생기를 모아 오면 쉬게 해 주마.\""
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
 	_sound.text = "소리 켬" if Prefs.sfx_on else "소리 끔"
 	_night_button.text = "밤으로 나가기  ·  밭 %d단계  (%d초)" % [Night.field_level, roundi(Game.night_seconds())]
+
+
+## 약속된 휴식은 몇 분에서 백 년을 넘게까지 커진다: 1년 이상이면 "N년", 하루 이상이면 "N일 N시간", 아니면 "N시간 N분"
+func _long_duration(seconds: float) -> String:
+	if seconds >= YEAR_SECONDS:
+		return "%s년" % Num.format(floor(seconds / YEAR_SECONDS))
+	if seconds >= DAY_SECONDS:
+		return "%d일 %d시간" % [floori(seconds / DAY_SECONDS), floori(fmod(seconds, DAY_SECONDS) / 3600.0)]
+	return Num.format_duration(seconds)

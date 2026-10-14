@@ -19,7 +19,7 @@ func run() -> void:
 	Save.reset_data()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "데이터 초기화의 낮은 조용하다")
 
-	Game.rest = 1000.0
+	Game.vitality = 1000.0
 	Upgrades.buy(Balance.Upgrade.RADIUS)
 	_equal(int(Sfx.played.get("buy", 0)), 0, "버튼 없이 오른 레벨은 조용하다")
 	Sfx.reset_limits()
