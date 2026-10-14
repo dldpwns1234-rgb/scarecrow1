@@ -33,7 +33,14 @@ func run() -> void:
 	_equal([int(Sfx.played.get("spray", 0)), int(Sfx.played.get("sprout", 0))], [1, 1], "약 치기·다시 자람 소리")
 	for skill in Balance.SKILLS.size():
 		Night.skill_used.emit(skill)
-	_equal(int(Sfx.played.get("skill_storm", 0)) + int(Sfx.played.get("skill_flock", 0)) + int(Sfx.played.get("skill_sigh", 0)) + int(Sfx.played.get("skill_tide", 0)), Balance.SKILLS.size(), "스킬마다 소리")
+	var skill_sounds := 0
+	for cue in Sfx.SKILL_CUES:
+		skill_sounds += int(Sfx.played.get(cue, 0))
+	_equal(skill_sounds, Balance.SKILLS.size(), "스킬마다 소리")
+	Night.crop_burst.emit(0, 1.5)
+	Night.seeds_flung.emit(0, PackedInt32Array([1]))
+	Night.chain_struck.emit(0, 1)
+	_equal([int(Sfx.played.get("burst", 0)), int(Sfx.played.get("seeds", 0)), int(Sfx.played.get("zap", 0))], [1, 1, 1], "수박 터짐·해바라기 씨앗·덩굴 번개 소리")
 	Sfx.play("chain", 2.0)
 	_close(Sfx.last_pitch, 2.0, "높이를 주면 흔들지 않고 그 높이 (풍작 콤보의 연쇄음)")
 	Save.reset_data()
