@@ -23,6 +23,10 @@ const SOUNDS: Dictionary = {
 	"storm": [1.3, 0.6],
 	"spray": [0.4, 0.3],
 	"sprout": [0.3, 0.28],
+	"skill_storm": [1.4, 0.6],
+	"skill_flock": [0.9, 0.5],
+	"skill_sigh": [1.2, 0.55],
+	"skill_tide": [1.0, 0.5],
 }
 
 const C5: float = 72.0  # MIDI 음 번호 기준
@@ -132,6 +136,38 @@ func _spray(s: Synth) -> void:
 func _sprout(s: Synth) -> void:
 	s.tone(0.0, 0.1, _n(-5.0), _n(4.0), 0.4, 0.004, 0.06, Synth.Wave.SOFT, 0.03)
 	s.noise(0.02, 0.12, 0.15, 1800.0, 900.0, 0.005, 0.04)
+
+
+## 스킬 '역병 폭풍'을 켠다: 부풀어 오르는 바람과 올라가는 낮은 두 음 (켜 둔 동안의 큰 박자는 storm)
+func _skill_storm(s: Synth) -> void:
+	s.noise(0.0, 1.3, 0.5, 300.0, 2000.0, 0.5, 2.0)
+	s.tone(0.0, 1.0, _n(-29.0), _n(-24.0), 0.3, 0.3, 1.5, Synth.Wave.SOFT, 0.3)
+	s.tone(0.0, 1.0, _n(-22.0), _n(-17.0), 0.22, 0.3, 1.5, Synth.Wave.SOFT, 0.3)
+
+
+## 스킬 '까마귀 떼': 높이가 다른 까악 넷이 겹친다
+func _skill_flock(s: Synth) -> void:
+	var pitches: PackedFloat32Array = [1.0, 1.18, 0.9, 1.3]
+	for i in pitches.size():
+		var start := 0.13 * i
+		s.tone(start, 0.11, 820.0 * pitches[i], 560.0 * pitches[i], 0.4, 0.005, 0.07, Synth.Wave.TRIANGLE, 0.03)
+		s.noise(start, 0.11, 0.25, 2000.0, 1200.0, 0.005, 0.06)
+	s.noise(0.0, 0.8, 0.2, 900.0, 600.0, 0.05, 0.3)  # 날갯짓 바람
+
+
+## 스킬 '짚돌이의 한숨': 길게 내려가는 숨(걸러 낸 잡음)과 낮은 쿵, 맨 끝에 작은 종
+func _skill_sigh(s: Synth) -> void:
+	s.noise(0.0, 0.9, 0.55, 1400.0, 300.0, 0.15, 0.6)
+	s.tone(0.55, 0.4, 90.0, 55.0, 0.8, 0.004, 0.25)
+	s.bell(0.6, _n(-5.0), 0.2, 0.3)
+
+
+## 스킬 '역병 파도': 빠르게 번지는 보글 여섯과 밀려가는 물결 소리
+func _skill_tide(s: Synth) -> void:
+	for i in 6:
+		var start := 0.07 * i
+		s.tone(start, 0.06, _n(-7.0 + i), _n(0.0 + i), 0.35, 0.003, 0.04, Synth.Wave.SOFT, 0.02)
+	s.noise(0.0, 0.9, 0.35, 500.0, 1600.0, 0.2, 0.4)
 
 
 ## 업그레이드 구매: 작은 동전 딸깍 (회귀 용사와 같다)

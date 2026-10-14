@@ -31,6 +31,9 @@ func run() -> void:
 	Night.farmer_sprayed.emit(0)
 	Night.crop_regrown.emit(0)
 	_equal([int(Sfx.played.get("spray", 0)), int(Sfx.played.get("sprout", 0))], [1, 1], "약 치기·다시 자람 소리")
+	for skill in Balance.SKILLS.size():
+		Night.skill_used.emit(skill)
+	_equal(int(Sfx.played.get("skill_storm", 0)) + int(Sfx.played.get("skill_flock", 0)) + int(Sfx.played.get("skill_sigh", 0)) + int(Sfx.played.get("skill_tide", 0)), Balance.SKILLS.size(), "스킬마다 소리")
 	Save.reset_data()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "데이터 초기화의 낮은 조용하다")
 
