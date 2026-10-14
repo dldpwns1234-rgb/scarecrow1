@@ -1,12 +1,13 @@
 extends "res://autoload/night/field.gd"
-## Night 2부: 밭 위를 오가는 것들 (GDD 4절·8절 M3). 까마귀(사역마)는 간격마다 아무 작물이나 쪼고, 농부(5단계부터)는 밭을 걸어 다니며
-## 둘레의 작물에 약을 쳐서(구름·번짐 피해 절반, 번짐 씻기) 지키고 시든 칸에 다시 심는다. 흐름(박자·시듦·정복)은 night.gd가 상속해서 맡는다
+## Night 2부: 밭 위를 오가는 것들 (GDD 4절·8절 M3). 까마귀(사역마)는 간격마다 작물을 쪼고, 지키는 이(5단계부터 농부, 깊어지면 감독관·관리·여신)는
+## 밭을 걸어 다니며 둘레의 작물에 약을 쳐서(구름·번짐 피해 줄이기, 번짐 씻기) 지키고 시든 칸에 다시 심는다. 흐름(박자·시듦·정복)은 night.gd가 상속해서 맡는다
 
 signal crow_pecked(index: int)
 signal farmer_sprayed(index: int)  # 농부가 번짐을 씻어 냈다
 
 var active: bool = false           # 밤이 도는 중
-var farmers: Array[Vector2] = []   # 농부 자리 (격자 단위). 화면이 매 프레임 읽는다
+var farmers: Array[Vector2] = []   # 지키는 이 자리 (격자 단위). 화면이 매 프레임 읽는다
+var farmer_kinds: Array[int] = []  # 지키는 이 종류 (Balance.Guardian)
 var _farmer_targets: Array[Vector2] = []
 var _replant_left: Array[float] = []
 var _stun_left: Array[float] = []  # 까마귀 소란으로 멈춘 남은 초
@@ -23,12 +24,13 @@ func _setup_critters() -> void:
 	_farmer_targets.clear()
 	_replant_left.clear()
 	_stun_left.clear()
+	farmer_kinds = Balance.guardians(field_level)
 	var size := float(Balance.FIELD_SIZE)
-	for i in Balance.farmer_count(field_level):
+	for i in farmer_kinds.size():
 		var edge := rng.randf() * size
 		farmers.append(Vector2(edge, 0.0) if i % 2 == 0 else Vector2(size, edge))
 		_farmer_targets.append(_next_target())
-		_replant_left.append(Balance.FARMER_REPLANT_INTERVAL)
+		_replant_left.append(Balance.guardian_replant(farmer_kinds[i]))
 		_stun_left.append(0.0)
 
 
@@ -49,17 +51,18 @@ func _tick_critters(dt: float) -> void:
 		_spray(f)
 		_replant_left[f] -= dt
 		if _replant_left[f] <= 0.0:
-			_replant_left[f] += Balance.FARMER_REPLANT_INTERVAL
+			_replant_left[f] += Balance.guardian_replant(farmer_kinds[f])
 			_replant(f)
 
 
-## 농부 둘레 안의 작물이 받는 피해 배율 (약을 쳤다, 스며드는 독). 멈춘 농부는 약을 못 친다
+## 지키는 이 둘레 안의 작물이 받는 피해 배율 (약을 쳤다, 스며드는 독). 여럿이면 가장 센 약. 멈춘 이는 약을 못 친다
 func guard(index: int) -> float:
 	var at := cell_position(index)
+	var result := 1.0
 	for f in farmers.size():
-		if _stun_left[f] <= 0.0 and farmers[f].distance_to(at) <= Balance.FARMER_RADIUS:
-			return Balance.farmer_guard(Upgrades.level(Balance.Upgrade.SEEP))
-	return 1.0
+		if _stun_left[f] <= 0.0 and farmers[f].distance_to(at) <= Balance.guardian_radius(farmer_kinds[f]):
+			result = minf(result, Balance.guardian_guard(farmer_kinds[f], Upgrades.level(Balance.Upgrade.SEEP)))
+	return result
 
 
 ## 이 농부가 까마귀 소란으로 멈춰 있는지 (화면용)
@@ -110,7 +113,7 @@ func _stun_farmer() -> void:
 ## 농부가 노리던 자리에 닿으면 다음 자리 (살아 있는 작물 하나, 없으면 밭 가운데)
 func _walk(f: int, dt: float) -> void:
 	var step := _farmer_targets[f] - farmers[f]
-	var reach := Balance.FARMER_SPEED * dt
+	var reach := Balance.guardian_speed(farmer_kinds[f]) * dt
 	if step.length() <= reach:
 		farmers[f] = _farmer_targets[f]
 		_farmer_targets[f] = _next_target()
@@ -134,7 +137,7 @@ func _next_target() -> Vector2:
 ## 둘레 안의 번진 작물을 씻어 낸다
 func _spray(f: int) -> void:
 	for i in kinds.size():
-		if infected[i] == 1 and is_alive(i) and cell_position(i).distance_to(farmers[f]) <= Balance.FARMER_RADIUS:
+		if infected[i] == 1 and is_alive(i) and cell_position(i).distance_to(farmers[f]) <= Balance.guardian_radius(farmer_kinds[f]):
 			infected[i] = 0
 			farmer_sprayed.emit(i)
 
@@ -142,7 +145,7 @@ func _spray(f: int) -> void:
 ## 둘레 안의 시든 칸 하나에 다시 심는다 (가장 가까운 칸)
 func _replant(f: int) -> void:
 	var pick := -1
-	var nearest := Balance.FARMER_RADIUS
+	var nearest := Balance.guardian_radius(farmer_kinds[f])
 	for i in kinds.size():
 		if kinds[i] == EMPTY or is_alive(i):
 			continue

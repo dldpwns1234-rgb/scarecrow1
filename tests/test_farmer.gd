@@ -9,6 +9,7 @@ func run() -> void:
 	_test_replant_and_walk()
 	_test_harvest()
 	_test_counters()
+	_test_guardians()
 	_fresh()
 	Night.reset()
 
@@ -141,3 +142,23 @@ func _test_counters() -> void:
 		Night.stop()
 	_equal(golden > 20 * 144 * 0.03 and golden < 20 * 144 * 0.09, true, "황금 이삭 6%% 안팎 (%d / 2880)" % golden)
 	_close(Balance.crop_vitality(Balance.Crop.GOLDEN, 1) / Balance.crop_vitality(Balance.Crop.PUMPKIN, 1), 8.0, "황금 이삭은 호박의 8배 생기")
+
+
+func _test_guardians() -> void:
+	var G := Balance.Guardian
+	_equal(Balance.guardians(4), [] as Array[int], "4단계엔 아무도 없다")
+	_equal(Balance.guardians(7), [G.FARMER] as Array[int], "7단계: 농부")
+	_equal(Balance.guardians(41), [G.INSPECTOR, G.INSPECTOR, G.INSPECTOR] as Array[int], "40단계부터 감독관")
+	_equal(Balance.guardians(91)[0], G.OFFICIAL, "90단계부터 관리")
+	_equal(Balance.guardians(150).back(), G.GODDESS, "150단계 수확일: 마지막 한 명이 여신")
+	_equal(Balance.guardians(151).has(G.GODDESS), false, "수확일이 아니면 여신이 없다")
+	_equal(Balance.guardians(145).has(G.GODDESS), false, "150 전 수확일엔 여신이 없다")
+	_close(Balance.guardian_guard(G.GODDESS, 0), 0.3, "여신의 약이 가장 세다")
+	_start(150)
+	_equal(Night.farmer_kinds.back(), G.GODDESS, "밤에도 여신이 나온다")
+	var near := 5 * Balance.FIELD_SIZE + 5
+	for f in Night.farmers.size():
+		Night.farmers[f] = Night.cell_position(near)
+		Night._farmer_targets[f] = Night.cell_position(near)
+	_close(Night.guard(near), 0.3, "여럿이 겹치면 가장 센 약")
+	Night.stop()

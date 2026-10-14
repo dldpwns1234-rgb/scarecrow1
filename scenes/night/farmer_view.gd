@@ -1,9 +1,16 @@
 extends Node2D
-## 농부 그림 (GDD 8절 M3): Night.farmers 자리에 농부가 걸으며 흔들리고, 발밑에 약을 친 둘레(옅은 물빛 타원)를 그린다.
+## 지키는 이들의 그림 (GDD 2절·8절 M3): Night.farmers 자리에 종류(농부·감독관·관리·여신)별 그림이 걸으며 흔들리고, 발밑에 약을 친 둘레(옅은 물빛 타원, 여신은 금빛)를 그린다.
 ## 번짐을 씻어 낼 때(Night.farmer_sprayed) 그 작물 위에 흰 김이 피어오른다. 그리기만 한다. 상수는 연출용이다
 
 const Iso := preload("res://scenes/night/iso.gd")
-const TEXTURE := preload("res://assets/sprites/farmer.svg")
+const TEXTURES: Array[Texture2D] = [  # Balance.Guardian 순서
+	preload("res://assets/sprites/farmer.svg"),
+	preload("res://assets/sprites/inspector.svg"),
+	preload("res://assets/sprites/official.svg"),
+	preload("res://assets/sprites/goddess.svg"),
+]
+const GODDESS_AURA := Color(1.0, 0.9, 0.55, 0.18)
+const GODDESS_RIM := Color(1.0, 0.92, 0.6, 0.55)
 const SCALE: float = 0.5
 const BASE := Vector2(0.5, 0.96)       # 그림 안에서 발끝 자리 (크기 비율)
 const AURA := Color(0.62, 0.84, 1.0, 0.16)
@@ -35,15 +42,17 @@ func _process(delta: float) -> void:
 	var count := Night.farmers.size() if Night.active else 0
 	while _sprites.size() < count:
 		var sprite := Sprite2D.new()
-		sprite.texture = TEXTURE
 		sprite.scale = Vector2.ONE * SCALE
-		sprite.offset = -TEXTURE.get_size() * BASE + TEXTURE.get_size() * 0.5
 		add_child(sprite)
 		_sprites.append(sprite)
 	for i in _sprites.size():
 		var sprite := _sprites[i]
 		sprite.visible = i < count
 		if sprite.visible:
+			var texture := TEXTURES[Night.farmer_kinds[i]]
+			if sprite.texture != texture:
+				sprite.texture = texture
+				sprite.offset = -texture.get_size() * BASE + texture.get_size() * 0.5
 			var stunned := Night.is_stunned(i)  # 까마귀 소란: 멈춰서 갸웃거린다
 			var bob := 0.0 if stunned else absf(sin(_clock * BOB_SPEED + i)) * BOB_HEIGHT
 			sprite.position = Iso.to_screen(origin, Night.farmers[i]) - Vector2(0.0, bob)
@@ -63,18 +72,20 @@ func _on_sprayed(index: int) -> void:
 func _draw() -> void:
 	if not Night.active:
 		return
-	var radii := Iso.ellipse_radii(Balance.FARMER_RADIUS)
 	for f in Night.farmers.size():
 		if Night.is_stunned(f):
-			continue  # 멈춘 농부는 약을 못 친다
+			continue  # 멈춘 이는 약을 못 친다
+		var kind := Night.farmer_kinds[f]
+		var radii := Iso.ellipse_radii(Balance.guardian_radius(kind))
+		var goddess := kind == Balance.Guardian.GODDESS
 		var center := Iso.to_screen(origin, Night.farmers[f])
 		var points := PackedVector2Array()
 		for k in ELLIPSE_POINTS:
 			var angle := TAU * k / ELLIPSE_POINTS
 			points.append(center + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
-		draw_colored_polygon(points, AURA)
+		draw_colored_polygon(points, GODDESS_AURA if goddess else AURA)
 		points.append(points[0])
-		draw_polyline(points, AURA_RIM, 2.0, true)
+		draw_polyline(points, GODDESS_RIM if goddess else AURA_RIM, 2.0, true)
 	for puff in _puffs:
 		var t := float(puff["t"])
 		var at: Vector2 = puff["at"]
