@@ -63,9 +63,10 @@ func _ready() -> void:
 				"정복" if cleared else "-", clock / 60.0, bought])
 		if _winter and since_new >= _stall and Winter.can_sleep():
 			var reached := Night.best_level
+			var reward := Winter.shard_reward()
 			Winter.perform()
 			print("== 겨울잠 %d: %.1f분 철 (누적 %.1f분), 밭 %d단계, 꿈 조각 +%s, 산 꿈: %s" % [Winter.sleeps, (clock - season_start) / 60.0, clock / 60.0,
-				reached, Num.format(Winter.shards), _dream_shop()])
+				reached, Num.format(reward), _dream_shop()])
 			season_start = clock
 			_play_level = Night.best_level
 			since_new = 0
