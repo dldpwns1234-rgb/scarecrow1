@@ -19,6 +19,7 @@ const SOUNDS: Dictionary = {
 	"dawn": [1.4, 0.55],
 	"clear": [1.5, 0.65],
 	"buy": [0.18, 0.32],
+	"sleep": [2.4, 0.55],
 }
 
 const C5: float = 72.0  # MIDI 음 번호 기준
@@ -98,6 +99,16 @@ func _clear(s: Synth) -> void:
 		s.bell(0.1 * i, _n(notes[i]), 0.5 if i < 4 else 0.7, 0.18 if i < 4 else 0.45)
 	s.tone(0.0, 0.4, 110.0, 70.0, 0.6, 0.003, 0.2)
 	s.tone(0.4, 0.4, 110.0, 70.0, 0.5, 0.003, 0.2)
+
+
+## 겨울잠: 잦아드는 눈바람, 위에서 아래로 천천히 내려앉는 종 넷, 따뜻하고 낮은 받침 화음 (짚돌이가 처음으로 잠든다)
+func _sleep(s: Synth) -> void:
+	s.noise(0.0, 2.2, 0.22, 900.0, 250.0, 0.3, 1.2)
+	var notes: PackedFloat32Array = [12.0, 7.0, 4.0, 0.0]
+	for i in notes.size():
+		s.bell(0.25 * i, _n(notes[i]), 0.4, 0.45)
+	s.tone(0.3, 1.6, _n(-24.0), _n(-24.0), 0.25, 0.5, 1.2, Synth.Wave.SOFT, 0.5)
+	s.tone(0.3, 1.6, _n(-17.0), _n(-17.0), 0.18, 0.5, 1.2, Synth.Wave.SOFT, 0.5)
 
 
 ## 업그레이드 구매: 작은 동전 딸깍 (회귀 용사와 같다)

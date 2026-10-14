@@ -20,7 +20,7 @@ const MUSIC_FADE: float = 1.5     # 곡을 바꿀 때 교차 페이드 (초)
 const CUES := {
 	"pulse": [2, 250, -13.0], "wither": [3, 45, -11.0], "spread": [2, 90, -12.0],
 	"crow": [1, 450, -8.0], "night_start": [1, 1000, -4.0], "dawn": [1, 1000, -4.0], "clear": [1, 1000, -2.0],
-	"buy": [2, 50, -7.0],
+	"buy": [2, 50, -7.0], "sleep": [1, 1000, -4.0],
 }
 
 var unlocked: bool = false   # 소리를 낼 수 있는지. 웹은 첫 입력 전 false, 데스크톱은 처음부터 true

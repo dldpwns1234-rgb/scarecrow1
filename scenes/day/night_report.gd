@@ -1,5 +1,6 @@
 extends PanelContainer
 ## 밤이 끝나 낮으로 돌아오면 오른쪽(어둠의 나무) 위쪽 가운데에 잠깐 뜨는 결과 (왼쪽 위의 이야기·소리 버튼을 가리지 않게): "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
+## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 셋째 줄에 "겨울잠이 열렸다".
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
 
 const TOP: float = 20.0
@@ -56,6 +57,8 @@ func _show_report(haul: float) -> void:
 	_clear.text = "밭 %d단계 정복!" % _cleared_level
 	if Night.best_level > _best_before:
 		_clear.text += "  %d단계가 열렸다" % Night.best_level
+	if Winter.sleeps == 0 and _best_before < Balance.WINTER_MIN_LEVEL and Balance.can_winter(Night.best_level):
+		_clear.text += "\n겨울잠이 열렸다  ·  오른쪽 위 꿈의 상점"  # 첫 겨울잠 전에 한 번
 	reset_size()
 	size.x = WIDTH
 	position = Vector2(LEFT_SPAN + (get_parent_area_size().x - LEFT_SPAN - RIGHT_MARGIN - WIDTH) * 0.5, TOP)
