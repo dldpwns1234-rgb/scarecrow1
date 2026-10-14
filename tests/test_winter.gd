@@ -63,17 +63,19 @@ func _test_perform() -> void:
 
 func _test_shop() -> void:
 	_clean()
-	_close(Balance.dream_cost(0), 1.0, "첫 레벨 1조각")
-	_close(Balance.dream_cost(4), 5.0, "현재 레벨 + 1")
+	var D: int = Balance.Dream.DEEP_SLEEP
+	_close(Balance.dream_cost(D, 0), 1.0, "깊은 잠 첫 레벨 1조각")
+	_close(Balance.dream_cost(D, 4), 16.0, "레벨마다 ×2")
+	_close(Balance.dream_cost(Balance.Dream.DREAM_CROW, 1), 15.0, "꿈의 까마귀 5 × 3")
 	_equal(Winter.buy(Balance.Dream.DEEP_SLEEP), false, "조각이 없으면 못 산다")
 	Winter.shards = 10.0
 	_equal(Winter.buy(Balance.Dream.DEEP_SLEEP), true, "깊은 잠")
 	_equal(Winter.buy(Balance.Dream.DEEP_SLEEP), true, "깊은 잠 2")
 	_close(Winter.shards, 7.0, "1 + 2조각")
-	_close(Winter.damage_multiplier(), 4.0, "구름 피해 ×2씩")
-	_close(Night.cloud_dps(), Balance.cloud_dps(0) * 4.0, "밤의 구름 피해에 든다")
+	_close(Winter.damage_multiplier(), 1.6 * 1.6, "구름 피해 ×1.6씩")
+	_close(Night.cloud_dps(), Balance.cloud_dps(0) * 1.6 * 1.6, "밤의 구름 피해에 든다")
 	Winter.dream_levels[Balance.Dream.DREAM_HARVEST] = 3
-	_close(Winter.vitality_multiplier(), 8.0, "꿈속 수확 ×2씩")
+	_close(Winter.vitality_multiplier(), pow(1.6, 3), "꿈속 수확 ×1.6씩")
 	Winter.dream_levels[Balance.Dream.SLEEPWALK] = 2
 	_close(Game.night_seconds(), Balance.NIGHT_BASE_SECONDS + 4.0, "몽유: 밤 +2초씩")
 	Winter.dream_levels[Balance.Dream.DREAM_CROW] = Balance.dream_max_level(Balance.Dream.DREAM_CROW)
@@ -81,7 +83,7 @@ func _test_shop() -> void:
 	Upgrades.levels[Balance.Upgrade.DENSE] = Balance.upgrade_max_level(Balance.Upgrade.DENSE)
 	Game.start_night()
 	Night.begin(3)
-	_close(Night.crop_vitality(0), 8.0 * Balance.crop_vitality(Night.kinds[0], 1), "작물 생기에 꿈속 수확이 든다")
+	_close(Night.crop_vitality(0), pow(1.6, 3) * Balance.crop_vitality(Night.kinds[0], 1), "작물 생기에 꿈속 수확이 든다")
 	_equal(Night._crow_left.size(), Balance.dream_max_level(Balance.Dream.DREAM_CROW), "꿈의 까마귀가 밤에 난다")
 	Night.stop()
 

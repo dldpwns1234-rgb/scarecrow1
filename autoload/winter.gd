@@ -83,7 +83,7 @@ func is_maxed(index: int) -> bool:
 
 
 func cost(index: int) -> float:
-	return Balance.dream_cost(dream_levels[index])
+	return Balance.dream_cost(index, dream_levels[index])
 
 
 func can_buy(index: int) -> bool:

@@ -102,19 +102,31 @@ func _play() -> float:
 	return elapsed
 
 
-## 원 안 작물의 (생기 ÷ 남은 체력) 합이 가장 큰 작물 자리
+## 원 안 작물의 (생기 ÷ 남은 체력) 합이 가장 큰 작물 자리. 작물마다 값을 한 번만 재고, 후보 둘레의 네모 칸만 본다
 func _best_spot() -> Vector2:
 	var radius := Night.cloud_radius()
+	var size := Balance.FIELD_SIZE
+	var reach := ceili(radius)
+	var value := PackedFloat64Array()
+	value.resize(Night.cell_count())
+	for j in Night.cell_count():
+		if Night.is_alive(j):
+			value[j] = Night.crop_vitality(j) / maxf(Night.hp[j], 1e-9)
 	var best := -1.0
 	var spot := Night.cloud
 	for i in Night.cell_count():
-		if not Night.is_alive(i):
+		if value[i] <= 0.0:
 			continue
 		var center := Night.cell_position(i)
+		var cx := i % size
+		@warning_ignore("integer_division")
+		var cy := i / size
 		var score := 0.0
-		for j in Night.cell_count():
-			if Night.is_alive(j) and Night.cell_position(j).distance_to(center) <= radius:
-				score += Night.crop_vitality(j) / maxf(Night.hp[j], 1e-9)
+		for y in range(maxi(cy - reach, 0), mini(cy + reach, size - 1) + 1):
+			for x in range(maxi(cx - reach, 0), mini(cx + reach, size - 1) + 1):
+				var j := y * size + x
+				if value[j] > 0.0 and Night.cell_position(j).distance_to(center) <= radius:
+					score += value[j]
 		if score > best:
 			best = score
 			spot = center
