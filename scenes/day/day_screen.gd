@@ -13,12 +13,11 @@ const DreamShop := preload("res://scenes/day/dream_shop.gd")
 const Hideout := preload("res://scenes/day/hideout.gd")
 const SubTabs := preload("res://scenes/ui/sub_tabs.gd")
 const FieldPicker := preload("res://scenes/day/field_picker.gd")
-const PORTRAIT := preload("res://icon.svg")
+const Portrait := preload("res://scenes/day/portrait.gd")
 
 const MARGIN: int = 24
 const GAP: int = 24
 const LEFT_WIDTH: float = 420.0
-const PORTRAIT_SIZE := Vector2(150, 150)
 const NIGHT_BUTTON_HEIGHT: float = 88.0
 const PROMISE_BAR_HEIGHT: float = 10.0
 const RECORD_HEIGHT: float = 80.0  # 두 줄 자리. 글이 바뀌어도 아래가 밀리지 않게
@@ -86,12 +85,7 @@ func _make_left() -> VBoxContainer:
 	settings.custom_minimum_size = SETTINGS_BUTTON_SIZE
 	settings.pressed.connect(settings_requested.emit)
 	top.add_child(settings)
-	var portrait := TextureRect.new()
-	portrait.texture = PORTRAIT
-	portrait.custom_minimum_size = PORTRAIT_SIZE
-	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	column.add_child(portrait)
+	column.add_child(Portrait.new())  # 숨 쉬는 짚돌이와 어깨의 까마귀
 	var vitality_row := HBoxContainer.new()
 	vitality_row.add_theme_constant_override("separation", GAP / 2)
 	column.add_child(vitality_row)

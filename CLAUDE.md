@@ -29,7 +29,7 @@ res://
   scenes/
     main.tscn, main.gd  화면 전체. 낮이면 day, 밤이면 night만 보이고, 그 위에 결과 알림·첫 밤 안내·이야기 다시 읽기·조각 카드·첫 실행 장면을 겹친다
     day/         day_screen(헛간: 짚돌이·생기·약속된 휴식·밤 기록·밭 단계·밤으로 나가기, 왼쪽 위 이야기·소리 버튼), upgrade_tree(어둠의 나무: tree_board·tree_layout),
-                 field_picker(밭 단계 고르기), night_report(지난 밤 결과), dream_shop·winter_confirm(겨울잠), hideout·job_row·worker_token(아지트)
+                 portrait(숨 쉬는 짚돌이와 어깨의 까마귀), field_picker(밭 단계 고르기), night_report(지난 밤 결과), dream_shop·winter_confirm(겨울잠), hideout·job_row·worker_token(아지트)
     night/       night_screen(밤 밭)
     ui/          refresh_gate(시그널은 표시만, 보일 때 프레임당 한 번 갱신), tap_scroll(버튼 위에서도 끌어 스크롤), sub_tabs(칩 줄 하위 탭) — 회귀 용사에서 옮겨 옴.
                  intro_card(첫 실행 장면), night_hint(첫 밤 안내), story_card(이야기 조각 카드), story_book(다시 읽기), ending_scene(엔딩), winter_scene(겨울잠 전환), settings_panel·sound_panel(설정), korean_text(한글 줄바꿈·조사)
