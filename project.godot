@@ -19,6 +19,8 @@ Balance="*res://autoload/balance.gd"
 Num="*res://autoload/num.gd"
 Upgrades="*res://autoload/upgrades.gd"
 Game="*res://autoload/game.gd"
+; 밤 한 판의 규칙(밭·구름·번짐·까마귀). Game의 낮·밤 전환을 받고 Game.add_rest()를 부른다
+Night="*res://autoload/night.gd"
 ; 저장은 위 오토로드를 모두 불러오므로 맨 뒤에
 Save="*res://autoload/save.gd"
 

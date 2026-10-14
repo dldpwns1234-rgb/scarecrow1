@@ -45,6 +45,7 @@ func to_dict() -> Dictionary:
 		"saved_at": Time.get_unix_time_from_system(),
 		"game": Game.to_dict(),
 		"upgrades": Upgrades.to_dict(),
+		"night": Night.to_dict(),
 	}
 
 
@@ -52,6 +53,7 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> void:
 	Upgrades.from_dict(_section(data, "upgrades"))
 	Game.from_dict(_section(data, "game"))
+	Night.from_dict(_section(data, "night"))
 
 
 func save_game() -> void:
@@ -102,6 +104,7 @@ func import_string(text: String) -> bool:
 func reset_data() -> void:
 	Upgrades.reset()
 	Game.reset()
+	Night.reset()
 	save_game()
 
 
