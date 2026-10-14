@@ -1,15 +1,16 @@
 extends MarginContainer
-## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·휴식·밤 기록과 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
+## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·휴식·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
 ## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 상수는 배치용이다.
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const UpgradeTree := preload("res://scenes/day/upgrade_tree.gd")
+const FieldPicker := preload("res://scenes/day/field_picker.gd")
 const PORTRAIT := preload("res://icon.svg")
 
 const MARGIN: int = 24
 const GAP: int = 24
 const LEFT_WIDTH: float = 420.0
-const PORTRAIT_SIZE := Vector2(180, 180)
+const PORTRAIT_SIZE := Vector2(150, 150)
 const NIGHT_BUTTON_HEIGHT: float = 88.0
 const RECORD_HEIGHT: float = 80.0  # 두 줄 자리. 글이 바뀌어도 아래가 밀리지 않게
 const TITLE_COLOR := Color("e9c46a")
@@ -39,6 +40,7 @@ func _ready() -> void:
 	Game.rest_changed.connect(_gate.queue)
 	Game.night_finished.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)
+	Night.field_level_changed.connect(_gate.queue)
 	_refresh()
 
 
@@ -59,6 +61,7 @@ func _make_left() -> VBoxContainer:
 	_record = _label("", 0, NOTE_COLOR)
 	_record.custom_minimum_size = Vector2(0.0, RECORD_HEIGHT)
 	column.add_child(_record)
+	column.add_child(FieldPicker.new())  # 다음 밤의 밭 단계 (밭 정복으로 열린다)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(spacer)
@@ -86,4 +89,4 @@ func _refresh() -> void:
 		_record.text = "아직 밤에 나가 본 적이 없다.\n밭이 망하면 나도 쉴 수 있겠지…"
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
-	_night_button.text = "밤으로 나가기  (%d초)" % roundi(Game.night_seconds())
+	_night_button.text = "밤으로 나가기  ·  밭 %d단계  (%d초)" % [Night.field_level, roundi(Game.night_seconds())]
