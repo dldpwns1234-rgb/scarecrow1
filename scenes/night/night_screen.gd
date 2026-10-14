@@ -23,8 +23,7 @@ const MOON_POSITION := Vector2(0.86, 0.2)  # 화면 비율
 const MOON_RADIUS: float = 34.0
 const FIELD_DROP: float = 34.0       # 밭 가운데를 화면 가운데보다 이만큼 아래에 (위쪽 글 자리)
 const SIDE_DEPTH: float = 16.0
-const MAX_FIELD_WIDTH: float = 880.0  # 밭이 이보다 넓어지면 판을 줄인다 (왼쪽 아래 스킬·오른쪽 풍작 막대 자리)
-const FIELD_SHIFT_X: float = 40.0     # 밭을 가운데보다 이만큼 오른쪽에 (왼쪽 아래 스킬 버튼 자리)
+const MAX_FIELD_WIDTH: float = 960.0  # 밭이 이보다 넓어지면 판을 줄인다 (오른쪽 풍작 막대 자리)
 const FIELD_ROOM_Y: float = 170.0     # 밭 높이로 쓰지 않는 세로 (위쪽 글·아래 여백)
 
 var _board: Node2D
@@ -78,7 +77,7 @@ func _layout() -> void:
 	var field := Iso.field_size(Night.field_size) + Vector2(0.0, SIDE_DEPTH)
 	var zoom := minf(1.0, minf(MAX_FIELD_WIDTH / field.x, maxf(size.y - FIELD_ROOM_Y, 1.0) / field.y))
 	_board.scale = Vector2.ONE * zoom
-	_board.position = Vector2(size.x * 0.5 + FIELD_SHIFT_X, (size.y - field.y * zoom) * 0.5 + FIELD_DROP)
+	_board.position = Vector2(size.x * 0.5, (size.y - field.y * zoom) * 0.5 + FIELD_DROP)
 	_fx.target = _hud.rest_target()
 	queue_redraw()
 

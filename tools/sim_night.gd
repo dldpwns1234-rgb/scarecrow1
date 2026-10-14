@@ -113,8 +113,6 @@ func _play() -> float:
 		var step := target - Night.cloud
 		var reach := _speed * DT
 		Night.set_cloud(Night.cloud + (step if step.length() <= reach else step.normalized() * reach))
-		for skill in Balance.SKILLS.size():  # 스킬은 쓸 수 있으면 바로 쓴다
-			Night.use_skill(skill)
 		Night.tick(DT)
 		elapsed += DT
 		if _waves > 0 and Night.waves >= _waves and Night.active:

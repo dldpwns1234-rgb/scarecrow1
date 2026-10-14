@@ -78,12 +78,13 @@ func tick(dt: float) -> void:
 
 
 ## 구름 박자: 원 안의 작물은 구름 피해, 번짐에 걸린 작물은 번짐 피해 (한 박자 몫). 농부 둘레 안은 절반.
-## 밤 끝 몰아치기 동안은 구름 피해 두 배 (역병 폭풍 스킬은 night/skills.gd가 반경·피해를 키운다)
+## 밤 끝 몰아치기 동안은 구름 피해 두 배 (역병 폭풍 스킬은 night/skills.gd가 반경·피해를 키운다). 구름이 친 작물 수는 타수형 스킬이 센다
 func _pulse() -> void:
 	var dps := cloud_dps()
 	var hit := dps * _tick * (Balance.FRENZY_MULTIPLIER if in_frenzy() else 1.0)
 	var rot := Balance.rot_dps(dps, Upgrades.level(Balance.Upgrade.ROT)) * _tick
 	var radius := cloud_radius()
+	var struck := 0
 	pulsed.emit()
 	for i in kinds.size():
 		if not active:
@@ -93,10 +94,13 @@ func _pulse() -> void:
 		var amount := 0.0
 		if cell_position(i).distance_to(cloud) <= radius:
 			amount += hit
+			struck += 1
 		if infected[i] == 1:
 			amount += rot
 		if amount > 0.0:
 			_damage(i, amount * guard(i))
+	if struck > 0 and active:
+		_count_cloud_hits(struck)  # 타수형 스킬: 친 작물 하나가 한 타
 
 
 ## 새벽 전 몰아치기 중인지 (밤 끝 몇 초)

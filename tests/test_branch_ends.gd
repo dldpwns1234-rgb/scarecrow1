@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 어둠의 나무 갈래 끝 칸과 밤 스킬: 역병 폭풍·한숨·역병 파도·까마귀 떼(스킬), 새벽 전 몰아치기(밤 끝 피해 ×2), 풍요의 저주(수확일 생기), 까마귀 왕(값진 작물부터)
+## 어둠의 나무 갈래 끝 칸과 밤 스킬: 역병 폭풍·한숨·역병 파도·까마귀 떼(스킬, 타수형·확률형으로 저절로 터진다), 새벽 전 몰아치기(밤 끝 피해 ×2), 풍요의 저주(수확일 생기), 까마귀 왕(값진 작물부터)
 
 
 func run() -> void:
@@ -23,7 +23,10 @@ func _start(level: int = 1) -> void:
 func _test_storm() -> void:
 	_close(Balance.skill_duration(Balance.Skill.STORM, 0), 0.0, "없으면 폭풍이 없다")
 	_close(Balance.skill_duration(Balance.Skill.STORM, 3), 8.0, "3레벨: 8초 동안")
-	_close(Balance.skill_cooldown(Balance.Skill.STORM, 3), 26.0, "3레벨: 쿨타임 26초")
+	_equal(Balance.skill_need(Balance.Skill.STORM, 3), 96, "3레벨: 96타면 터진다")
+	_equal(Balance.skill_need(Balance.Skill.STORM, 99), Balance.MIN_NEED, "타수에는 바닥이 있다")
+	_close(Balance.skill_chance(Balance.Skill.REAP, 3), 0.06, "낫 3레벨: 시들 때 6%")
+	_close(Balance.skill_rest(Balance.Skill.REAP, 99), Balance.MIN_REST, "쉬는 시간에도 바닥")
 	_start()
 	_equal(Night.use_skill(Balance.Skill.STORM), false, "칸을 안 샀으면 못 쓴다")
 	Upgrades.levels[Balance.Upgrade.STORM] = 1
@@ -35,7 +38,7 @@ func _test_storm() -> void:
 	var far := 5 * Night.field_size + 6  # 한 칸 옆: 보통 반경(1) 끝, 폭풍 반경(1.8) 안
 	var radius := Night.cloud_radius()
 	var dps := Night.cloud_dps()
-	Night.time_left = 999.0  # 쿨타임이 끝날 때까지 밤이 이어지게
+	Night.time_left = 999.0  # 다시 차오를 때까지 밤이 이어지게
 	_equal(Night.use_skill(Balance.Skill.STORM), true, "역병 폭풍을 켠다")
 	Night.storm_pulsed.disconnect(on_storm)
 	_equal(storms.size(), 1, "켜는 순간 신호")
@@ -45,11 +48,45 @@ func _test_storm() -> void:
 	Night.tick(Balance.skill_duration(Balance.Skill.STORM, 1) + 0.1)
 	_equal(Night.is_skill_active(Balance.Skill.STORM), false, "6초 뒤 꺼진다")
 	_close(Night.cloud_radius(), radius, "반경이 돌아온다")
-	_equal(Night.use_skill(Balance.Skill.STORM), false, "쿨타임 중")
-	Night.tick(Balance.skill_cooldown(Balance.Skill.STORM, 1))
-	_equal(Night.can_use(Balance.Skill.STORM), true, "쿨타임이 지나면 다시")
+	_equal(Night.charge[Balance.Skill.STORM], 0, "터지면 타수는 0부터")
+	Night._count_cloud_hits(Balance.skill_need(Balance.Skill.STORM, 1) - 1)
+	_equal(Night.is_skill_active(Balance.Skill.STORM), false, "한 타 모자라면 아직")
+	Night._count_cloud_hits(1)
+	_equal(Night.is_skill_active(Balance.Skill.STORM), true, "타수가 다 차면 저절로 켜진다")
+	Night._count_cloud_hits(5)
+	_equal(Night.charge[Balance.Skill.STORM], 0, "켜진 동안은 타수를 세지 않는다")
+	Night.time_left = 999.0
+	Night.tick(Balance.skill_duration(Balance.Skill.STORM, 1) + 0.1)
+	var target := _first_alive()
+	Night.set_cloud(Night.cell_position(target))
+	var charge := Night.charge[Balance.Skill.STORM]
+	Night.tick(Night._tick + 0.01)
+	_equal(Night.charge[Balance.Skill.STORM] > charge, true, "구름이 작물을 치면 타수가 찬다")
 	Night.stop()
+	_test_wither_trigger()
 	_test_other_skills()
+
+
+## 확률형: 시들 때마다 굴려 터지고, 터진 뒤엔 쉰다
+func _test_wither_trigger() -> void:
+	_start()
+	Upgrades.levels[Balance.Upgrade.REAP] = 1
+	var fired: Array[int] = []
+	var on_used := func(skill: int) -> void: fired.append(skill)
+	Night.skill_used.connect(on_used)
+	var rolls := 0
+	while fired.is_empty() and rolls < 2000:
+		Night._roll_wither_skills()
+		rolls += 1
+	_equal(fired, [Balance.Skill.REAP], "시들 때 확률로 낫이 터진다 (%d번째)" % rolls)
+	_close(Night.rest_left[Balance.Skill.REAP], Balance.skill_rest(Balance.Skill.REAP, 1), "터진 뒤 쉰다")
+	for i in 500:
+		Night._roll_wither_skills()
+	_equal(fired.size(), 1, "쉬는 동안은 안 터진다")
+	Night.tick(Balance.skill_rest(Balance.Skill.REAP, 1) + 0.1)
+	_close(Night.rest_left[Balance.Skill.REAP], 0.0, "쉬는 시간이 지나면 다시 굴린다")
+	Night.skill_used.disconnect(on_used)
+	Night.stop()
 
 
 func _test_other_skills() -> void:
@@ -130,3 +167,11 @@ func _test_bounty_and_king() -> void:
 	_equal(pecks, [best], "까마귀 왕: 생기가 가장 많은 작물을 쫀다")
 	_equal(Night.kinds[best] == Balance.Crop.GOLDEN or Night.kinds[best] == Balance.Crop.PUMPKIN, true, "황금 이삭이나 호박")
 	Night.stop()
+
+
+## 살아 있는 첫 작물 (없으면 -1)
+func _first_alive() -> int:
+	for i in Night.cell_count():
+		if Night.is_alive(i):
+			return i
+	return -1

@@ -1,14 +1,16 @@
 extends "res://autoload/night/critters.gd"
-## Night 2.5부: 밤 스킬 (방장 2026-10-14: 역병 폭풍을 지속형으로, 스킬을 다양하게). 어둠의 나무 칸을 사면 열리고 밤마다 쿨타임 없이 시작한다.
+## Night 2.5부: 밤 스킬 (방장 2026-10-14: 역병 폭풍을 지속형으로, 스킬을 다양하게. 2026-10-15: 누르지 않고 저절로 터지게). 어둠의 나무 칸을 사면 열린다.
+## 타수형은 구름이 친 작물 수(night.gd의 _pulse가 _count_cloud_hits, 작물 하나가 한 타)를 세어 다 차면, 확률형은 작물이 시들 때(night/crops.gd가 _roll_wither_skills) 확률로 터진다.
 ## 역병 폭풍(켜 둔 동안 구름 반경·피해↑), 까마귀 떼(켜 둔 동안 까마귀가 빨리 쫌), 짚돌이의 한숨(구름 안에 한꺼번에), 역병 파도(작물 일부가 번짐),
 ## 어둠의 장막(켜 둔 동안 지키는 이가 잠듦), 수확의 낫(약한 작물을 한꺼번에), 썩은 비(켜 둔 동안 밭 전체에), 연쇄 시듦(켜 둔 동안 시들면 옆으로. night/crops.gd).
-## 화면은 use_skill()을 부르고 cooldown_left·active_left를 읽어 그린다. 시듦·번짐(_damage·_infect)은 night/waves.gd가 채운다
+## 화면은 charge·rest_left·active_left를 읽어 게이지만 그린다. 시듦·번짐(_damage·_infect)은 night/waves.gd가 채운다
 
 signal skill_used(skill: int)
 signal skill_ended(skill: int)  # 지속형이 끝났다
 signal storm_pulsed()           # 역병 폭풍을 켰다 (소리·구름 연출)
 
-var cooldown_left: Array[float] = []  # 스킬마다 남은 쿨타임 (Balance.Skill 순서)
+var charge: Array[int] = []           # 타수형이 센 박자 (Balance.Skill 순서). 밤마다 0에서
+var rest_left: Array[float] = []      # 확률형이 터진 뒤 쉬는 남은 초
 var active_left: Array[float] = []    # 지속형이 켜져 남은 초
 var _summoned: int = 0                # 까마귀 떼가 불러온 임시 까마귀 수
 var _rain_left: float = 0.0           # 썩은 비가 다음에 내리기까지 남은 초
@@ -26,16 +28,13 @@ func is_skill_active(skill: int) -> bool:
 	return skill < active_left.size() and active_left[skill] > 0.0
 
 
-func can_use(skill: int) -> bool:
-	return active and is_skill_unlocked(skill) and cooldown_left[skill] <= 0.0 and not is_skill_active(skill)
-
-
-## 스킬을 쓴다. 못 쓰면 false
+## 스킬을 터뜨린다 (타수·확률이 차면 저절로 부른다. 테스트·캡처는 바로 부른다). 밤이 아니거나, 안 열렸거나, 켜져 있으면 false
 func use_skill(skill: int) -> bool:
-	if not can_use(skill):
+	if not active or not is_skill_unlocked(skill) or is_skill_active(skill):
 		return false
 	var level := skill_level(skill)
-	cooldown_left[skill] = Balance.skill_cooldown(skill, level)
+	charge[skill] = 0
+	rest_left[skill] = Balance.skill_rest(skill, level)
 	active_left[skill] = Balance.skill_duration(skill, level)
 	match skill:
 		Balance.Skill.STORM:
@@ -67,12 +66,33 @@ func cloud_dps() -> float:
 	return Balance.cap(super() * (Balance.STORM_DAMAGE if is_skill_active(Balance.Skill.STORM) else 1.0))
 
 
-## 밤 시작: 모든 스킬이 바로 쓸 수 있다
+## 구름 박자 하나가 작물 hits개를 쳤다: 켜져 있지 않은 타수형마다 그만큼 차고, 다 차면 터진다 (몰린 곳을 칠수록 빨리 찬다)
+func _count_cloud_hits(hits: int) -> void:
+	for skill in charge.size():
+		if not Balance.counts_hits(skill) or not is_skill_unlocked(skill) or is_skill_active(skill):
+			continue
+		charge[skill] += hits
+		if charge[skill] >= Balance.skill_need(skill, skill_level(skill)):
+			use_skill(skill)
+
+
+## 작물 하나가 시들었다: 쉬지 않는 확률형마다 굴린다
+func _roll_wither_skills() -> void:
+	for skill in rest_left.size():
+		if not active or Balance.counts_hits(skill) or not is_skill_unlocked(skill) or is_skill_active(skill) or rest_left[skill] > 0.0:
+			continue
+		if rng.randf() < Balance.skill_chance(skill, skill_level(skill)):
+			use_skill(skill)
+
+
+## 밤 시작: 타수는 0에서, 확률형은 쉬지 않고
 func _reset_skills() -> void:
-	cooldown_left.clear()
+	charge.clear()
+	rest_left.clear()
 	active_left.clear()
 	for i in Balance.SKILLS.size():
-		cooldown_left.append(0.0)
+		charge.append(0)
+		rest_left.append(0.0)
 		active_left.append(0.0)
 	_summoned = 0
 	_rain_left = 0.0
@@ -84,8 +104,8 @@ func _tick_skills(dt: float) -> void:
 		while active and _rain_left <= 0.0:
 			_rain_left += Balance.CLOUD_TICK
 			_rain(Balance.CLOUD_TICK)
-	for skill in cooldown_left.size():
-		cooldown_left[skill] = maxf(cooldown_left[skill] - dt, 0.0)
+	for skill in rest_left.size():
+		rest_left[skill] = maxf(rest_left[skill] - dt, 0.0)
 		if active_left[skill] > 0.0:
 			active_left[skill] -= dt
 			if active_left[skill] <= 0.0:

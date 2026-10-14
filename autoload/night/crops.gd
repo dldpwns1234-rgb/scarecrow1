@@ -1,5 +1,5 @@
 extends "res://autoload/night/skills.gd"
-## Night 2.7부: 시든 뒤 일 (방장 2026-10-14: 가득 차는 맛). 작물 버릇(해바라기 씨앗·수박 터짐·포도 덩굴)과 연쇄 시듦 스킬.
+## Night 2.7부: 시든 뒤 일 (방장 2026-10-14: 가득 차는 맛). 작물 버릇(해바라기 씨앗·수박 터짐·포도 덩굴), 연쇄 시듦 스킬, 확률형 스킬 굴리기.
 ## night/waves.gd의 시듦이 줄을 세워 _after_wither()를 차례로 부른다. 그 안에서 친 작물이 시들면 줄 끝에 서서 이어 풀린다 (연쇄)
 
 signal seeds_flung(index: int, targets: PackedInt32Array)  # 해바라기 씨앗이 튀어 번짐을 옮겼다 (연출용)
@@ -7,7 +7,7 @@ signal crop_burst(index: int, radius: float)              # 수박이 터졌다
 signal chain_struck(from: int, to: int)                   # 포도 덩굴·연쇄 시듦이 옆 작물을 쳤다
 
 
-## 시든 작물 하나의 뒤 일: 작물 버릇, 그다음 연쇄 시듦 (켜져 있으면)
+## 시든 작물 하나의 뒤 일: 작물 버릇, 연쇄 시듦 (켜져 있으면), 확률형 스킬
 func _after_wither(index: int) -> void:
 	match kinds[index]:
 		Balance.Crop.SUNFLOWER:
@@ -18,6 +18,7 @@ func _after_wither(index: int) -> void:
 			_snap_vine(index)
 	if is_skill_active(Balance.Skill.CHAIN):
 		_chain_from(index)
+	_roll_wither_skills()
 
 
 ## 해바라기: 둘레의 번지지 않은 작물 몇에 씨앗이 튀어 번짐에 걸린다
