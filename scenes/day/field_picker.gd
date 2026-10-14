@@ -1,5 +1,5 @@
 extends VBoxContainer
-## 낮 화면: 다음 밤의 밭 단계 고르기 (GDD 4절 밭 정복). "◀  밭 3단계  ▶"와 그 단계의 작물 체력·휴식 배율.
+## 낮 화면: 다음 밤의 밭 단계 고르기 (GDD 4절 밭 정복). "◀  밭 3단계  ▶"와 그 단계의 작물 체력·생기 배율.
 ## 밭을 정복하면(90% 시듦) 다음 단계가 열린다. 낮은 단계로 돌아가 쉽게 모을 수도 있다. Night의 함수와 시그널만 쓴다. 상수는 배치용이다.
 
 const ARROW_SIZE := Vector2(72, 64)
@@ -51,4 +51,4 @@ func _refresh() -> void:
 	_up.disabled = level >= Night.best_level
 	var hp := Balance.crop_hp(0, level) / Balance.crop_hp(0, 1)
 	var rest := Balance.crop_rest(0, level) / Balance.crop_rest(0, 1)
-	_note.text = "작물 체력 %s  ·  휴식 %s  ·  열린 단계 %d" % [Num.multiplier(hp), Num.multiplier(rest), Night.best_level]
+	_note.text = "작물 체력 %s  ·  생기 %s  ·  열린 단계 %d" % [Num.multiplier(hp), Num.multiplier(rest), Night.best_level]

@@ -1,5 +1,5 @@
 extends PanelContainer
-## 밤이 끝나 낮으로 돌아오면 화면 위쪽 가운데에 잠깐 뜨는 결과: "지난 밤 · 휴식 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
+## 밤이 끝나 낮으로 돌아오면 화면 위쪽 가운데에 잠깐 뜨는 결과: "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
 
 const TOP: float = 20.0
@@ -49,7 +49,7 @@ func _line(color: Color) -> Label:
 
 
 func _show_report(haul: float) -> void:
-	_haul.text = "지난 밤  ·  휴식 +%s  ·  작물 %d / %d 시듦" % [Num.format(haul), Night.withered, Night.crops_total]
+	_haul.text = "지난 밤  ·  생기 +%s  ·  작물 %d / %d 시듦" % [Num.format(haul), Night.withered, Night.crops_total]
 	_clear.visible = _cleared_level > 0
 	_clear.text = "밭 %d단계 정복!" % _cleared_level
 	if Night.best_level > _best_before:

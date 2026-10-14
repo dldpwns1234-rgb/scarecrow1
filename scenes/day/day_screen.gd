@@ -1,5 +1,5 @@
 extends MarginContainer
-## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·휴식·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
+## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·생기·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
 ## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 상수는 배치용이다.
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -94,9 +94,9 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 
 
 func _refresh() -> void:
-	_rest.text = "휴식 %s" % Num.format(Game.rest)
+	_rest.text = "생기 %s" % Num.format(Game.rest)
 	if Game.nights == 0:
-		_record.text = "아직 밤에 나가 본 적이 없다.\n밭이 망하면 나도 쉴 수 있겠지…"
+		_record.text = "까마귀가 속삭였다.\n\"생기를 모아 오면 쉬게 해 주마.\""
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
 	_sound.text = "소리 켬" if Prefs.sfx_on else "소리 끔"
