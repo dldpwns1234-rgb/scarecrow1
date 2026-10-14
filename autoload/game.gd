@@ -1,19 +1,27 @@
 extends Node
-## 게임 흐름 (GDD 3절): 낮과 밤의 전환, 휴식(재화), 밤 기록. 상태 변경은 오토로드의 함수로만 하고 UI는 시그널을 받아 표시만 한다.
-## 밤 한 판 안의 일(밭·구름·작물·번짐·남은 시간)은 밤 쪽이 맡고, 작물이 시들면 add_rest()를, 시간이 끝나면 finish_night()를 부른다
+## 게임 흐름 (GDD 3절): 낮과 밤의 전환, 생기(재화), 어둠에게 바친 생기의 합과 약속된 휴식(이야기), 밤 기록. 상태 변경은 오토로드의 함수로만 하고 UI는 시그널을 받아 표시만 한다.
+## 밤 한 판 안의 일(밭·구름·작물·번짐·남은 시간)은 Night가 맡고, 작물이 시들면 add_vitality()를, 시간이 끝나면 finish_night()를 부른다
 
 signal phase_changed(phase: int)
-signal rest_changed(rest: float)
-signal night_finished(haul: float)  # 이번 밤에 모은 휴식. 결과 창용
+signal vitality_changed(vitality: float)
+signal rest_changed(vitality: float)  # 옛 이름 (낮 화면이 vitality_changed로 옮기면 지운다). vitality_changed와 늘 함께 난다
+signal night_finished(haul: float)    # 이번 밤에 거둔 생기. 결과 창용
 
 enum Phase { DAY, NIGHT }
 
 var phase: int = Phase.DAY
-var rest: float = 0.0        # 휴식: 시든 작물에서 나오는 재화. 업그레이드에 쓴다
+var vitality: float = 0.0    # 생기: 시든 작물에서 거둔다. 어둠의 나무에 쓴다
+var offered: float = 0.0     # 지금까지 거둔 생기의 합 (쓴 것도 친다). 약속된 휴식을 정한다
 var nights: int = 0          # 지난 밤 수
-var night_haul: float = 0.0  # 지금 밤에 모은 휴식
-var last_haul: float = 0.0   # 지난 밤에 모은 휴식
-var best_haul: float = 0.0   # 가장 많이 모은 밤
+var night_haul: float = 0.0  # 지금 밤에 거둔 생기
+var last_haul: float = 0.0   # 지난 밤에 거둔 생기
+var best_haul: float = 0.0   # 가장 많이 거둔 밤
+## 옛 이름 (낮 화면이 vitality로 옮기면 지운다)
+var rest: float:
+	get:
+		return vitality
+	set(value):
+		vitality = value
 
 
 func _ready() -> void:
@@ -23,27 +31,29 @@ func _ready() -> void:
 ## 데이터 초기화에서만 부른다
 func reset() -> void:
 	phase = Phase.DAY
-	rest = 0.0
+	vitality = 0.0
+	offered = 0.0
 	nights = 0
 	night_haul = 0.0
 	last_haul = 0.0
 	best_haul = 0.0
 	phase_changed.emit(phase)
-	rest_changed.emit(rest)
+	_emit_vitality()
 
 
 func to_dict() -> Dictionary:
-	return {"rest": rest, "nights": nights, "last_haul": last_haul, "best_haul": best_haul}
+	return {"vitality": vitality, "offered": offered, "nights": nights, "last_haul": last_haul, "best_haul": best_haul}
 
 
-## 없는 필드는 기본값으로. 불러오면 늘 낮이다 (밤 한 판은 저장하지 않는다)
+## 없는 필드는 기본값으로 (옛 저장의 "rest"는 생기로 읽는다). 불러오면 늘 낮이다 (밤 한 판은 저장하지 않는다)
 func from_dict(data: Dictionary) -> void:
 	reset()
-	rest = Balance.cap(maxf(float(data.get("rest", 0.0)), 0.0))
+	vitality = _read(data, "vitality", float(data.get("rest", 0.0)))
+	offered = maxf(_read(data, "offered", vitality), vitality)
 	nights = maxi(int(data.get("nights", 0)), 0)
-	last_haul = Balance.cap(maxf(float(data.get("last_haul", 0.0)), 0.0))
-	best_haul = Balance.cap(maxf(float(data.get("best_haul", 0.0)), 0.0))
-	rest_changed.emit(rest)
+	last_haul = _read(data, "last_haul", 0.0)
+	best_haul = _read(data, "best_haul", 0.0)
+	_emit_vitality()
 
 
 func is_night() -> bool:
@@ -53,6 +63,11 @@ func is_night() -> bool:
 ## 이번 밤의 길이 (초)
 func night_seconds() -> float:
 	return Balance.night_seconds(Upgrades.level(Balance.Upgrade.LONG_NIGHT))
+
+
+## 지금까지 바친 생기로 어둠이 약속한 휴식 (초)
+func promised_rest_seconds() -> float:
+	return Balance.promised_rest_seconds(offered)
 
 
 ## 낮 → 밤. 이미 밤이면 false
@@ -79,19 +94,34 @@ func finish_night() -> bool:
 	return true
 
 
-## 시든 작물의 휴식. 밤에만 받는다
-func add_rest(amount: float) -> void:
+## 시든 작물의 생기. 밤에만 받는다
+func add_vitality(amount: float) -> void:
 	if amount <= 0.0 or not is_night():
 		return
 	night_haul = Balance.cap(night_haul + amount)
-	rest = Balance.cap(rest + amount)
-	rest_changed.emit(rest)
+	vitality = Balance.cap(vitality + amount)
+	offered = Balance.cap(offered + amount)
+	_emit_vitality()
 
 
-## 휴식을 치른다. 모자라면 false
+## 옛 이름 (지운다)
+func add_rest(amount: float) -> void:
+	add_vitality(amount)
+
+
+## 생기를 치른다. 모자라면 false
 func spend(cost: float) -> bool:
-	if cost < 0.0 or rest < cost:
+	if cost < 0.0 or vitality < cost:
 		return false
-	rest -= cost
-	rest_changed.emit(rest)
+	vitality -= cost
+	_emit_vitality()
 	return true
+
+
+func _emit_vitality() -> void:
+	vitality_changed.emit(vitality)
+	rest_changed.emit(vitality)
+
+
+func _read(data: Dictionary, key: String, fallback: float) -> float:
+	return Balance.cap(maxf(float(data.get(key, fallback)), 0.0))

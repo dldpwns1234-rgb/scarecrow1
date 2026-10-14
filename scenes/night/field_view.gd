@@ -1,6 +1,6 @@
 extends Node2D
 ## 밤 밭의 그림 (GDD 4절): 아이소메트릭 땅(마름모 칸과 흙 옆면)과 칸마다 작물 그림. Night의 시그널을 받아 그리기만 한다.
-## 작물은 체력이 줄수록 병든 색으로 물들고, 맞으면 번쩍이며 움찔하고, 시들면 시든 그림으로 바뀌며 땅이 썩은 색이 된다. 번진 작물은 보랏빛. 상수는 배치·연출용이다
+## 작물은 체력이 줄수록 병든 색으로 물들고, 맞으면 번쩍이며 움찔하고, 시들면 시든 그림으로 바뀌며 땅이 썩은 색이 된다. 번진 작물은 보랏빛, 다시 자란 작물은 작게 솟아난다. 상수는 배치·연출용이다
 
 const Iso := preload("res://scenes/night/iso.gd")
 const TEXTURES: Array[Texture2D] = [  # Balance.Crop 순서
@@ -28,6 +28,8 @@ const HIT_FLASH := Color(1.6, 1.6, 1.4)
 const HIT_DURATION: float = 0.18
 const HIT_SQUASH := Vector2(1.08, 0.9)
 const WITHER_DROP: float = 4.0
+const REGROW_START: float = 0.2
+const REGROW_DURATION: float = 0.35
 
 var origin: Vector2 = Vector2.ZERO
 var _ground: Node2D
@@ -54,6 +56,7 @@ func _ready() -> void:
 	Night.crop_hit.connect(_on_hit)
 	Night.crop_withered.connect(_on_withered)
 	Night.crop_infected.connect(_on_infected)
+	Night.crop_regrown.connect(_on_regrown)
 	rebuild()
 
 
@@ -135,6 +138,21 @@ func _on_withered(index: int, _rest: float) -> void:
 	sprite.modulate = Color.WHITE
 	_place(index)
 	sprite.position.y += WITHER_DROP
+	_ground.queue_redraw()
+
+
+## 다시 자라는 뿌리: 새 작물이 작게 솟아난다
+func _on_regrown(index: int) -> void:
+	var sprite := _sprites[index]
+	if _tweens[index] != null:
+		_tweens[index].kill()
+	sprite.texture = TEXTURES[Night.kinds[index]]
+	sprite.modulate = Color.WHITE
+	_place(index)
+	sprite.scale = Vector2.ONE * CROP_SCALE * REGROW_START
+	var tween := sprite.create_tween()
+	tween.tween_property(sprite, "scale", Vector2.ONE * CROP_SCALE, REGROW_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_tweens[index] = tween
 	_ground.queue_redraw()
 
 

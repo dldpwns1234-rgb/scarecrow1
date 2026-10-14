@@ -1,32 +1,38 @@
 extends "res://tests/test_case.gd"
-## 업그레이드 나무: 비용, 열림(앞 업그레이드), 구매, 상한 (GDD 6절)
+## 어둠의 나무: 비용, 네 갈래의 뿌리, 열림(앞 업그레이드), 구매, 상한 (GDD 6절)
 
 
 func run() -> void:
 	_fresh()
 	var R: int = Balance.Upgrade.RADIUS
+	var T: int = Balance.Upgrade.TOXIN
 	var N: int = Balance.Upgrade.LONG_NIGHT
 	_close(Balance.upgrade_cost(R, 0), 10.0, "넓은 구름 첫 비용")
 	_close(Balance.upgrade_cost(R, 1), 16.0, "다음 비용은 ×1.6")
-	_equal(Upgrades.is_unlocked(R), true, "처음부터 열림")
-	_equal(Upgrades.is_unlocked(N), false, "긴 밤은 넓은 구름이 있어야")
-	_equal(Upgrades.can_buy(R), false, "휴식이 없으면 못 산다")
-	Game.rest = 100.0
-	_equal(Upgrades.buy(N), false, "잠긴 것은 못 산다")
+	_equal(Upgrades.is_unlocked(R), true, "뿌리는 처음부터 열림")
+	_equal(Upgrades.is_unlocked(N), true, "긴 밤도 뿌리 (왼쪽 갈래)")
+	_equal(Upgrades.is_unlocked(T), false, "독한 포자는 넓은 구름이 있어야")
+	_equal(Upgrades.can_buy(R), false, "생기가 없으면 못 산다")
+	Game.vitality = 100.0
+	_equal(Upgrades.buy(T), false, "잠긴 것은 못 산다")
 	_equal(Upgrades.buy(R), true, "넓은 구름 구매")
-	_close(Game.rest, 90.0, "비용만큼 썼다")
-	_equal(Upgrades.is_unlocked(N), true, "긴 밤이 열린다")
+	_close(Game.vitality, 90.0, "비용만큼 썼다")
+	_equal(Upgrades.is_unlocked(T), true, "독한 포자가 열린다")
 	_equal(Upgrades.buy(N), true, "긴 밤 구매")
 	_close(Game.night_seconds(), Balance.NIGHT_BASE_SECONDS + Balance.NIGHT_SECONDS_PER_LEVEL, "긴 밤 1레벨이면 밤이 길어진다")
 	Upgrades.levels[R] = Balance.upgrade_max_level(R)
-	Game.rest = 1e9
+	Game.vitality = 1e9
 	_equal(Upgrades.is_maxed(R), true, "최대 레벨")
 	_equal(Upgrades.buy(R), false, "최대면 못 산다")
-	var T: int = Balance.Upgrade.TOXIN
 	_equal(Balance.upgrade_max_level(T), 0, "독한 포자는 상한 없음")
 	_equal(Upgrades.is_maxed(T), false, "상한이 없으면 다 차지 않는다")
 	_equal(is_inf(Balance.upgrade_cost(T, 100000)), false, "비용은 무한대가 되지 않는다")
+	var branches: Array[String] = []
 	for i in Balance.UPGRADES.size():
 		var need := Balance.upgrade_requires(i)
-		_equal(need < i, true, "%d번은 앞의 업그레이드만 요구한다 (순환 없음)" % i)
+		_equal(need < i, true, "%s: 앞의 업그레이드만 요구한다 (순환 없음, 화면 배치가 기댄다)" % Balance.upgrade_name(i))
+		if need < 0:
+			branches.append(Balance.UPGRADES[i]["branch"])
+	branches.sort()
+	_equal(branches, ["down", "left", "right", "up"], "뿌리는 네 갈래에 하나씩")
 	_fresh()
