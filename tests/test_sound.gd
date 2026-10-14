@@ -28,6 +28,9 @@ func run() -> void:
 	_equal(int(Sfx.played.get("sleep", 0)), 1, "겨울잠 소리")
 	Night.storm_pulsed.emit()
 	_equal(int(Sfx.played.get("storm", 0)), 1, "역병 폭풍 소리")
+	Night.farmer_sprayed.emit(0)
+	Night.crop_regrown.emit(0)
+	_equal([int(Sfx.played.get("spray", 0)), int(Sfx.played.get("sprout", 0))], [1, 1], "약 치기·다시 자람 소리")
 	Save.reset_data()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "데이터 초기화의 낮은 조용하다")
 
