@@ -2,7 +2,8 @@ extends VBoxContainer
 ## 낮 화면 오른쪽 [아지트] 칸 (GDD 8절 M2, 대화방 #419): 일자리 세 줄(job_row.gd)과 아래의 쉬는 일꾼 줄.
 ## 일꾼 토큰(worker_token.gd)을 끌어 일자리 줄에 놓거나, 토큰을 눌러 고른 뒤 일자리 줄을 누른다. 칸이 다 찼으면 그 자리의 일꾼과 바꾼다
 ## (방장 2026-10-14: 까악이를 놓은 뒤 허수아비를 같은 일자리에 놓으면 아무 반응이 없었다). 쉬는 줄에 놓거나 고른 뒤 쉬는 줄을 누르면 쉬게 한다.
-## Workers의 함수만 부르고 workers_changed를 받아 다시 그린다. 상수는 배치용이다
+## Workers의 함수만 부르고 workers_changed를 받아 다시 그린다. 생기가 바뀔 때는 확장 버튼만 고친다
+## (생기 나르기로 생기가 매 프레임 늘면 토큰을 프레임마다 다시 만들어, 누른 토큰이 손을 떼기 전에 사라졌다. 별빛이 찾음 #451). 상수는 배치용이다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const JobRow := preload("res://scenes/day/job_row.gd")
@@ -59,8 +60,14 @@ func _ready() -> void:
 	add_child(_hint)
 	_rest_panel.set_drag_forwarding(Callable(), _can_drop_rest, _drop_rest)
 	Workers.workers_changed.connect(_on_changed)
-	Game.vitality_changed.connect(_gate.queue.unbind(1))
+	Game.vitality_changed.connect(_on_vitality_changed.unbind(1))
 	_refresh()
+
+
+func _on_vitality_changed() -> void:
+	if is_visible_in_tree():
+		for row in _rows:
+			row.refresh_expand()
 
 
 func _on_changed() -> void:

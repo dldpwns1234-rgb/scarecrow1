@@ -113,6 +113,11 @@ func refresh(selected: int) -> void:
 		empty.add_child(plus)
 		_slots.add_child(empty)
 		_tokens.append(empty)
+	refresh_expand()
+
+
+## 헛간 확장 버튼만 (생기가 바뀔 때. 토큰을 다시 만들면 누르고 있던 토큰이 사라진다)
+func refresh_expand() -> void:
 	var maxed := Workers.extra_slots[job] >= Balance.MAX_EXTRA_SLOTS
 	_expand.text = "칸 최대" if maxed else "칸 +1\n생기 %s" % Num.format(Workers.expand_cost(job))
 	_expand.disabled = not Workers.can_expand(job)
