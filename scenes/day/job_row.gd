@@ -92,6 +92,7 @@ func refresh(selected: int) -> void:
 			token.tapped.connect(token_tapped.emit)
 			_slots.add_child(token)
 			token.set_selected(w == selected)
+			token.set_double(Balance.worker_share(Workers.worker_kind(w), job) > 1.0)
 			_tokens.append(token)
 	for i in Workers.slots_of(job) - Workers.used(job):
 		var empty := Panel.new()

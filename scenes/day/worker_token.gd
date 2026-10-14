@@ -1,6 +1,6 @@
 extends PanelContainer
 ## 아지트의 일꾼 토큰 하나 (hideout.gd): 그림(까마귀·지친 허수아비)과 이름. 끌어서 일자리 줄이나 쉬는 줄에 놓는다 (_get_drag_data).
-## 누르면 tapped를 내고, 아지트가 '고른 일꾼'으로 기억한 뒤 일자리 줄을 누르면 그 자리에 놓는다 (폰에서 끌기가 불편할 때). 상수는 배치용이다
+## 맞는 일자리(두 몫)에서 일하면 그림 오른쪽 위에 금색 '×2'. 누르면 tapped를 내고, 아지트가 '고른 일꾼'으로 기억한 뒤 일자리 줄을 누르면 그 자리에 놓는다 (폰에서 끌기가 불편할 때). 상수는 배치용이다
 
 signal tapped(worker: int)
 
@@ -11,11 +11,14 @@ const PICTURE := Vector2(48, 48)
 const NAME_FONT_SIZE: int = 16
 const SELECTED_COLOR := Color("e9c46a")
 const TAP_SLOP: float = 12.0  # 이만큼 안에서 떼면 누른 것 (끌기와 구분)
+const BADGE_FONT_SIZE: int = 15
+const BADGE_POSITION := Vector2(30, -10)  # 그림 안에서 (그림은 컨테이너가 아니라 자리가 그대로다)
 
 var worker: int = -1
 var _picture: TextureRect
 var _name: Label
 var _border: StyleBoxFlat
+var _badge: Label
 var _press_at := Vector2.INF
 
 
@@ -33,6 +36,16 @@ func _init(worker_index: int) -> void:
 	_picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_picture)
+	_badge = Label.new()  # 두 몫 표시
+	_badge.text = "×2"
+	_badge.position = BADGE_POSITION
+	_badge.add_theme_font_size_override("font_size", BADGE_FONT_SIZE)
+	_badge.add_theme_color_override("font_color", SELECTED_COLOR)
+	_badge.add_theme_color_override("font_outline_color", Color.BLACK)
+	_badge.add_theme_constant_override("outline_size", 4)
+	_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_badge.visible = false
+	_picture.add_child(_badge)
 	_name = Label.new()
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name.add_theme_font_size_override("font_size", NAME_FONT_SIZE)
@@ -48,6 +61,11 @@ func _init(worker_index: int) -> void:
 func _ready() -> void:
 	_picture.texture = CROW if Workers.worker_kind(worker) == Balance.Worker.CROW else SCARECROW
 	_name.text = Workers.worker_name(worker)
+
+
+## 맞는 일자리에서 두 몫으로 일하는지
+func set_double(on: bool) -> void:
+	_badge.visible = on
 
 
 func set_selected(on: bool) -> void:
