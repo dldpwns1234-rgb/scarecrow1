@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="56" viewBox="0 0 96 56">
+  <!-- 나무판 단추 (눌림): 그늘이 사라지고 판이 아래로 내려앉는다 -->
+  <rect x="2" y="2" width="92" height="52" rx="10" fill="#24160c"/>
+  <rect x="4" y="10" width="88" height="42" rx="8" fill="#5c3f27"/>
+  <path d="M12 13 H84" stroke="#8a6a4c" stroke-width="1.5" opacity="0.6" stroke-linecap="round"/>
+  <path d="M10 32 H86" stroke="#4d3420" stroke-width="1.2" opacity="0.7"/>
+  <g fill="#b09a72" stroke="#24160c" stroke-width="1">
+    <circle cx="11" cy="20" r="2"/>
+    <circle cx="85" cy="20" r="2"/>
+  </g>
+</svg>

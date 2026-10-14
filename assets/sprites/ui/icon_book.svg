@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 이야기: 펼친 낡은 책과 볏짚 책갈피 -->
+  <g stroke="#24160c" stroke-width="3" stroke-linejoin="round">
+    <path d="M6 16 Q20 10 32 18 Q44 10 58 16 V50 Q44 44 32 52 Q20 44 6 50 Z" fill="#6b4a2f"/>
+    <path d="M10 18 Q21 13 32 20 V48 Q21 42 10 46 Z" fill="#efe2c4"/>
+    <path d="M54 18 Q43 13 32 20 V48 Q43 42 54 46 Z" fill="#e2d2ae"/>
+  </g>
+  <path d="M15 24 Q22 21 28 25 M15 30 Q22 27 28 31 M15 36 Q22 33 28 37 M36 25 Q42 21 49 24 M36 31 Q42 27 49 30" stroke="#a08868" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M40 14 V30 L43 27 L46 30 V12" fill="#e2c372" stroke="#24160c" stroke-width="2" stroke-linejoin="round"/>
+</svg>

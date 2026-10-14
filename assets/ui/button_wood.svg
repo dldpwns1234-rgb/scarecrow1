@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="56" viewBox="0 0 96 56">
+  <!-- 9칸 늘림 단추 '나무판' (보통): 가장자리 16px은 그대로. 위는 달빛 테두리 빛, 아래는 두꺼운 그늘이라 눌리면 그늘이 줄어든다 -->
+  <rect x="2" y="2" width="92" height="52" rx="10" fill="#24160c"/>
+  <rect x="4" y="4" width="88" height="44" rx="8" fill="#6b4a2f"/>
+  <rect x="4" y="38" width="88" height="10" rx="4" fill="#553a24"/>
+  <path d="M12 6.5 H84" stroke="#a88566" stroke-width="2" opacity="0.7" stroke-linecap="round"/>
+  <path d="M10 27 H86" stroke="#5c3f27" stroke-width="1.2" opacity="0.7"/>
+  <g fill="#c9b48a" stroke="#24160c" stroke-width="1">
+    <circle cx="11" cy="14" r="2"/>
+    <circle cx="85" cy="14" r="2"/>
+  </g>
+</svg>

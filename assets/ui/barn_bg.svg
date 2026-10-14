@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <!-- 낮 화면 배경 '헛간 안' (달빛 동화 그림책풍, 방장 2026-10-15): 세로 판자 벽, 짚돌이 뒤 창으로 드는 오후 햇살, 매달린 등불, 볏짚 더미, 가장자리 어둡게.
+       위에 패널이 얹히므로 어둡고 낮은 대비로 그린다 -->
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b1f1a"/>
+      <stop offset="0.75" stop-color="#3a2a20"/>
+      <stop offset="1" stop-color="#2a1d16"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1d14"/>
+      <stop offset="1" stop-color="#1a120c"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fb6d8"/>
+      <stop offset="1" stop-color="#e9d9b0"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6dc9a" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#f6dc9a" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffcf7a" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="0.55" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.6"/>
+    </radialGradient>
+  </defs>
+  <!-- 벽 -->
+  <rect width="1280" height="720" fill="url(#wall)"/>
+  <g stroke="#1f1610" stroke-width="3" opacity="0.8">
+    <path d="M64 0V600 M128 0V600 M192 0V600 M256 0V600 M320 0V600 M384 0V600 M448 0V600 M512 0V600 M576 0V600 M640 0V600 M704 0V600 M768 0V600 M832 0V600 M896 0V600 M960 0V600 M1024 0V600 M1088 0V600 M1152 0V600 M1216 0V600"/>
+  </g>
+  <g stroke="#4a3628" stroke-width="1.5" opacity="0.5">
+    <path d="M67 0V600 M131 0V600 M195 0V600 M259 0V600 M323 0V600 M387 0V600 M451 0V600 M515 0V600 M579 0V600 M643 0V600 M707 0V600 M771 0V600 M835 0V600 M899 0V600 M963 0V600 M1027 0V600 M1091 0V600 M1155 0V600 M1219 0V600"/>
+  </g>
+  <!-- 옹이 -->
+  <g fill="none" stroke="#22180f" stroke-width="2" opacity="0.6">
+    <ellipse cx="96" cy="300" rx="6" ry="10"/>
+    <ellipse cx="545" cy="140" rx="5" ry="9"/>
+    <ellipse cx="1000" cy="420" rx="6" ry="11"/>
+    <ellipse cx="740" cy="520" rx="5" ry="8"/>
+  </g>
+  <!-- 가로 들보 -->
+  <rect x="0" y="40" width="1280" height="26" fill="#22170f"/>
+  <path d="M0 42 H1280" stroke="#5a4232" stroke-width="2" opacity="0.6"/>
+  <!-- 짚돌이 뒤 창: 오후 하늘과 먼 밭 -->
+  <g>
+    <rect x="300" y="96" width="150" height="136" rx="6" fill="#1a110a"/>
+    <rect x="308" y="104" width="134" height="120" fill="url(#sky)"/>
+    <path d="M308 196 Q350 178 390 190 T442 184 V224 H308 Z" fill="#7c9a5a"/>
+    <path d="M308 206 Q360 196 442 204 V224 H308 Z" fill="#c9ad5c"/>
+    <path d="M375 104 V224 M308 164 H442" stroke="#1a110a" stroke-width="7"/>
+    <rect x="296" y="228" width="158" height="10" rx="3" fill="#22170f"/>
+  </g>
+  <!-- 창으로 드는 햇살 -->
+  <path d="M308 104 L442 104 L760 600 L470 600 Z" fill="url(#beam)"/>
+  <!-- 매달린 등불과 빛 (짚돌이 초상화 왼쪽 빈자리. 오른쪽 칸의 글과 겹치지 않게) -->
+  <g transform="translate(-560 0)">
+    <circle cx="660" cy="160" r="150" fill="url(#lamp)"/>
+    <path d="M660 66 V128" stroke="#15100a" stroke-width="3"/>
+    <g stroke="#15100a" stroke-width="3" stroke-linejoin="round">
+      <rect x="644" y="126" width="32" height="8" rx="2" fill="#3a2a18"/>
+      <path d="M646 134 L674 134 L670 176 L650 176 Z" fill="#f2c26a"/>
+      <rect x="642" y="176" width="36" height="8" rx="2" fill="#3a2a18"/>
+    </g>
+    <path d="M660 144 Q666 154 660 166 Q654 154 660 144 Z" fill="#fff0c0"/>
+  </g>
+  <!-- 바닥 -->
+  <rect x="0" y="600" width="1280" height="120" fill="url(#floor)"/>
+  <path d="M0 600 H1280" stroke="#120c08" stroke-width="4"/>
+  <g stroke="#120c08" stroke-width="2" opacity="0.7">
+    <path d="M0 640 H1280 M0 684 H1280"/>
+  </g>
+  <!-- 볏짚 더미 (왼쪽 아래, 오른쪽 아래) -->
+  <g stroke="#2a1d0e" stroke-width="3" stroke-linejoin="round">
+    <path d="M-10 720 L-10 590 Q30 560 80 575 Q130 560 170 590 L190 720 Z" fill="#a8873f"/>
+    <path d="M1110 720 L1120 610 Q1160 585 1205 598 Q1250 585 1290 610 L1290 720 Z" fill="#9a7c3a"/>
+  </g>
+  <g stroke="#d9b968" stroke-width="2" opacity="0.6">
+    <path d="M10 600 L30 640 M50 590 L60 650 M100 588 L95 640 M140 598 L125 650"/>
+    <path d="M1140 615 L1150 660 M1180 604 L1185 655 M1230 604 L1220 660 M1265 612 L1250 660"/>
+  </g>
+  <!-- 가장자리 어둡게 -->
+  <rect width="1280" height="720" fill="url(#vignette)"/>
+</svg>

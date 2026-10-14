@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 밤으로 나가기: 초승달과 작은 별 둘 -->
+  <path d="M40 8 A24 24 0 1 0 56 44 A20 20 0 1 1 40 8 Z" fill="#f3ecd2" stroke="#2a2416" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M26 16 A20 20 0 0 0 30 54 A24 24 0 0 1 26 16 Z" fill="#d9cfa8" opacity="0.8"/>
+  <path d="M48 16 L49.5 20 L53.5 21.5 L49.5 23 L48 27 L46.5 23 L42.5 21.5 L46.5 20 Z" fill="#fff6c8"/>
+  <circle cx="54" cy="34" r="2" fill="#fff6c8"/>
+</svg>

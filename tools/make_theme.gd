@@ -1,10 +1,9 @@
-extends SceneTree
+extends "res://tools/theme_art.gd"
 ## 게임 전체 테마를 만들어 assets/ui/theme.tres로 저장한다. 회귀 용사(alex)의 생성기를 옮겨 와 색만 밤 밭(남색 바탕, 짚 색 강조)으로 바꿨다. project.godot의 gui/theme/custom이 이 파일을 쓴다.
 ##
 ##   godot --headless --path . --script tools/make_theme.gd
 ##
-## 색과 모양은 여기 상수가 원본이다. 고친 뒤 다시 돌려서 .tres를 갱신하고 함께 커밋한다.
-## 타입 변형(theme_type_variation): AccentButton(금색 주요 버튼), NavButton(탭 내비게이션),
+## 색과 모양은 여기 상수와 1부 theme_art.gd(그림 틀)가 원본이다. 고친 뒤 다시 돌려서 .tres를 갱신하고 함께 커밋한다. 타입 변형: AccentButton(금칠 주요 단추), NavButton(탭),
 ## SkillReady(쓸 수 있는 스킬), SkillActive(발동 중 스킬), TopBar(상단 바), Pill(둥근 알림 라벨), DangerPill(붉은 알림 라벨),
 ## GoalBar(업적 진행 막), Sheet(하단 메뉴 시트: 바탕색으로 전투 화면을 가린다)
 
@@ -50,6 +49,7 @@ func _init() -> void:
 	_fields(theme)
 	_scrollbars(theme)
 	_dialogs(theme)
+	_dress(theme)  # 1부 theme_art.gd: 단추·패널을 그림 틀로
 	var err := ResourceSaver.save(theme, OUT_PATH)
 	print("theme ", OUT_PATH, " ", error_string(err))
 	quit(0 if err == OK else 1)

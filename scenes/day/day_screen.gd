@@ -14,6 +14,12 @@ const Hideout := preload("res://scenes/day/hideout.gd")
 const SubTabs := preload("res://scenes/ui/sub_tabs.gd")
 const FieldPicker := preload("res://scenes/day/field_picker.gd")
 const Portrait := preload("res://scenes/day/portrait.gd")
+const ICON_VITALITY := preload("res://assets/sprites/ui/icon_vitality.svg")
+const ICON_BOOK := preload("res://assets/sprites/ui/icon_book.svg")
+const ICON_GEAR := preload("res://assets/sprites/ui/icon_gear.svg")
+const ICON_MOON := preload("res://assets/sprites/ui/icon_moon.svg")
+const BUTTON_ICON: int = 26          # 단추 안 아이콘 크기
+const VITALITY_ICON := Vector2(40, 40)
 
 const MARGIN: int = 24
 const GAP: int = 24
@@ -29,8 +35,8 @@ const CARRY_FONT_SIZE: int = 22
 const TITLE_FONT_SIZE: int = 28
 const DAY_SECONDS: float = 86400.0
 const YEAR_SECONDS: float = 31536000.0
-const SETTINGS_BUTTON_SIZE := Vector2(100, 48)
-const STORY_BUTTON_SIZE := Vector2(126, 48)
+const SETTINGS_BUTTON_SIZE := Vector2(64, 48)
+const STORY_BUTTON_SIZE := Vector2(150, 48)
 
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
 var _rest: Label
@@ -79,9 +85,12 @@ func _make_left() -> VBoxContainer:
 	_story = Button.new()
 	_story.custom_minimum_size = STORY_BUTTON_SIZE
 	_story.pressed.connect(book_requested.emit)
+	_with_icon(_story, ICON_BOOK)
 	top.add_child(_story)
 	var settings := Button.new()  # 소리·저장 내보내기·데이터 초기화
-	settings.text = "설정"
+	settings.tooltip_text = "설정"  # 톱니바퀴만 (자리를 아낀다)
+	_with_icon(settings, ICON_GEAR)
+	settings.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	settings.custom_minimum_size = SETTINGS_BUTTON_SIZE
 	settings.pressed.connect(settings_requested.emit)
 	top.add_child(settings)
@@ -91,6 +100,13 @@ func _make_left() -> VBoxContainer:
 	column.add_child(vitality_row)
 	_rest = _label("", REST_FONT_SIZE, REST_COLOR)
 	_rest.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var leaf := TextureRect.new()
+	leaf.texture = ICON_VITALITY
+	leaf.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	leaf.custom_minimum_size = VITALITY_ICON
+	leaf.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	leaf.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vitality_row.add_child(leaf)
 	vitality_row.add_child(_rest)
 	_carry = _label("", CARRY_FONT_SIZE, REST_COLOR.darkened(0.25))
 	_carry.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -116,8 +132,16 @@ func _make_left() -> VBoxContainer:
 	_night_button.custom_minimum_size = Vector2(0.0, NIGHT_BUTTON_HEIGHT)
 	_night_button.theme_type_variation = "AccentButton"
 	_night_button.pressed.connect(Game.start_night)
+	_with_icon(_night_button, ICON_MOON)
 	column.add_child(_night_button)
 	return column
+
+
+## 단추 글 앞에 아이콘 (테마의 그림 틀 위에서 글과 같은 줄에)
+func _with_icon(button: Button, texture: Texture2D) -> void:
+	button.icon = texture
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", BUTTON_ICON)
 
 
 func _label(text: String, font_size: int, color: Color) -> Label:

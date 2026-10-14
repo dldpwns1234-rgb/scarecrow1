@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 설정: 나무 톱니바퀴와 못 -->
+  <g stroke="#24160c" stroke-width="3" stroke-linejoin="round">
+    <path d="M28 4 H36 L38 12 L45 15 L52 10 L57 16 L52 23 L55 30 L62 31 V37 L55 38 L52 45 L57 52 L51 57 L45 52 L38 55 L36 62 H28 L26 55 L19 52 L13 57 L7 52 L12 45 L9 38 L2 37 V31 L9 30 L12 23 L7 16 L12 10 L19 15 L26 12 Z" fill="#8a6240"/>
+    <circle cx="32" cy="34" r="11" fill="#5a3d26"/>
+  </g>
+  <path d="M14 22 Q24 12 40 14" stroke="#b08458" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <circle cx="32" cy="34" r="4" fill="#c9b48a" stroke="#24160c" stroke-width="2"/>
+</svg>

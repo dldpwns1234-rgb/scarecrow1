@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 꿈 조각: 보랏빛 수정 조각 셋과 별빛 -->
+  <g stroke="#1d1430" stroke-width="3" stroke-linejoin="round">
+    <path d="M30 6 L44 22 L36 58 L20 24 Z" fill="#9d7ad0"/>
+    <path d="M12 30 L22 26 L28 52 L14 46 Z" fill="#7f5cb6"/>
+    <path d="M44 28 L54 34 L48 54 L38 52 Z" fill="#8a66c2"/>
+  </g>
+  <path d="M30 6 L36 58 L20 24 Z" fill="#c4a6f0" opacity="0.7"/>
+  <path d="M30 10 L27 22" stroke="#efe2ff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M52 6 L53.5 10 L57.5 11.5 L53.5 13 L52 17 L50.5 13 L46.5 11.5 L50.5 10 Z" fill="#efe2ff"/>
+</svg>

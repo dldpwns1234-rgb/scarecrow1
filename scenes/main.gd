@@ -1,5 +1,5 @@
 extends Control
-## 화면 전체 (가로 1280×720). 낮이면 헛간(day/day_screen.gd), 밤이면 밭(night/night_screen.gd)만 보인다. Game의 시그널을 받아 바꾸기만 한다.
+## 화면 전체 (가로 1280×720). 낮이면 헛간 그림 위에 헛간 화면(day/day_screen.gd), 밤이면 밭(night/night_screen.gd)만 보인다. Game의 시그널을 받아 바꾸기만 한다.
 
 const DayScreen := preload("res://scenes/day/day_screen.gd")
 const NightScreen := preload("res://scenes/night/night_screen.gd")
@@ -12,13 +12,22 @@ const WinterConfirm := preload("res://scenes/day/winter_confirm.gd")
 const WinterScene := preload("res://scenes/ui/winter_scene.gd")
 const SettingsPanel := preload("res://scenes/ui/settings_panel.gd")
 const EndingScene := preload("res://scenes/ui/ending_scene.gd")
+const BARN := preload("res://assets/ui/barn_bg.svg")  # 낮 배경 '헛간 안' (달빛 동화 그림책풍, 방장 2026-10-15)
 
 var _day: Control
+var _barn: TextureRect  # 낮 화면 뒤 헛간 그림
 var _night: Control
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_barn = TextureRect.new()
+	_barn.texture = BARN
+	_barn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_barn.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_barn.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_barn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_barn)
 	_day = DayScreen.new()
 	_night = NightScreen.new()
 	for screen: Control in [_day, _night]:
@@ -47,4 +56,5 @@ func _ready() -> void:
 
 func _on_phase_changed() -> void:
 	_day.visible = not Game.is_night()
+	_barn.visible = _day.visible
 	_night.visible = Game.is_night()

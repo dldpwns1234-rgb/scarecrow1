@@ -7,6 +7,8 @@ signal sleep_requested()
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const TapScroll := preload("res://scenes/ui/tap_scroll.gd")
 const KoreanText := preload("res://scenes/ui/korean_text.gd")
+const ICON_SHARD := preload("res://assets/sprites/ui/icon_shard.svg")
+const SHARD_ICON := Vector2(36, 36)
 
 const GAP: int = 12
 const COLUMNS: int = 1  # 한 줄에 하나 (두 칸이면 이름·효과가 잘리고 낱말 중간에서 줄이 바뀌었다)
@@ -37,8 +39,18 @@ func _ready() -> void:
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(text)
+	var shard_row := HBoxContainer.new()
+	text.add_child(shard_row)
+	var shard := TextureRect.new()
+	shard.texture = ICON_SHARD
+	shard.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	shard.custom_minimum_size = SHARD_ICON
+	shard.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	shard.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	shard_row.add_child(shard)
 	_shards = _label(SHARD_FONT_SIZE, SHARD_COLOR)
-	text.add_child(_shards)
+	_shards.autowrap_mode = TextServer.AUTOWRAP_OFF  # 가로줄 안이라 줄바꿈을 켜면 글자마다 세로로 선다
+	shard_row.add_child(_shards)
 	_sleep_note = _label(NOTE_FONT_SIZE, NOTE_COLOR)
 	text.add_child(_sleep_note)
 	_sleep = Button.new()

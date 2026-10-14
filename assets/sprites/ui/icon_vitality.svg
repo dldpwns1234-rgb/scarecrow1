@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- 생기: 풀빛 물방울 잎과 반짝임 (굵은 외곽선·두 단계 명암·달빛 테두리 빛) -->
+  <g stroke="#1c2410" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M32 6 C20 22 12 32 12 42 A20 20 0 0 0 52 42 C52 32 44 22 32 6 Z" fill="#7fbf3a"/>
+  </g>
+  <path d="M32 12 C24 24 18 32 18 41 A14 14 0 0 0 26 54 C20 46 22 32 32 12 Z" fill="#a6db62"/>
+  <path d="M32 6 C44 22 52 32 52 42 A20 20 0 0 1 44 58 C50 48 46 30 32 6 Z" fill="#5e9a2a" opacity="0.8"/>
+  <path d="M32 22 V52 M32 36 L24 30 M32 44 L40 38" stroke="#3f6b1c" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M50 8 L52 13 L57 15 L52 17 L50 22 L48 17 L43 15 L48 13 Z" fill="#fff6c8"/>
+</svg>
