@@ -1,11 +1,12 @@
 extends SceneTree
-## 배경음 두 곡을 코드로 합성해 assets/music/<이름>.wav로 저장한다. 8마디 반복 곡이고 꼬리를 앞으로 감아 이음매 없이 돈다.
+## 배경음 세 곡을 코드로 합성해 assets/music/<이름>.wav로 저장한다. 8마디 반복 곡이고 꼬리를 앞으로 감아 이음매 없이 돈다.
 ##
 ##   godot --headless --path . --script tools/make_music.gd
 ##
 ## day: 낮의 헛간. 바장조 자장가 (F → Dm → Bb → C), 하프 분산화음과 피리 선율. 72 BPM, 26.7초. 지친 짚돌이가 꾸벅이는 따뜻한 오후
 ## night: 밤의 밭. 라 단조 (Dm → Bb → Gm → A, Dm → Eb → Cm → A), 레·라 지속음, 낮은 오카리나와 반딧불 같은 높은 종. 60 BPM, 32초.
 ##   밤에는 구름이 0.5초마다 '쿵' 하므로 박이 또렷한 소리(북·빠른 분산화음)를 넣지 않는다
+## harvest: 수확일 밤(보스 밤). 라 단조를 빠르게, 8분음표 하프·다급한 피리·낮은 북. 84 BPM, 22.9초
 ## 회귀 용사의 make_music.gd를 옮겨 와 곡과 반딧불 종(bells)만 바꿨다. 곡은 여기 상수가 원본이다. .wav는 손으로 고치지 않는다.
 ## 고친 뒤 다시 돌리고 `--headless --import`, 함께 커밋한다. .wav.import의 edit/loop_mode는 2(앞으로 반복)여야 한다 (Sfx가 다시 확인한다)
 
@@ -37,7 +38,7 @@ const DAY := {
 	"arp": [0, 1, 2, 3, 2, 1, 2, 1],       # 화음 음 번호 (3 = 맨 아래 음의 옥타브 위). 한 옥타브 올려 퉁긴다
 	"arp_amp": 0.14, "arp_tau": 0.35,
 	"melody_amp": 0.18, "pad_amp": 0.07, "bass_amp": 0.26,
-	"drone": [], "bells": [],
+	"drone": [], "bells": [], "drums": [], "drum_amp": 0.0,
 	"echo": [0.4167, 0.28],
 }
 
@@ -65,19 +66,48 @@ const NIGHT := {
 		[0, 2.5, 86], [1, 1.5, 82], [2, 3.0, 86], [3, 1.0, 85],
 		[4, 2.5, 89], [5, 0.5, 87], [6, 2.0, 84], [7, 3.5, 88],
 	],
+	"drums": [], "drum_amp": 0.0,
 	"echo": [0.5, 0.35],
+}
+
+## 수확일 밤 (5의 배수 단계, 보스 밤): 라 단조를 빠르게 (Dm → C → Bb → A), 8분음표 하프, 다급한 피리, 낮은 북. 84 BPM, 22.9초
+const HARVEST := {
+	"bpm": 84.0,
+	"bars": [
+		[38, [50, 53, 57]], [36, [48, 52, 55]], [34, [50, 53, 58]], [33, [49, 52, 57]],
+		[38, [50, 53, 57]], [36, [48, 52, 55]], [31, [50, 55, 58]], [33, [49, 52, 57]],
+	],
+	"melody": [
+		[0, 0.0, 74, 1.0], [0, 1.0, 72, 0.5], [0, 1.5, 74, 0.5], [0, 2.0, 77, 1.0], [0, 3.0, 74, 1.0],
+		[1, 0.0, 72, 1.0], [1, 1.0, 70, 0.5], [1, 1.5, 72, 0.5], [1, 2.0, 76, 2.0],
+		[2, 0.0, 70, 1.0], [2, 1.0, 69, 0.5], [2, 1.5, 70, 0.5], [2, 2.0, 74, 1.0], [2, 3.0, 77, 1.0],
+		[3, 0.0, 76, 2.0], [3, 2.0, 73, 2.0],
+		[4, 0.0, 81, 1.0], [4, 1.0, 79, 0.5], [4, 1.5, 77, 0.5], [4, 2.0, 76, 1.0], [4, 3.0, 74, 1.0],
+		[5, 0.0, 72, 1.0], [5, 1.0, 76, 1.0], [5, 2.0, 79, 2.0],
+		[6, 0.0, 79, 1.0], [6, 1.0, 77, 1.0], [6, 2.0, 74, 1.0], [6, 3.0, 70, 1.0],
+		[7, 0.0, 73, 2.0], [7, 2.0, 76, 1.0], [7, 3.0, 69, 1.0],
+	],
+	"melody_attack": 0.03, "melody_tau": 0.9,
+	"arp_step": 0.5,
+	"arp": [0, 1, 2, 1, 0, 1, 2, 1],
+	"arp_amp": 0.12, "arp_tau": 0.25,
+	"melody_amp": 0.17, "pad_amp": 0.06, "bass_amp": 0.28,
+	"drone": [38], "bells": [],
+	"drums": [0.0, 1.5, 2.0], "drum_amp": 0.35,  # 마디 안 박 자리: 쿵 · 쿠쿵
+	"echo": [0.357, 0.25],
 }
 
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
 	var failed := 0
-	for entry: Array in [["day", DAY], ["night", NIGHT]]:
+	var songs: Array = [["day", DAY], ["night", NIGHT], ["harvest", HARVEST]]
+	for entry: Array in songs:
 		var err := _render(entry[1]).save(OUT_DIR + str(entry[0]) + ".wav")
 		if err != OK:
 			failed += 1
 			push_error("%s 저장 실패: %s" % [entry[0], error_string(err)])
-	print("배경음 2곡 저장 (실패 %d)" % failed)
+	print("배경음 %d곡 저장 (실패 %d)" % [songs.size(), failed])
 	quit(0 if failed == 0 else 1)
 
 
@@ -91,6 +121,8 @@ func _render(song: Dictionary) -> Synth:
 		var chord: Array = bars[b][1]
 		_bar_bed(s, song, start, bar_length, float(bars[b][0]), chord)
 		_arpeggio(s, song, start, beat, chord)
+		for at: Variant in song["drums"]:
+			s.tone(start + float(at) * beat, 0.35, 82.0, 46.0, float(song["drum_amp"]), 0.004, 0.22)
 	for note: Array in song["melody"]:
 		var at := float(note[0]) * bar_length + float(note[1]) * beat
 		var f := Synth.midi(float(note[2]))

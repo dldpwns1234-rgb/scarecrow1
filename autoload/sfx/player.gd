@@ -8,7 +8,7 @@ extends Node
 ## 소리 파일은 tools/make_sfx.gd가 만들고 버스는 default_bus_layout.tres에 있다. 음량 설정은 Prefs가 저장하고 여기서 버스에 건다.
 
 const SFX_DIR := "res://assets/sfx/"
-const MUSIC_FILES := {"day": "res://assets/music/day.wav", "night": "res://assets/music/night.wav"}  # tools/make_music.gd가 만든다
+const MUSIC_FILES := {"day": "res://assets/music/day.wav", "night": "res://assets/music/night.wav", "harvest": "res://assets/music/harvest.wav"}  # tools/make_music.gd가 만든다
 const BUS_SFX := &"SFX"
 const BUS_MUSIC := &"Music"
 const PITCH_JITTER: float = 0.06  # 음높이를 ±6% 안에서 흔든다 (같은 소리가 기계처럼 되풀이되지 않게)
