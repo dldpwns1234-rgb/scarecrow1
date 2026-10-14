@@ -41,6 +41,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var panel := PanelContainer.new()
+	panel.theme_type_variation = "WoodPanel"
 	panel.custom_minimum_size = Vector2(WIDTH, 0.0)
 	center.add_child(panel)
 	var margin := MarginContainer.new()

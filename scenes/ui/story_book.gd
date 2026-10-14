@@ -6,10 +6,11 @@ extends Control
 signal read_requested(index: int)
 
 const SHADE := Color(0.02, 0.02, 0.05, 0.8)
-const WIDTH: float = 620.0
+const WIDTH: float = 900.0
+const COLUMNS: int = 2  # 나무판 단추가 높아 한 줄에 열 개면 화면을 넘어서 두 줄로
 const PADDING: int = 20
 const ROW_HEIGHT: float = 40.0
-const TITLE_COLOR := Color("e9c46a")
+const TITLE_COLOR := Color("7a2e1c")   # 종이 위 붉은 갈색 제목
 const LOCKED_COLOR := Color("6f7486")
 const TITLE_FONT_SIZE: int = 26
 const CLOSE_SIZE := Vector2(200, 48)
@@ -32,6 +33,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var panel := PanelContainer.new()
+	panel.theme_type_variation = "Parchment"
 	panel.custom_minimum_size = Vector2(WIDTH, 0.0)
 	center.add_child(panel)
 	var margin := MarginContainer.new()
@@ -46,13 +48,19 @@ func _ready() -> void:
 	_count.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 	_count.add_theme_color_override("font_color", TITLE_COLOR)
 	column.add_child(_count)
+	var grid := GridContainer.new()
+	grid.columns = COLUMNS
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 6)
+	column.add_child(grid)
 	for i in Balance.FRAGMENTS.size():
 		var row := Button.new()
 		row.custom_minimum_size = Vector2(0.0, ROW_HEIGHT)
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		row.pressed.connect(read_requested.emit.bind(i))
-		column.add_child(row)
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(row)
 		_rows.append(row)
 	var close := Button.new()
 	close.text = "닫기"

@@ -6,8 +6,8 @@ extends Control
 const SHADE := Color(0.02, 0.02, 0.05, 0.8)
 const WIDTH: float = 900.0
 const PADDING: int = 28
-const TITLE_COLOR := Color("e9c46a")
-const TEXT_COLOR := Color("f1eee4")
+const TITLE_COLOR := Color("7a2e1c")   # 종이 위 붉은 갈색 제목
+const TEXT_COLOR := Color("3a2a1a")    # 종이 위 짙은 갈색 글
 const TITLE_FONT_SIZE: int = 26
 const TEXT_FONT_SIZE: int = 24
 const BUTTON_SIZE := Vector2(220, 64)
@@ -37,6 +37,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	_panel = PanelContainer.new()
+	_panel.theme_type_variation = "Parchment"  # 낡은 종이 (그림책)
 	_panel.custom_minimum_size = Vector2(WIDTH, 0.0)
 	center.add_child(_panel)
 	var margin := MarginContainer.new()

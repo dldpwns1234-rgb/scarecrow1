@@ -29,6 +29,7 @@ var _level_now: int = 0       # 이번 밤의 밭 단계
 
 
 func _ready() -> void:
+	theme_type_variation = "WoodPanel"  # 볏짚 끈 나무판 (theme_art.gd)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = false
 	var margin := MarginContainer.new()

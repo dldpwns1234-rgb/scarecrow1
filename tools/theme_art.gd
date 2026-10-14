@@ -1,15 +1,20 @@
 extends SceneTree
 ## 테마 생성기 1부: 그림 틀 (방장 2026-10-15 '진짜 게임처럼', 아트 방향 '달빛 동화 그림책풍'). tools/make_theme.gd가 상속해 마지막에 _dress()를 부른다.
 ## 납작한 단색 상자 대신 SVG 9칸 늘림 그림을 입힌다: 단추는 볏짚 끈 나무판(눌리면 내려앉음), 주요 단추는 금칠 판, 패널은 바느질한 삼베.
+## 타입 변형 WoodPanel(볏짚 끈 나무판: 결과 알림·확인 창·설정), Parchment(낡은 종이: 이야기 카드·다시 읽기, 글은 짙은 갈색은 화면이 정한다).
 ## 그림은 assets/ui/*.svg (손으로 그린 SVG가 원본). 9칸 늘림이라 가장자리 폭(margin)만큼은 그대로, 가운데는 늘어난다
 
 const WOOD := "res://assets/ui/button_wood.svg"
 const WOOD_PRESSED := "res://assets/ui/button_wood_pressed.svg"
 const GOLD := "res://assets/ui/button_gold.svg"
 const BURLAP := "res://assets/ui/frame_burlap.svg"
+const WOOD_FRAME := "res://assets/ui/frame_wood.svg"
+const PARCHMENT := "res://assets/ui/frame_parchment.svg"
 const BUTTON_EDGE: int = 16          # 단추 그림의 가장자리 폭
 const BUTTON_SHADOW: int = 10        # 단추 아래 그늘 두께 (글을 그만큼 위로)
 const PANEL_EDGE: int = 20
+const FRAME_EDGE: int = 28          # 나무판 틀·종이의 가장자리 폭
+const FRAME_TEXT := Vector2(26, 22)
 const BUTTON_TEXT := Vector2(14, 8)  # 단추 글 여백
 const PANEL_TEXT := Vector2(16, 12)
 const WOOD_TEXT := Color("f3e6c8")   # 나무판 위 글 (밝은 짚 색)
@@ -43,6 +48,12 @@ func _dress(theme: Theme) -> void:
 	burlap.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	theme.set_stylebox("panel", "PanelContainer", burlap)
 	theme.set_stylebox("panel", "Panel", burlap)
+	theme.add_type("WoodPanel")
+	theme.set_type_variation("WoodPanel", "PanelContainer")
+	theme.set_stylebox("panel", "WoodPanel", _box(WOOD_FRAME, FRAME_EDGE, FRAME_TEXT))
+	theme.add_type("Parchment")
+	theme.set_type_variation("Parchment", "PanelContainer")
+	theme.set_stylebox("panel", "Parchment", _box(PARCHMENT, FRAME_EDGE, FRAME_TEXT))
 
 
 ## 9칸 늘림 상자: edge는 그림의 가장자리 폭, text는 글 여백, shadow는 아래 그늘만큼 글을 위로, sink는 눌렸을 때 글을 아래로

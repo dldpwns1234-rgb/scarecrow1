@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 9칸 늘림 패널 '낡은 종이' (이야기 카드·다시 읽기, 그림책 쪽): 가장자리 24px(그을린 테·찢긴 결)은 그대로. 글은 짙은 갈색 -->
+  <defs>
+    <radialGradient id="paper" cx="0.5" cy="0.45" r="0.7">
+      <stop offset="0.55" stop-color="#ecdfc2"/>
+      <stop offset="1" stop-color="#cdb487"/>
+    </radialGradient>
+  </defs>
+  <!-- 그림자 -->
+  <path d="M5 6 Q20 3 34 6 T62 5 T91 6 Q93 20 91 34 T92 62 T90 91 Q76 93 62 90 T34 92 T6 90 Q3 76 6 62 T5 34 T5 6 Z" fill="#1a120a" opacity="0.55" transform="translate(1.5 2)"/>
+  <!-- 종이 (가장자리가 조금 울퉁불퉁) -->
+  <path d="M5 6 Q20 3 34 6 T62 5 T91 6 Q93 20 91 34 T92 62 T90 91 Q76 93 62 90 T34 92 T6 90 Q3 76 6 62 T5 34 T5 6 Z" fill="url(#paper)" stroke="#6b4a2f" stroke-width="2"/>
+  <!-- 그을린 테 -->
+  <path d="M9 10 Q22 8 34 10 T62 9 T87 10" stroke="#a88a5a" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M9 86 Q22 88 34 86 T62 87 T87 86" stroke="#a88a5a" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <!-- 모서리 얼룩 -->
+  <circle cx="84" cy="14" r="5" fill="#b89a68" opacity="0.35"/>
+  <circle cx="13" cy="83" r="4" fill="#b89a68" opacity="0.3"/>
+</svg>
