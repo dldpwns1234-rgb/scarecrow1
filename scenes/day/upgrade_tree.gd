@@ -82,7 +82,9 @@ func _make_detail() -> PanelContainer:
 	_buy = Button.new()
 	_buy.custom_minimum_size = BUY_SIZE
 	_buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_buy.pressed.connect(func() -> void: Upgrades.buy(_selected))
+	_buy.pressed.connect(func() -> void:
+		if Upgrades.buy(_selected):
+			_board.pulse(_selected))
 	row.add_child(_buy)
 	return panel
 

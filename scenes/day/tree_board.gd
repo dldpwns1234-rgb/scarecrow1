@@ -1,12 +1,13 @@
 extends "res://scenes/day/tree_pan_zoom.gd"
 ## 스킬트리 판: 가운데 '어둠의 계약'에서 사방으로 뻗는 카드와 가지 선. 끌면 판이 움직이고, 짧게 누르면 그 카드를 고른다 (selected 시그널).
-## 앞 업그레이드를 1레벨 이상 사야 카드가 나타난다(뿌리는 처음부터). 새로 나타날 때 작게 시작해 커지며 떠오른다.
+## 앞 업그레이드를 1레벨 이상 사야 카드가 나타난다(뿌리는 처음부터). 새로 나타날 때 떠오르고, 사면 톡 튄다 (card_fx.gd).
 ## 카드는 입력을 받지 않고(IGNORE) 판이 누름·끌기를 가른다: 버튼이 누름을 삼키면 버튼 위에서 시작한 끌기가 안 된다 (회귀 용사 tap_scroll과 같은 까닭).
 ## 끌기·줌·누름 판정은 1부 tree_pan_zoom.gd, 배치는 tree_layout.gd. Upgrades의 함수만 읽는다. 상수는 배치·연출용이다
 
 signal selected(index: int)  # -1이면 가운데 (어둠의 계약)
 
 const TreeLayout := preload("res://scenes/day/tree_layout.gd")
+const CardFx := preload("res://scenes/day/card_fx.gd")
 const CARD_SIZE := TreeLayout.CARD
 const STEP := TreeLayout.STEP     # 격자 한 칸의 간격 (배치가 선이 카드를 지나는지 따질 때도 쓴다)
 const CENTER_RADIUS: float = 58.0
@@ -17,7 +18,6 @@ const CENTER_FILL := Color("2b1f3a")
 const CENTER_RING := Color("9d7bd8")
 const SELECT_COLOR := Color("e9c46a")
 const SELECT_MARGIN: float = 5.0
-const REVEAL_SECONDS: float = 0.35
 const CARD_TEXT_PADDING: float = 40.0  # 카드 안 좌우 여백 (테마 버튼 여백 포함)
 const MIN_CARD_FONT: int = 13
 const EDGE_MARK: float = 10.0     # 판 밖의 살 수 있는 카드를 가리키는 가장자리 세모 크기
@@ -75,7 +75,7 @@ func refresh(texts: PackedStringArray, styles: PackedStringArray, tints: Array[C
 		card.self_modulate = tints[i]
 		var show := _is_revealed(i) and i != center_index  # 가운데 줄은 원으로 그린다
 		if show and not _shown[i]:
-			_reveal(card)
+			CardFx.reveal(card, zoom)
 		card.visible = show
 		_shown[i] = show
 	_place()
@@ -94,21 +94,15 @@ func _fit_font(card: Button) -> void:
 		card.add_theme_font_size_override("font_size", maxi(floori(base * room / widest), MIN_CARD_FONT))
 
 
+## 샀을 때 그 카드가 톡 튀며 번쩍인다 (upgrade_tree가 부른다)
+func pulse(index: int) -> void:
+	if index >= 0 and _cards[index].visible:
+		CardFx.pulse(_cards[index], zoom)
+
+
 ## 뿌리는 처음부터, 나머지는 앞 업그레이드를 1레벨 이상 샀을 때 나타난다
 func _is_revealed(index: int) -> bool:
 	return Upgrades.is_unlocked(index)
-
-
-func _reveal(card: Button) -> void:
-	card.scale = Vector2.ONE * 0.6 * zoom
-	card.modulate.a = 0.0
-	card.set_meta("revealing", true)
-	var tween := card.create_tween().set_parallel(true)
-	tween.tween_property(card, "scale", Vector2.ONE * zoom, REVEAL_SECONDS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(card, "modulate:a", 1.0, REVEAL_SECONDS)
-	tween.chain().tween_callback(func() -> void:
-		card.remove_meta("revealing")
-		card.scale = Vector2.ONE * zoom)
 
 
 func _place() -> void:
@@ -118,7 +112,7 @@ func _place() -> void:
 	_center_label.scale = Vector2.ONE * zoom
 	for i in _cards.size():
 		_cards[i].position = _card_center(i) - CARD_SIZE * 0.5  # 가운데(pivot)를 축으로 줄어든다
-		if _cards[i].visible and not _is_revealing(_cards[i]):
+		if _cards[i].visible and not CardFx.busy(_cards[i]):
 			_cards[i].scale = Vector2.ONE * zoom
 	queue_redraw()
 	_marks.queue_redraw()
@@ -193,7 +187,3 @@ func _bounds() -> Rect2:
 			box = box.merge(Rect2(Vector2(_cells[i]) * STEP - CARD_SIZE * 0.5, CARD_SIZE))
 	return box
 
-
-## 나타나는 중인 카드는 떠오르는 연출이 크기를 맡는다
-func _is_revealing(card: Button) -> bool:
-	return card.has_meta("revealing")
