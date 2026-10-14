@@ -37,7 +37,7 @@ func _setup_critters() -> void:
 ## 까마귀와 농부의 시간을 흘린다 (night.gd의 tick이 부른다)
 func _tick_critters(dt: float) -> void:
 	for i in _crow_left.size():
-		_crow_left[i] -= dt
+		_crow_left[i] -= dt * _crow_speed()
 		if active and _crow_left[i] <= 0.0:
 			_crow_left[i] += Balance.CROW_INTERVAL
 			_peck()
@@ -158,7 +158,12 @@ func _replant(f: int) -> void:
 		crop_regrown.emit(pick)
 
 
-## night.gd가 채운다 (까마귀가 쪼고 번짐을 옮길 때 부른다)
+## night/skills.gd가 채운다 (까마귀 떼 동안 빨리)
+func _crow_speed() -> float:
+	return 1.0
+
+
+## night/waves.gd가 채운다 (까마귀가 쪼고 번짐을 옮길 때 부른다)
 func _damage(_index: int, _amount: float) -> void:
 	pass
 

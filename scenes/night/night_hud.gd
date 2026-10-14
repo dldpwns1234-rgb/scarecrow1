@@ -1,6 +1,8 @@
 extends Control
-## 밤 화면 위의 글 (GDD 4절): 왼쪽 이번 밤 생기, 가운데 밭 단계와 시든 작물 막대(정복 90% 표시), 오른쪽 남은 시간, 오른쪽 아래 '새벽까지 쉬기'(밤을 일찍 끝낸다).
+## 밤 화면 위의 글 (GDD 4절): 왼쪽 아래 스킬 버튼(skill_bar), 왼쪽 위 이번 밤 생기, 가운데 밭 단계와 시든 작물 막대(정복 90% 표시), 오른쪽 남은 시간, 오른쪽 아래 '새벽까지 쉬기'(밤을 일찍 끝낸다).
 ## Night·Game의 시그널을 받아 표시만 한다. 상수는 배치용이다
+
+const SkillBar := preload("res://scenes/night/skill_bar.gd")
 
 const MARGIN: int = 20
 const BIG_FONT: int = 30
@@ -19,6 +21,7 @@ var _field: Label
 var _bar: ProgressBar
 var _mark: ColorRect
 var _stop: Button
+var _skills: SkillBar
 
 
 func _ready() -> void:
@@ -46,6 +49,8 @@ func _ready() -> void:
 	_stop.size = STOP_SIZE
 	_stop.pressed.connect(Night.stop)
 	add_child(_stop)
+	_skills = SkillBar.new()
+	add_child(_skills)
 	Night.time_changed.connect(_on_time_changed)
 	Night.night_started.connect(_refresh)
 	Night.wave_started.connect(_refresh.unbind(1))
@@ -80,6 +85,7 @@ func _layout() -> void:
 	_bar.position = Vector2((size.x - BAR_SIZE.x) * 0.5, MARGIN + 30.0)
 	_mark.position = _bar.position + Vector2(BAR_SIZE.x * Balance.CLEAR_RATIO - 1.0, -4.0)
 	_stop.position = size - STOP_SIZE - Vector2.ONE * MARGIN
+	_skills.position = Vector2(MARGIN, size.y - SkillBar.BUTTON_SIZE.y - MARGIN)
 
 
 func _on_time_changed(seconds_left: float) -> void:

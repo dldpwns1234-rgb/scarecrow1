@@ -142,7 +142,7 @@ func _test_counters() -> void:
 			golden += 1 if Night.kinds[i] == Balance.Crop.GOLDEN else 0
 		Night.stop()
 	_equal(golden > 20 * 144 * 0.03 and golden < 20 * 144 * 0.09, true, "황금 이삭 6%% 안팎 (%d / 2880)" % golden)
-	_close(Balance.crop_vitality(Balance.Crop.GOLDEN, 1) / Balance.crop_vitality(Balance.Crop.PUMPKIN, 1), 8.0, "황금 이삭은 호박의 8배 생기")
+	_close(Balance.crop_vitality(Balance.Crop.GOLDEN, 1) / Balance.crop_vitality(Balance.Crop.PUMPKIN, 1), 10.0, "황금 이삭은 호박의 10배 생기")
 
 
 func _test_guardians() -> void:

@@ -1,18 +1,16 @@
 extends "res://autoload/night/waves.gd"
 ## 밤 한 판의 흐름 (GDD 4절): 시작(밭 심기·시계), 역병 구름의 박자, 번짐, 시듦과 생기, 다시 자라기, 밭 정복(수확일 보너스), 끝.
-## 밭 단계는 night/levels.gd, 밭(칸·심기)은 night/field.gd, 까마귀와 지키는 이는 night/critters.gd, 시듦·번짐·정복·물결은 night/waves.gd.
+## 밭 단계는 night/levels.gd, 밭(칸·심기)은 night/field.gd, 까마귀와 지키는 이는 night/critters.gd, 스킬은 night/skills.gd, 시듦·번짐·정복·물결은 night/waves.gd.
 ## 화면(scenes/night/)은 시그널을 받아 그리고 set_cloud()로 구름 자리만 넘긴다. 화면 없이도 돈다: 시뮬레이션 봇이 set_cloud()와 tick()을 직접 부른다.
 ## 수치는 Balance, 생기는 Game.add_vitality(), 밤 끝은 Game.finish_night(). 상태 변경은 이 오토로드의 함수로만 한다
 
 signal night_started()
 signal pulsed()                                        # 구름이 한 번 쳤다 (박자 연출)
-signal storm_pulsed()                                  # 그 박자가 역병 폭풍의 큰 박자였다 (pulsed 바로 앞에 난다)
 signal time_changed(seconds_left: float)
 
 var time_left: float = 0.0
 var _pulse_left: float = 0.0
 var _tick: float = Balance.CLOUD_TICK  # 이번 밤의 박자 간격 (어스름)
-var _storm_left: float = 0.0           # 역병 폭풍까지 남은 초 (없으면 0)
 
 
 func _ready() -> void:
@@ -53,7 +51,7 @@ func begin(seed: int = -1) -> void:
 	time_left = Game.night_seconds()
 	_tick = Balance.cloud_tick(Upgrades.level(Balance.Upgrade.DUSK))
 	_pulse_left = _tick
-	_storm_left = Balance.storm_interval(Upgrades.level(Balance.Upgrade.STORM))
+	_reset_skills()
 	_setup_critters()
 	set_cloud(Vector2.ONE * Balance.FIELD_SIZE * 0.5)
 	night_started.emit()
@@ -66,14 +64,10 @@ func tick(dt: float) -> void:
 		return
 	time_left -= dt
 	_pulse_left -= dt
-	if _storm_left > 0.0:
-		_storm_left -= dt
 	while active and _pulse_left <= 0.0:
 		_pulse_left += _tick
-		var storm := _storm_left < 0.0
-		if storm:
-			_storm_left += Balance.storm_interval(Upgrades.level(Balance.Upgrade.STORM))
-		_pulse(storm)
+		_pulse()
+	_tick_skills(dt)
 	_tick_regrow(dt)
 	_tick_critters(dt)
 	if not active:
@@ -84,14 +78,12 @@ func tick(dt: float) -> void:
 
 
 ## 구름 박자: 원 안의 작물은 구름 피해, 번짐에 걸린 작물은 번짐 피해 (한 박자 몫). 농부 둘레 안은 절반.
-## 역병 폭풍 박자는 반경 두 배, 밤 끝 몰아치기 동안은 구름 피해 두 배
-func _pulse(storm: bool = false) -> void:
+## 밤 끝 몰아치기 동안은 구름 피해 두 배 (역병 폭풍 스킬은 night/skills.gd가 반경·피해를 키운다)
+func _pulse() -> void:
 	var dps := cloud_dps()
 	var hit := dps * _tick * (Balance.FRENZY_MULTIPLIER if in_frenzy() else 1.0)
 	var rot := Balance.rot_dps(dps, Upgrades.level(Balance.Upgrade.ROT)) * _tick
-	var radius := cloud_radius() * (Balance.STORM_RADIUS if storm else 1.0)
-	if storm:
-		storm_pulsed.emit()
+	var radius := cloud_radius()
 	pulsed.emit()
 	for i in kinds.size():
 		if not active:

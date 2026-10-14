@@ -12,9 +12,9 @@ const MAX_FIELD_LEVEL: int = 800       # 작물 체력(10 × 2.2^(단계 − 1))
 enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN }
 const CROPS: Array[Dictionary] = [
 	{"name": "밀", "hp": 10.0, "vitality": 1.0},
-	{"name": "옥수수", "hp": 45.0, "vitality": 5.0},
-	{"name": "호박", "hp": 200.0, "vitality": 25.0},
-	{"name": "황금 이삭", "hp": 60.0, "vitality": 200.0},  # 아주 가끔 심긴다. 찾아가 시들게 하는 재미 (회귀 용사의 보물 요정)
+	{"name": "옥수수", "hp": 30.0, "vitality": 3.5},
+	{"name": "호박", "hp": 90.0, "vitality": 12.0},       # 처음엔 200이라 너무 오래 때려야 했다 (방장 2026-10-14)
+	{"name": "황금 이삭", "hp": 60.0, "vitality": 120.0},  # 아주 가끔 심긴다. 찾아가 시들게 하는 재미 (회귀 용사의 보물 요정)
 ]
 const GOLDEN_BASE_CHANCE: float = 0.01      # 심기는 작물 하나가 황금 이삭일 확률 1%
 const GOLDEN_CHANCE_PER_LEVEL: float = 0.005  # 황금 이삭(업그레이드): 레벨당 +0.5%p
@@ -47,9 +47,6 @@ const FEATHER_PER_LEVEL: float = 0.15  # 검은 깃털: 쪼인 작물이 번짐�
 
 const REGROW_BASE_DELAY: float = 15.0  # 다시 자라는 뿌리: 시든 칸에 이만큼(초) 뒤 새 작물 (레벨마다 ×0.9)
 const REGROW_DELAY_STEP: float = 0.9
-const STORM_BASE_INTERVAL: float = 10.0  # 역병 폭풍: 10초마다 (레벨마다 1초 빨리)
-const STORM_INTERVAL_CUT: float = 1.0
-const STORM_RADIUS: float = 2.0         # 폭풍 박자의 반경 배율
 const FRENZY_BASE_SECONDS: float = 5.0  # 새벽 전 몰아치기: 밤 끝 5초 (레벨마다 +1초) 동안
 const FRENZY_SECONDS_PER_LEVEL: float = 1.0
 const FRENZY_MULTIPLIER: float = 2.0
@@ -136,13 +133,6 @@ func regrow_delay(regrow_level: int) -> float:
 	if regrow_level <= 0:
 		return 0.0
 	return REGROW_BASE_DELAY * pow(REGROW_DELAY_STEP, regrow_level - 1)
-
-
-## 역병 폭풍: 이만큼(초)마다 구름이 크게 친다 (0레벨이면 0, 없음)
-func storm_interval(storm_level: int) -> float:
-	if storm_level <= 0:
-		return 0.0
-	return STORM_BASE_INTERVAL - STORM_INTERVAL_CUT * (storm_level - 1)
 
 
 ## 새벽 전 몰아치기: 밤 끝 이만큼(초) 동안 구름 피해 ×2 (0레벨이면 0)

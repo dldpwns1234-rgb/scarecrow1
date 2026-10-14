@@ -48,10 +48,10 @@ func _test_plant() -> void:
 	var wheat := _first_crop(Balance.Crop.WHEAT)
 	_close(Night.max_hp[wheat], Balance.crop_hp(Balance.Crop.WHEAT, 1), "밀 체력")
 	_close(Balance.crop_hp(Balance.Crop.WHEAT, 3), 10.0 * pow(Balance.FIELD_HP_GROWTH, 2), "밭 단계마다 체력 ×성장")
-	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 2), 25.0 * Balance.FIELD_VITALITY_GROWTH, "밭 단계마다 생기 ×성장")
+	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 2), 12.0 * Balance.FIELD_VITALITY_GROWTH, "밭 단계마다 생기 ×성장")
 	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * 1.5 * 1.5, "비옥한 어둠: 체력 ×1.5씩")
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), 1.7 * 1.7, "비옥한 어둠: 생기 ×1.7씩")
-	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 25.0 * 2.0, "탐스러운 호박: 호박 생기 +25%씩")
+	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 12.0 * 2.0, "탐스러운 호박: 호박 생기 +25%씩")
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0, "탐스러운 호박은 밀에는 안 듣는다")
 	for level: int in [1, 5, 100]:
 		var weights := Balance.crop_weights(level, 10)

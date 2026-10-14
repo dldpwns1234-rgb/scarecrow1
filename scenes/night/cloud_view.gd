@@ -61,7 +61,7 @@ func _on_pulsed() -> void:
 
 
 func _draw() -> void:
-	var radii := Iso.ellipse_radii(Night.cloud_radius()) * lerpf(1.0, PULSE_SCALE, _pulse) * lerpf(1.0, Balance.STORM_RADIUS, _storm)
+	var radii := Iso.ellipse_radii(Night.cloud_radius()) * lerpf(1.0, PULSE_SCALE, _pulse) * (1.0 + 0.25 * _storm)  # 역병 폭풍을 켜면 한 번 크게 출렁인다 (반경은 Night가 키운다)
 	var points := PackedVector2Array()
 	for i in ELLIPSE_POINTS:
 		var angle := TAU * i / ELLIPSE_POINTS

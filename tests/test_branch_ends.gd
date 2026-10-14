@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 어둠의 나무 갈래 끝 칸: 역병 폭풍(큰 박자), 새벽 전 몰아치기(밤 끝 피해 ×2), 풍요의 저주(수확일 생기), 까마귀 왕(값진 작물부터)
+## 어둠의 나무 갈래 끝 칸과 밤 스킬: 역병 폭풍·한숨·역병 파도·까마귀 떼(스킬), 새벽 전 몰아치기(밤 끝 피해 ×2), 풍요의 저주(수확일 생기), 까마귀 왕(값진 작물부터)
 
 
 func run() -> void:
@@ -21,24 +21,71 @@ func _start(level: int = 1) -> void:
 
 
 func _test_storm() -> void:
-	_close(Balance.storm_interval(0), 0.0, "없으면 폭풍이 없다")
-	_close(Balance.storm_interval(3), 8.0, "3레벨: 8초마다")
+	_close(Balance.skill_duration(Balance.Skill.STORM, 0), 0.0, "없으면 폭풍이 없다")
+	_close(Balance.skill_duration(Balance.Skill.STORM, 3), 8.0, "3레벨: 8초 동안")
+	_close(Balance.skill_cooldown(Balance.Skill.STORM, 3), 26.0, "3레벨: 쿨타임 26초")
 	_start()
+	_equal(Night.use_skill(Balance.Skill.STORM), false, "칸을 안 샀으면 못 쓴다")
 	Upgrades.levels[Balance.Upgrade.STORM] = 1
-	Night.begin(4)
 	var storms: Array[int] = []
 	var on_storm := func() -> void: storms.append(1)
 	Night.storm_pulsed.connect(on_storm)
 	var center := 5 * Balance.FIELD_SIZE + 5
 	Night.set_cloud(Night.cell_position(center))
-	var far := 5 * Balance.FIELD_SIZE + 7  # 두 칸 옆: 보통 반경(1) 밖, 폭풍 반경(2) 안
-	Night.tick(9.9)
-	_equal(storms.size(), 0, "10초 전에는 폭풍이 없다")
-	_close(Night.hp[far], Night.max_hp[far], "보통 박자는 두 칸 옆에 안 닿는다")
-	Night.tick(0.6)
+	var far := 5 * Balance.FIELD_SIZE + 6  # 한 칸 옆: 보통 반경(1) 끝, 폭풍 반경(1.8) 안
+	var radius := Night.cloud_radius()
+	var dps := Night.cloud_dps()
+	Night.time_left = 999.0  # 쿨타임이 끝날 때까지 밤이 이어지게
+	_equal(Night.use_skill(Balance.Skill.STORM), true, "역병 폭풍을 켠다")
 	Night.storm_pulsed.disconnect(on_storm)
-	_equal(storms.size(), 1, "10초마다 폭풍 박자")
-	_equal(Night.hp[far] < Night.max_hp[far], true, "폭풍 박자는 반경 두 배")
+	_equal(storms.size(), 1, "켜는 순간 신호")
+	_close(Night.cloud_radius(), radius * Balance.STORM_RADIUS, "켜 둔 동안 반경 ×1.8")
+	_close(Night.cloud_dps(), dps * Balance.STORM_DAMAGE, "켜 둔 동안 피해 ×1.5")
+	_equal(Night.use_skill(Balance.Skill.STORM), false, "켜져 있으면 또 못 쓴다")
+	Night.tick(Balance.skill_duration(Balance.Skill.STORM, 1) + 0.1)
+	_equal(Night.is_skill_active(Balance.Skill.STORM), false, "6초 뒤 꺼진다")
+	_close(Night.cloud_radius(), radius, "반경이 돌아온다")
+	_equal(Night.use_skill(Balance.Skill.STORM), false, "쿨타임 중")
+	Night.tick(Balance.skill_cooldown(Balance.Skill.STORM, 1))
+	_equal(Night.can_use(Balance.Skill.STORM), true, "쿨타임이 지나면 다시")
+	Night.stop()
+	_test_other_skills()
+
+
+func _test_other_skills() -> void:
+	# 짚돌이의 한숨: 구름 안 작물에 한꺼번에
+	_start()
+	Upgrades.levels[Balance.Upgrade.SIGH] = 2
+	var center := 5 * Balance.FIELD_SIZE + 5
+	Night.set_cloud(Night.cell_position(center))
+	var before := Night.hp[center]
+	_equal(Night.use_skill(Balance.Skill.SIGH), true, "한숨")
+	_close(before - Night.hp[center], minf(before, Balance.sigh_damage(Night.cloud_dps(), 2)), "구름 피해 12초 몫 (2레벨)")
+	_equal(Night.is_skill_active(Balance.Skill.SIGH), false, "즉발형은 켜진 채로 남지 않는다")
+	# 역병 파도: 살아 있는 작물의 25%가 번진다
+	_start()
+	Upgrades.levels[Balance.Upgrade.TIDE] = 1
+	_equal(Night.use_skill(Balance.Skill.TIDE), true, "역병 파도")
+	var sick := 0
+	for i in Night.cell_count():
+		sick += Night.infected[i]
+	_equal(sick, ceili(Night.alive_count() * Balance.tide_share(1)), "25%가 번짐에 걸린다")
+	# 까마귀 떼: 까마귀가 없으면 셋이 날아들고, 끝나면 돌아간다
+	_start()
+	Upgrades.levels[Balance.Upgrade.FLOCK] = 1
+	Night.set_cloud(Vector2(-99.0, -99.0))
+	var pecks: Array[int] = []
+	var on_peck := func(index: int) -> void: pecks.append(index)
+	Night.crow_pecked.connect(on_peck)
+	_equal(Night.use_skill(Balance.Skill.FLOCK), true, "까마귀 떼")
+	Night.tick(Balance.CROW_INTERVAL / Balance.FLOCK_SPEED + 0.01)
+	_equal(pecks.size(), Balance.FLOCK_SUMMONED, "날아든 셋이 네 배 빨리 쫀다")
+	Night.tick(Balance.skill_duration(Balance.Skill.FLOCK, 1))
+	var after := pecks.size()
+	Night.tick(Balance.CROW_INTERVAL * 2.0)
+	Night.crow_pecked.disconnect(on_peck)
+	_equal(pecks.size(), after, "끝나면 돌아간다")
+	Night.stop()
 
 
 func _test_frenzy() -> void:
