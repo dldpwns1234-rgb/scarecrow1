@@ -1,8 +1,10 @@
 extends PanelContainer
-## 밤이 끝나 낮으로 돌아오면 화면 위쪽 가운데에 잠깐 뜨는 결과: "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
+## 밤이 끝나 낮으로 돌아오면 오른쪽(어둠의 나무) 위쪽 가운데에 잠깐 뜨는 결과 (왼쪽 위의 이야기·소리 버튼을 가리지 않게): "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
 
 const TOP: float = 20.0
+const LEFT_SPAN: float = 468.0  # 낮 화면 왼쪽 열(여백 24 + 폭 420 + 사이 24). 그 오른쪽에 띄운다
+const RIGHT_MARGIN: float = 24.0
 const WIDTH: float = 640.0
 const PADDING: int = 16
 const HOLD_SECONDS: float = 4.0
@@ -56,7 +58,7 @@ func _show_report(haul: float) -> void:
 		_clear.text += "  %d단계가 열렸다" % Night.best_level
 	reset_size()
 	size.x = WIDTH
-	position = Vector2((get_parent_area_size().x - WIDTH) * 0.5, TOP)
+	position = Vector2(LEFT_SPAN + (get_parent_area_size().x - LEFT_SPAN - RIGHT_MARGIN - WIDTH) * 0.5, TOP)
 	visible = true
 	modulate.a = 1.0
 	if _tween != null:

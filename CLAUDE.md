@@ -15,17 +15,24 @@
 ```
 res://
   autoload/
-    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(업그레이드 나무) → balance.gd(밤 기본값).
-                 밤 공식은 balance/night.gd로 사슬에 끼운다. 앞 스크립트는 뒤 스크립트의 것을 못 본다. 바깥에서는 Balance.만 쓴다
+    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(어둠의 나무) → night(밭·작물·구름·번짐·까마귀)
+                 → winter(겨울잠·꿈의 상점) → story(이야기 조각 10개의 조건·문안, 윤슬) → balance.gd(밤 길이, 약속된 휴식). 앞 스크립트는 뒤 스크립트의 것을 못 본다. 바깥에서는 Balance.만 쓴다
     num.gd       (Num) 한국식 숫자 표기 (회귀 용사 그대로)
-    upgrades.gd  (Upgrades) 업그레이드 레벨, 열림(앞 업그레이드), 구매
-    game.gd      (Game) 낮·밤 전환, 휴식(재화), 밤 기록. 밤 쪽은 작물이 시들면 add_rest(), 시간이 끝나면 finish_night()를 부른다
+    upgrades.gd  (Upgrades) 어둠의 나무 레벨, 열림(앞 업그레이드), 구매
+    game.gd      (Game) 낮·밤 전환, 생기(재화)와 바친 생기 합(약속된 휴식), 밤 기록. 밤 쪽은 작물이 시들면 add_vitality(), 시간이 끝나면 finish_night()를 부른다
+    night.gd     (Night) 밤 한 판의 규칙(밭·구름·번짐·까마귀·밭 단계). night/field.gd 등을 상속한다
+    winter.gd    (Winter) 겨울잠(회귀)과 꿈 조각·꿈의 상점
+    story.gd     (Story) 첫 실행 장면을 봤는지, 이야기 조각의 열린 수(줄지 않는다)·본 수
+    prefs.gd     (Prefs) 소리 켬/끔과 음량
     save.gd      (Save) 저장·불러오기·내보내기·가져오기·초기화. 저장할 오토로드를 늘리면 to_dict·from_dict·reset_data 세 곳을 함께 고친다. save/web_hooks.gd가 브라우저 이벤트로 저장한다
+    sfx.gd       (Sfx) 효과음·배경음. 시그널만 받는다. sfx/player.gd(버스·동시 재생 수·곡 교차 페이드·웹 첫 입력 잠금)를 상속한다
   scenes/
-    main.tscn, main.gd  화면 전체. 낮이면 day, 밤이면 night만 보인다
-    day/         day_screen(헛간: 짚돌이·휴식·밤 기록·밤으로 나가기), upgrade_list(업그레이드 나무)
-    night/       night_screen(밤 밭. 지금은 자리표)
-    ui/          refresh_gate(시그널은 표시만, 보일 때 프레임당 한 번 갱신), tap_scroll(버튼 위에서도 끌어 스크롤), sub_tabs(칩 줄 하위 탭) — 회귀 용사에서 옮겨 옴
+    main.tscn, main.gd  화면 전체. 낮이면 day, 밤이면 night만 보이고, 그 위에 결과 알림·첫 밤 안내·이야기 다시 읽기·조각 카드·첫 실행 장면을 겹친다
+    day/         day_screen(헛간: 짚돌이·생기·약속된 휴식·밤 기록·밭 단계·밤으로 나가기, 왼쪽 위 이야기·소리 버튼), upgrade_tree(어둠의 나무: tree_board·tree_layout),
+                 field_picker(밭 단계 고르기), night_report(지난 밤 결과)
+    night/       night_screen(밤 밭)
+    ui/          refresh_gate(시그널은 표시만, 보일 때 프레임당 한 번 갱신), tap_scroll(버튼 위에서도 끌어 스크롤), sub_tabs(칩 줄 하위 탭) — 회귀 용사에서 옮겨 옴.
+                 intro_card(첫 실행 장면), night_hint(첫 밤 안내), story_card(이야기 조각 카드), story_book(다시 읽기)
   assets/fonts/  한글 폰트 (고도 기본 폰트에 한글이 없다)
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
