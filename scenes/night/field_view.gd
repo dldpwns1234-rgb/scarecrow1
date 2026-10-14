@@ -1,29 +1,32 @@
 extends Node2D
-## 밤 밭의 그림 (GDD 4절): 아이소메트릭 땅(마름모 칸과 흙 옆면)과 칸마다 작물 그림. Night의 시그널을 받아 그리기만 한다.
+## 밤 밭의 그림 (GDD 4절): 아이소메트릭 땅(field_ground.gd)과 칸마다 작물 그림. Night의 시그널을 받아 그리기만 한다.
+## 밭 크기는 밤마다 다를 수 있어(밭 단계로 넓어진다) 밤이 시작될 때 칸 수가 바뀌었으면 그림을 새로 만든다. night_screen.gd의 판(Node2D) 안에서 그리고, 판의 배율로 화면에 맞춘다.
 ## 작물은 체력이 줄수록 병든 색으로 물들고, 맞으면 번쩍이며 움찔하고, 시들면 시든 그림으로 바뀌며 땅이 썩은 색이 된다. 번진 작물은 보랏빛, 다시 자란 작물은 작게 솟아난다. 상수는 배치·연출용이다
 
 const Iso := preload("res://scenes/night/iso.gd")
+const FieldGround := preload("res://scenes/night/field_ground.gd")
 const TEXTURES: Array[Texture2D] = [  # Balance.Crop 순서
 	preload("res://assets/sprites/crops/wheat.svg"),
 	preload("res://assets/sprites/crops/corn.svg"),
 	preload("res://assets/sprites/crops/pumpkin.svg"),
 	preload("res://assets/sprites/crops/golden.svg"),
+	preload("res://assets/sprites/crops/turnip.svg"),
+	preload("res://assets/sprites/crops/sunflower.svg"),
+	preload("res://assets/sprites/crops/watermelon.svg"),
+	preload("res://assets/sprites/crops/grape.svg"),
 ]
 const DEAD_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/crops/wheat_dead.svg"),
 	preload("res://assets/sprites/crops/corn_dead.svg"),
 	preload("res://assets/sprites/crops/pumpkin_dead.svg"),
 	preload("res://assets/sprites/crops/golden_dead.svg"),
+	preload("res://assets/sprites/crops/turnip_dead.svg"),
+	preload("res://assets/sprites/crops/sunflower_dead.svg"),
+	preload("res://assets/sprites/crops/watermelon_dead.svg"),
+	preload("res://assets/sprites/crops/grape_dead.svg"),
 ]
 const CROP_SCALE: float = 0.42          # 그림(96px × 가져오기 1.5배)을 칸 폭에 맞춘다
 const CROP_BASE := Vector2(0.5, 0.94)   # 그림 안에서 밑동 자리 (크기 비율)
-const GRASS := [Color("3f6b3a"), Color("44733e")]  # 달빛 아래 풀 (체크무늬)
-const BLIGHT := Color("4a4232")         # 시든 칸
-const ROT_GROUND := Color("4d3f5c")     # 번짐에 걸린 칸
-const SIDE_LEFT := Color("4b3524")      # 흙 옆면
-const SIDE_RIGHT := Color("3a291c")
-const SIDE_DEPTH: float = 16.0
-const EDGE := Color(0.0, 0.0, 0.0, 0.18)
 const SICK := Color("9a8f6e")           # 체력이 바닥에 가까울 때 작물 색
 const ROT_TINT := Color("c8a0e8")       # 번진 작물
 const HIT_FLASH := Color(1.6, 1.6, 1.4)
@@ -33,27 +36,17 @@ const WITHER_DROP: float = 4.0
 const REGROW_START: float = 0.2
 const REGROW_DURATION: float = 0.35
 
-var origin: Vector2 = Vector2.ZERO
-var _ground: Node2D
+var _ground: FieldGround
 var _crops: Node2D
 var _sprites: Array[Sprite2D] = []  # 칸 번호 순서
 var _tweens: Array[Tween] = []
 
 
 func _ready() -> void:
-	_ground = Node2D.new()
-	_ground.draw.connect(_draw_ground)
+	_ground = FieldGround.new()
 	add_child(_ground)
 	_crops = Node2D.new()
 	add_child(_crops)
-	_sprites.resize(Night.cell_count())
-	_tweens.resize(Night.cell_count())
-	for index in _draw_order():
-		var sprite := Sprite2D.new()
-		sprite.centered = false
-		sprite.scale = Vector2.ONE * CROP_SCALE
-		_crops.add_child(sprite)
-		_sprites[index] = sprite
 	Night.night_started.connect(rebuild)
 	Night.wave_started.connect(_on_wave.unbind(1))
 	Night.crop_hit.connect(_on_hit)
@@ -63,21 +56,21 @@ func _ready() -> void:
 	rebuild()
 
 
-## 밭을 옮긴다 (화면 크기가 바뀌면 night_screen.gd가 부른다)
-func set_origin(value: Vector2) -> void:
-	origin = value
-	for i in _sprites.size():
-		_place(i)
-	_ground.queue_redraw()
+## 칸 가운데의 판 안 자리 (작물 밑동). 판 안의 그림(농부·까마귀)이 쓴다
+func cell_local(index: int) -> Vector2:
+	return Iso.to_screen(Vector2.ZERO, Night.cell_position(index))
 
 
-## 칸 가운데의 화면 자리 (작물 밑동)
+## 칸 가운데의 밤 화면 자리: 판의 자리·배율을 씌운다. 판 밖의 연출(생기 글·알갱이)이 쓴다
 func cell_screen(index: int) -> Vector2:
-	return Iso.to_screen(origin, Night.cell_position(index))
+	var board := get_parent() as Node2D
+	return board.transform * cell_local(index) if board != null else cell_local(index)
 
 
-## 밤이 시작되면 새로 심은 밭으로 그림을 다시 맞춘다
+## 밤이 시작되면 새로 심은 밭으로 그림을 다시 맞춘다 (칸 수가 바뀌었으면 그림부터 새로)
 func rebuild() -> void:
+	if _sprites.size() != Night.cell_count():
+		_make_sprites()
 	for i in _sprites.size():
 		var sprite := _sprites[i]
 		var kind := Night.kinds[i]
@@ -90,13 +83,31 @@ func rebuild() -> void:
 	_ground.queue_redraw()
 
 
+func _make_sprites() -> void:
+	for tween in _tweens:
+		if tween != null:
+			tween.kill()
+	for sprite in _sprites:
+		sprite.queue_free()
+	_sprites.clear()
+	_tweens.clear()
+	_sprites.resize(Night.cell_count())
+	_tweens.resize(Night.cell_count())
+	for index in _draw_order():
+		var sprite := Sprite2D.new()
+		sprite.centered = false
+		sprite.scale = Vector2.ONE * CROP_SCALE
+		_crops.add_child(sprite)
+		_sprites[index] = sprite
+
+
 ## 밑동을 칸 가운데에 둔다 (offset으로 밑동을 기준점에 맞춰서 움찔·쓰러짐이 밑동을 축으로 돈다)
 func _place(index: int) -> void:
 	var sprite := _sprites[index]
 	if sprite.texture == null:
 		return
 	sprite.offset = -sprite.texture.get_size() * CROP_BASE
-	sprite.position = cell_screen(index)
+	sprite.position = cell_local(index)
 	sprite.scale = Vector2.ONE * CROP_SCALE
 
 
@@ -171,25 +182,3 @@ func _on_infected(index: int) -> void:
 	_sprites[index].modulate = _health_color(index)
 	_ground.queue_redraw()
 
-
-func _draw_ground() -> void:
-	var n := Balance.FIELD_SIZE
-	# 흙 옆면: 왼쪽 아래 모서리와 오른쪽 아래 모서리
-	var left := Iso.to_screen(origin, Vector2(0, n))
-	var bottom := Iso.to_screen(origin, Vector2(n, n))
-	var right := Iso.to_screen(origin, Vector2(n, 0))
-	var down := Vector2(0.0, SIDE_DEPTH)
-	_ground.draw_colored_polygon(PackedVector2Array([left, bottom, bottom + down, left + down]), SIDE_LEFT)
-	_ground.draw_colored_polygon(PackedVector2Array([bottom, right, right + down, bottom + down]), SIDE_RIGHT)
-	for y in n:
-		for x in n:
-			var index := y * n + x
-			var color: Color = GRASS[(x + y) % 2]
-			if Night.kinds[index] != Night.EMPTY and not Night.is_alive(index):
-				color = BLIGHT
-			elif Night.infected[index] == 1:
-				color = ROT_GROUND
-			var polygon := Iso.tile_polygon(origin, x, y)
-			_ground.draw_colored_polygon(polygon, color)
-			polygon.append(polygon[0])
-			_ground.draw_polyline(polygon, EDGE, 1.0)

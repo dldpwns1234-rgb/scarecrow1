@@ -85,7 +85,7 @@ func _layout() -> void:
 	_bar.position = Vector2((size.x - BAR_SIZE.x) * 0.5, MARGIN + 30.0)
 	_mark.position = _bar.position + Vector2(BAR_SIZE.x * Balance.CLEAR_RATIO - 1.0, -4.0)
 	_stop.position = size - STOP_SIZE - Vector2.ONE * MARGIN
-	_skills.position = Vector2(MARGIN, size.y - SkillBar.BUTTON_SIZE.y - MARGIN)
+	_skills.bottom_left = Vector2(MARGIN, size.y - MARGIN)
 
 
 func _on_time_changed(seconds_left: float) -> void:

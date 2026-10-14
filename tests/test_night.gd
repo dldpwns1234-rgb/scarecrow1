@@ -55,9 +55,17 @@ func _test_plant() -> void:
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0, "탐스러운 호박은 밀에는 안 듣는다")
 	for level: int in [1, 5, 100]:
 		var weights := Balance.crop_weights(level, 10)
-		_close(weights[0] + weights[1] + weights[2], 1.0, "작물 비율의 합은 1 (단계 %d)" % level)
+		var total := 0.0
+		for weight in weights:
+			total += weight
+		_close(total, 1.0, "작물 비율의 합은 1 (단계 %d)" % level)
+		_close(weights[Balance.Crop.GOLDEN], 0.0, "황금 이삭은 비율로 심기지 않는다 (단계 %d)" % level)
 	_close(Balance.crop_weights(1, 5)[2], 0.05 + 0.1, "탐스러운 호박 5레벨: 호박 +10%p")
-	_equal(Balance.crop_weights(100, 10)[0] >= Balance.MIN_WHEAT_WEIGHT * 0.5, true, "밀은 바닥 아래로 내려가지 않는다")
+	_equal(Balance.crop_weights(100, 10)[0] > 0.05, true, "밀은 바닥 아래로 내려가지 않는다")
+	_close(Balance.crop_weights(2)[Balance.Crop.TURNIP], 0.0, "순무는 3단계부터")
+	_equal(Balance.crop_weights(3)[Balance.Crop.TURNIP] > 0.0, true, "3단계에 순무가 섞여 든다")
+	_equal(Balance.crop_weights(3)[Balance.Crop.TURNIP] < Balance.crop_weights(5)[Balance.Crop.TURNIP], true, "새 작물은 몇 단계에 걸쳐 늘어난다")
+	_equal(Balance.crop_weights(100)[Balance.Crop.GRAPE] > 0.05, true, "깊은 밭엔 포도도 있다")
 
 
 func _test_cloud() -> void:
@@ -75,7 +83,7 @@ func _test_cloud() -> void:
 	_close(Night.hp[far], Night.max_hp[far], "구름 밖은 그대로")
 	_close(Balance.cloud_tick(4), Balance.CLOUD_TICK * 0.8, "어스름 4레벨: 박자 20% 빨리")
 	Night.set_cloud(Vector2(-5.0, 99.0))
-	_equal(Night.cloud, Vector2(0.0, float(Balance.FIELD_SIZE)), "구름은 밭 밖으로 나가지 않는다")
+	_equal(Night.cloud, Vector2(0.0, float(Night.field_size)), "구름은 밭 밖으로 나가지 않는다")
 	# 시듦: 생기 = 작물 생기 × 썩은 냄새 배율
 	Upgrades.levels[Balance.Upgrade.ROT_VALUE] = 5
 	var wheat := _first_crop(Balance.Crop.WHEAT)
@@ -92,7 +100,7 @@ func _test_spread() -> void:
 	_start()
 	_close(Balance.spread_chance(0), 0.0, "번지는 곰팡이 없으면 번지지 않는다")
 	_close(Balance.spread_chance(4), 0.2, "레벨당 +5%p")
-	var source := 5 * Balance.FIELD_SIZE + 5  # 꽉 찬 밭의 가운데 칸 (이웃 넷)
+	var source := 5 * Night.field_size + 5  # 꽉 찬 밭의 가운데 칸 (이웃 넷)
 	Night._damage(source, 1e9)
 	var none := 0
 	for n in Night.neighbors(source):

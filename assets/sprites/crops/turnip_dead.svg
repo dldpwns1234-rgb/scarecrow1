@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 시든 순무: 쪼그라든 잿빛 뿌리와 늘어진 잎 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="22" ry="6" fill="#3a3326" stroke="none" opacity="0.5"/>
+    <path d="M44 72 Q28 70 20 82 Q32 80 44 78 Z" fill="#8a806b"/>
+    <path d="M52 72 Q68 68 78 80 Q66 80 52 78 Z" fill="#8a806b"/>
+    <path d="M34 80 Q34 68 48 68 Q62 68 62 80 Q60 90 48 90 Q36 90 34 80 Z" fill="#a89c8c"/>
+    <path d="M38 76 Q44 80 42 86 M54 74 Q52 80 56 86" fill="none" stroke-width="2"/>
+  </g>
+</svg>

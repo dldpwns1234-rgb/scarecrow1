@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 순무: 흙 위로 반쯤 솟은 흰 보랏빛 뿌리와 무성한 잎 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="22" ry="6" fill="#5a4a2a" stroke="none" opacity="0.45"/>
+    <path d="M46 54 Q30 34 22 40 Q26 52 44 58 Z" fill="#6aa84f"/>
+    <path d="M50 54 Q66 32 76 38 Q72 52 52 58 Z" fill="#6aa84f"/>
+    <path d="M47 56 Q42 26 50 18 Q58 28 50 56 Z" fill="#7fbf5f"/>
+    <path d="M30 70 Q30 54 48 54 Q66 54 66 70 Q66 86 48 88 Q30 86 30 70 Z" fill="#f2ecf4"/>
+    <path d="M30 66 Q31 54 48 54 Q65 54 66 66 Q56 62 48 62 Q40 62 30 66 Z" fill="#a66bbf"/>
+    <path d="M48 88 L48 94" fill="none" stroke-width="2.5"/>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 해바라기: 키 큰 줄기 위 노란 꽃잎과 씨앗 박힌 갈색 얼굴 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="18" ry="6" fill="#5a4a2a" stroke="none" opacity="0.45"/>
+    <path d="M45 88 L45 36 L51 36 L51 88 Z" fill="#6aa84f"/>
+    <path d="M46 66 Q26 56 18 66 Q32 66 46 72 Z" fill="#7fbf5f"/>
+    <path d="M50 58 Q70 48 78 58 Q64 58 50 64 Z" fill="#7fbf5f"/>
+    <g fill="#f6c431">
+      <ellipse cx="48" cy="10" rx="6" ry="9"/>
+      <ellipse cx="48" cy="44" rx="6" ry="9"/>
+      <ellipse cx="31" cy="27" rx="9" ry="6"/>
+      <ellipse cx="65" cy="27" rx="9" ry="6"/>
+      <ellipse cx="36" cy="15" rx="6" ry="8" transform="rotate(-45 36 15)"/>
+      <ellipse cx="60" cy="15" rx="6" ry="8" transform="rotate(45 60 15)"/>
+      <ellipse cx="36" cy="39" rx="6" ry="8" transform="rotate(45 36 39)"/>
+      <ellipse cx="60" cy="39" rx="6" ry="8" transform="rotate(-45 60 39)"/>
+    </g>
+    <circle cx="48" cy="27" r="12" fill="#7a4a24"/>
+    <g fill="#4a2c14" stroke="none">
+      <circle cx="44" cy="23" r="1.8"/><circle cx="51" cy="22" r="1.8"/><circle cx="54" cy="28" r="1.8"/>
+      <circle cx="47" cy="30" r="1.8"/><circle cx="42" cy="29" r="1.8"/><circle cx="50" cy="34" r="1.8"/>
+    </g>
+  </g>
+</svg>

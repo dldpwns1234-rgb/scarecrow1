@@ -27,7 +27,7 @@ func _on_pecked(index: int) -> void:
 	var crow := Sprite2D.new()
 	crow.texture = TEXTURE
 	crow.scale = Vector2.ONE * SCALE
-	var land: Vector2 = field.cell_screen(index) + BEAK_OFFSET
+	var land: Vector2 = field.cell_local(index) + BEAK_OFFSET
 	crow.position = land + START_OFFSET
 	add_child(crow)
 	var tween := crow.create_tween()

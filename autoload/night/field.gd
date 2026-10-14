@@ -1,12 +1,11 @@
 extends "res://autoload/night/levels.gd"
-## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 심기와 다시 자라기·물결, 조회, 역병 구름의 자리·반경·피해, 밭 단계의 저장 (단계 자체는 night/levels.gd).
-## 좌표는 격자 단위다: 칸 (x, y)의 가운데가 (x + 0.5, y + 0.5), 칸 번호 = y × FIELD_SIZE + x. 흐름(시작·박자·시듦·끝)은 night.gd가 상속해서 맡는다
-
-signal crop_regrown(index: int)  # 다시 자라는 뿌리: 시든 칸에 새 작물
+## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 조회, 역병 구름의 자리·반경·피해, 밭 단계의 저장 (단계 자체는 night/levels.gd, 심기는 night/planting.gd).
+## 좌표는 격자 단위다: 칸 (x, y)의 가운데가 (x + 0.5, y + 0.5), 칸 번호 = y × field_size + x. 밭 크기는 밤이 시작할 때 밭 단계로 정해지고 그 밤 동안 그대로다. 흐름(시작·박자·시듦·끝)은 night.gd가 상속해서 맡는다
 
 const EMPTY: int = -1
 const NEIGHBORS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
+var field_size: int = 1           # 밭 한 변의 칸 수 (Balance.field_size). 밤마다 _clear_field가 정한다
 var kinds: PackedInt32Array       # 칸마다 작물 종류 (Balance.Crop), 맨땅은 EMPTY
 var hp: PackedFloat64Array        # 남은 체력. 0이면 시들었다
 var max_hp: PackedFloat64Array
@@ -42,12 +41,12 @@ func reset() -> void:
 
 
 func cell_count() -> int:
-	return Balance.FIELD_SIZE * Balance.FIELD_SIZE
+	return field_size * field_size
 
 
 func cell_position(index: int) -> Vector2:
 	@warning_ignore("integer_division")
-	return Vector2(index % Balance.FIELD_SIZE + 0.5, index / Balance.FIELD_SIZE + 0.5)
+	return Vector2(index % field_size + 0.5, index / field_size + 0.5)
 
 
 func is_alive(index: int) -> bool:
@@ -60,7 +59,7 @@ func alive_count() -> int:
 
 ## 구름을 옮긴다 (화면은 커서·손가락 자리를, 봇은 노리는 자리를 넘긴다). 밭 밖으로는 나가지 않는다
 func set_cloud(position: Vector2) -> void:
-	var size := float(Balance.FIELD_SIZE)
+	var size := float(field_size)
 	cloud = Vector2(clampf(position.x, 0.0, size), clampf(position.y, 0.0, size))
 
 
@@ -81,14 +80,14 @@ func in_cloud(index: int) -> bool:
 ## 상하좌우 이웃 칸 번호 (밭 밖은 뺀다)
 func neighbors(index: int) -> Array[int]:
 	var result: Array[int] = []
-	var x := index % Balance.FIELD_SIZE
+	var x := index % field_size
 	@warning_ignore("integer_division")
-	var y := index / Balance.FIELD_SIZE
+	var y := index / field_size
 	for offset in NEIGHBORS:
 		var nx := x + offset.x
 		var ny := y + offset.y
-		if nx >= 0 and ny >= 0 and nx < Balance.FIELD_SIZE and ny < Balance.FIELD_SIZE:
-			result.append(ny * Balance.FIELD_SIZE + nx)
+		if nx >= 0 and ny >= 0 and nx < field_size and ny < field_size:
+			result.append(ny * field_size + nx)
 	return result
 
 
@@ -99,78 +98,8 @@ func crop_vitality(index: int) -> float:
 	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)))
 
 
-## 밭을 새로 심는다: 칸마다 심는 비율(빽빽한 밭)만큼 작물, 종류는 밭 단계의 비율(탐스러운 호박)대로
-func _plant() -> void:
-	_clear_field()
-	var fill := Balance.field_fill(Upgrades.level(Balance.Upgrade.DENSE))
-	for i in cell_count():
-		if rng.randf() < fill:
-			_grow(i)
-	_add_goldens(Workers.watch_goldens())
-	first_planted = crops_total
-
-
-## 밭 망보기(아지트): 심긴 작물 중 n개를 황금 이삭으로 바꾼다
-func _add_goldens(n: int) -> void:
-	for _i in n:
-		var picks: Array[int] = []
-		for i in cell_count():
-			if is_alive(i) and kinds[i] != Balance.Crop.GOLDEN:
-				picks.append(i)
-		if picks.is_empty():
-			return
-		var cell := picks[rng.randi_range(0, picks.size() - 1)]
-		kinds[cell] = Balance.Crop.GOLDEN
-		max_hp[cell] = Balance.crop_hp(Balance.Crop.GOLDEN, field_level, Upgrades.level(Balance.Upgrade.FERTILE)) * Balance.harvest_hp(field_level)
-		hp[cell] = max_hp[cell]
-
-
-## 다음 물결: 밭을 새로 심는다 (밤 중에 정복하면). 시든 수와 심은 수는 밤 전체로 이어 센다
-func _replant_wave() -> void:
-	var fill := Balance.field_fill(Upgrades.level(Balance.Upgrade.DENSE))
-	var before := crops_total
-	for i in cell_count():
-		kinds[i] = EMPTY
-		hp[i] = 0.0
-		infected[i] = 0
-		regrow_left[i] = 0.0
-		if rng.randf() < fill:
-			_grow(i)
-	_add_goldens(Workers.watch_goldens())
-	first_planted = crops_total - before
-
-
-## 칸 하나에 작물을 심는다 (밤 시작과 다시 자라기). 체력은 밭 단계와 비옥한 어둠대로
-func _grow(index: int) -> void:
-	var weights := Balance.crop_weights(field_level, Upgrades.level(Balance.Upgrade.PUMPKIN))
-	var roll := rng.randf()
-	var crop: int = Balance.Crop.WHEAT
-	if rng.randf() < Balance.golden_chance(Upgrades.level(Balance.Upgrade.GOLDEN)):
-		crop = Balance.Crop.GOLDEN
-	elif roll >= weights[0] + weights[1]:
-		crop = Balance.Crop.PUMPKIN
-	elif roll >= weights[0]:
-		crop = Balance.Crop.CORN
-	kinds[index] = crop
-	max_hp[index] = Balance.crop_hp(crop, field_level, Upgrades.level(Balance.Upgrade.FERTILE)) * Balance.harvest_hp(field_level)
-	hp[index] = max_hp[index]
-	infected[index] = 0
-	regrow_left[index] = 0.0
-	crops_total += 1
-
-
-## 시든 칸의 다시 자라기 시계를 흘린다. 다 된 칸에는 새 작물 (night.gd의 tick이 부른다)
-func _tick_regrow(dt: float) -> void:
-	for i in regrow_left.size():
-		if regrow_left[i] <= 0.0:
-			continue
-		regrow_left[i] -= dt
-		if regrow_left[i] <= 0.0:
-			_grow(i)
-			crop_regrown.emit(i)
-
-
 func _clear_field() -> void:
+	field_size = Balance.field_size(field_level)
 	kinds = PackedInt32Array()
 	kinds.resize(cell_count())
 	kinds.fill(EMPTY)

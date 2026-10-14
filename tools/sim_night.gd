@@ -125,7 +125,7 @@ func _play() -> float:
 ## 원 안 작물의 (생기 ÷ 남은 체력) 합이 가장 큰 작물 자리. 작물마다 값을 한 번만 재고, 후보 둘레의 네모 칸만 본다
 func _best_spot() -> Vector2:
 	var radius := Night.cloud_radius()
-	var size := Balance.FIELD_SIZE
+	var size := Night.field_size
 	var reach := ceili(radius)
 	var value := PackedFloat64Array()
 	value.resize(Night.cell_count())

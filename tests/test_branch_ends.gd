@@ -30,9 +30,9 @@ func _test_storm() -> void:
 	var storms: Array[int] = []
 	var on_storm := func() -> void: storms.append(1)
 	Night.storm_pulsed.connect(on_storm)
-	var center := 5 * Balance.FIELD_SIZE + 5
+	var center := 5 * Night.field_size + 5
 	Night.set_cloud(Night.cell_position(center))
-	var far := 5 * Balance.FIELD_SIZE + 6  # 한 칸 옆: 보통 반경(1) 끝, 폭풍 반경(1.8) 안
+	var far := 5 * Night.field_size + 6  # 한 칸 옆: 보통 반경(1) 끝, 폭풍 반경(1.8) 안
 	var radius := Night.cloud_radius()
 	var dps := Night.cloud_dps()
 	Night.time_left = 999.0  # 쿨타임이 끝날 때까지 밤이 이어지게
@@ -56,7 +56,7 @@ func _test_other_skills() -> void:
 	# 짚돌이의 한숨: 구름 안 작물에 한꺼번에
 	_start()
 	Upgrades.levels[Balance.Upgrade.SIGH] = 2
-	var center := 5 * Balance.FIELD_SIZE + 5
+	var center := 5 * Night.field_size + 5
 	Night.set_cloud(Night.cell_position(center))
 	var before := Night.hp[center]
 	_equal(Night.use_skill(Balance.Skill.SIGH), true, "한숨")

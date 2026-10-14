@@ -1,6 +1,7 @@
-extends "res://autoload/night/skills.gd"
+extends "res://autoload/night/crops.gd"
 ## Night 3부: 시듦·번짐·정복·물결 (GDD 4절). 작물이 맞으면 체력이 줄고, 다하면 시들어 생기를 주고 옆으로 번지고, 다시 자라는 뿌리면 시계를 건다.
-## 이번 물결에서 심은 수의 90%가 시들면 정복: 남은 작물이 쓰러지고, 가장 높은 단계였으면 다음 단계가 열리고, 밤은 이어져 밭이 새로 심긴다 (방장 2026-10-14)
+## 이번 물결에서 심은 수의 90%가 시들면 정복: 남은 작물이 쓰러지고, 가장 높은 단계였으면 다음 단계가 열리고, 밤은 이어져 밭이 새로 심긴다 (방장 2026-10-14).
+## 시든 뒤 일(해바라기 씨앗·수박 터짐·포도 덩굴·연쇄 시듦)은 줄을 세워 바깥 시듦에서 차례로 푼다: 연쇄 도중에 정복해 밭이 새로 심기면 새 작물을 치게 된다
 
 signal crop_hit(index: int, hp: float, damage: float)  # 구름·번짐·까마귀가 친 순간 (연출용)
 signal crop_withered(index: int, vitality: float)
@@ -13,6 +14,8 @@ var waves: int = 0                 # 이번 밤에 정복한 수 (정복할 때�
 var _clearing: bool = false        # 정복으로 남은 작물을 쓰러뜨리는 중
 var _wave_withered: int = 0        # 이번 물결이 시작할 때의 시든 수
 var _wave_haul: float = 0.0        # 이번 물결이 시작할 때의 이번 밤 생기
+var _aftermath: Array[int] = []    # 시든 뒤 일을 기다리는 칸
+var _resolving: bool = false       # 시든 뒤 일을 푸는 중 (그 안에서 시든 작물은 줄 끝에 선다)
 
 
 func _damage(index: int, amount: float) -> void:
@@ -35,8 +38,20 @@ func _wither(index: int, spread: bool) -> void:
 	regrow_left[index] = Balance.regrow_delay(Upgrades.level(Balance.Upgrade.REGROW))
 	if spread:
 		_spread_from(index)
+	_aftermath.append(index)
+	if _resolving:
+		return
+	_resolving = true
+	while not _aftermath.is_empty() and wave_withered() < clear_target():
+		_after_wither(_aftermath.pop_front())
+	_aftermath.clear()
+	_resolving = false
 	if wave_withered() >= clear_target():
 		_clear()
+
+
+func waves_cleared() -> int:
+	return waves
 
 
 ## 밭 정복에 필요한 시든 작물 수 (이번 물결)

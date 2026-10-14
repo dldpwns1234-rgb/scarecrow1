@@ -1,4 +1,4 @@
-extends "res://autoload/night/field.gd"
+extends "res://autoload/night/planting.gd"
 ## Night 2부: 밭 위를 오가는 것들 (GDD 4절·8절 M3). 까마귀(사역마)는 간격마다 작물을 쪼고, 지키는 이(5단계부터 농부, 깊어지면 감독관·관리·여신)는
 ## 밭을 걸어 다니며 둘레의 작물에 약을 쳐서(구름·번짐 피해 줄이기, 번짐 씻기) 지키고 시든 칸에 다시 심는다. 흐름(박자·시듦·정복)은 night.gd가 상속해서 맡는다
 
@@ -25,7 +25,7 @@ func _setup_critters() -> void:
 	_replant_left.clear()
 	_stun_left.clear()
 	farmer_kinds = Balance.guardians(field_level)
-	var size := float(Balance.FIELD_SIZE)
+	var size := float(field_size)
 	for i in farmer_kinds.size():
 		var edge := rng.randf() * size
 		farmers.append(Vector2(edge, 0.0) if i % 2 == 0 else Vector2(size, edge))
@@ -41,6 +41,8 @@ func _tick_critters(dt: float) -> void:
 		if active and _crow_left[i] <= 0.0:
 			_crow_left[i] += Balance.CROW_INTERVAL
 			_peck()
+	if _veiled():
+		return
 	for f in farmers.size():
 		if not active:
 			return
@@ -55,8 +57,10 @@ func _tick_critters(dt: float) -> void:
 			_replant(f)
 
 
-## 지키는 이 둘레 안의 작물이 받는 피해 배율 (약을 쳤다, 스며드는 독). 여럿이면 가장 센 약. 멈춘 이는 약을 못 친다
+## 지키는 이 둘레 안의 작물이 받는 피해 배율 (약을 쳤다, 스며드는 독). 여럿이면 가장 센 약. 멈춘 이·잠든 이(어둠의 장막)는 약을 못 친다
 func guard(index: int) -> float:
+	if _veiled():
+		return 1.0
 	var at := cell_position(index)
 	var result := 1.0
 	for f in farmers.size():
@@ -124,14 +128,14 @@ func _walk(f: int, dt: float) -> void:
 func _next_target() -> Vector2:
 	var count := alive_count()
 	if count <= 0:
-		return Vector2.ONE * Balance.FIELD_SIZE * 0.5
+		return Vector2.ONE * field_size * 0.5
 	var pick := rng.randi_range(0, count - 1)
 	for i in kinds.size():
 		if is_alive(i):
 			if pick == 0:
 				return cell_position(i)
 			pick -= 1
-	return Vector2.ONE * Balance.FIELD_SIZE * 0.5
+	return Vector2.ONE * field_size * 0.5
 
 
 ## 둘레 안의 번진 작물을 씻어 낸다
@@ -161,6 +165,11 @@ func _replant(f: int) -> void:
 ## night/skills.gd가 채운다 (까마귀 떼 동안 빨리)
 func _crow_speed() -> float:
 	return 1.0
+
+
+## night/skills.gd가 채운다 (어둠의 장막 동안 지키는 이가 잠든다: 걷기·약·심기 멈춤)
+func _veiled() -> bool:
+	return false
 
 
 ## night/waves.gd가 채운다 (까마귀가 쪼고 번짐을 옮길 때 부른다)

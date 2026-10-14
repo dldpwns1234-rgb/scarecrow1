@@ -1,6 +1,7 @@
 extends "res://autoload/night/critters.gd"
 ## Night 2.5부: 밤 스킬 (방장 2026-10-14: 역병 폭풍을 지속형으로, 스킬을 다양하게). 어둠의 나무 칸을 사면 열리고 밤마다 쿨타임 없이 시작한다.
-## 역병 폭풍(켜 둔 동안 구름 반경·피해↑), 까마귀 떼(켜 둔 동안 까마귀가 빨리 쫌), 짚돌이의 한숨(구름 안에 한꺼번에), 역병 파도(작물 일부가 번짐).
+## 역병 폭풍(켜 둔 동안 구름 반경·피해↑), 까마귀 떼(켜 둔 동안 까마귀가 빨리 쫌), 짚돌이의 한숨(구름 안에 한꺼번에), 역병 파도(작물 일부가 번짐),
+## 어둠의 장막(켜 둔 동안 지키는 이가 잠듦), 수확의 낫(약한 작물을 한꺼번에), 썩은 비(켜 둔 동안 밭 전체에), 연쇄 시듦(켜 둔 동안 시들면 옆으로. night/crops.gd).
 ## 화면은 use_skill()을 부르고 cooldown_left·active_left를 읽어 그린다. 시듦·번짐(_damage·_infect)은 night/waves.gd가 채운다
 
 signal skill_used(skill: int)
@@ -10,6 +11,7 @@ signal storm_pulsed()           # 역병 폭풍을 켰다 (소리·구름 연출
 var cooldown_left: Array[float] = []  # 스킬마다 남은 쿨타임 (Balance.Skill 순서)
 var active_left: Array[float] = []    # 지속형이 켜져 남은 초
 var _summoned: int = 0                # 까마귀 떼가 불러온 임시 까마귀 수
+var _rain_left: float = 0.0           # 썩은 비가 다음에 내리기까지 남은 초
 
 
 func skill_level(skill: int) -> int:
@@ -47,6 +49,10 @@ func use_skill(skill: int) -> bool:
 			_sigh(level)
 		Balance.Skill.TIDE:
 			_tide(level)
+		Balance.Skill.REAP:
+			_reap(level)
+		Balance.Skill.RAIN:
+			_rain_left = 0.0
 	skill_used.emit(skill)
 	return true
 
@@ -69,9 +75,15 @@ func _reset_skills() -> void:
 		cooldown_left.append(0.0)
 		active_left.append(0.0)
 	_summoned = 0
+	_rain_left = 0.0
 
 
 func _tick_skills(dt: float) -> void:
+	if is_skill_active(Balance.Skill.RAIN):
+		_rain_left -= dt
+		while active and _rain_left <= 0.0:
+			_rain_left += Balance.CLOUD_TICK
+			_rain(Balance.CLOUD_TICK)
 	for skill in cooldown_left.size():
 		cooldown_left[skill] = maxf(cooldown_left[skill] - dt, 0.0)
 		if active_left[skill] > 0.0:
@@ -90,6 +102,10 @@ func _end_skill(skill: int) -> void:
 
 func _crow_speed() -> float:
 	return Balance.FLOCK_SPEED if is_skill_active(Balance.Skill.FLOCK) else 1.0
+
+
+func _veiled() -> bool:
+	return is_skill_active(Balance.Skill.VEIL)
 
 
 ## 짚돌이의 한숨: 구름 안 작물에 한꺼번에 (지키는 이의 약은 듣는다)
@@ -112,3 +128,31 @@ func _tide(level: int) -> void:
 		var pick := rng.randi_range(0, candidates.size() - 1)
 		_infect(candidates[pick])
 		candidates.remove_at(pick)
+
+
+## 수확의 낫: 체력이 최대의 몫 아래로 준 작물을 밭 어디서든 쓰러뜨린다 (고른 뒤 친다: 도중에 정복하면 새 물결은 안 친다)
+func _reap(level: int) -> void:
+	var share := Balance.reap_share(level)
+	var picks: Array[int] = []
+	for i in kinds.size():
+		if is_alive(i) and hp[i] <= max_hp[i] * share:
+			picks.append(i)
+	var wave := waves_cleared()
+	for i in picks:
+		if not active or waves_cleared() != wave:
+			return
+		if is_alive(i):
+			_damage(i, hp[i])
+
+
+## 썩은 비 한 번: 살아 있는 작물마다 (지키는 이의 약은 듣는다)
+func _rain(seconds: float) -> void:
+	var amount := Balance.rain_dps(cloud_dps(), skill_level(Balance.Skill.RAIN)) * seconds
+	for i in kinds.size():
+		if active and is_alive(i):
+			_damage(i, amount * guard(i))
+
+
+## night/waves.gd가 채운다 (이번 밤에 정복한 수)
+func waves_cleared() -> int:
+	return 0

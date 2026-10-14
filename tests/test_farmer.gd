@@ -41,10 +41,10 @@ func _test_counts() -> void:
 
 func _test_guard_and_spray() -> void:
 	_start(7)
-	var spot := Night.cell_position(5 * Balance.FIELD_SIZE + 5)
+	var spot := Night.cell_position(5 * Night.field_size + 5)
 	Night.farmers[0] = spot
 	Night._farmer_targets[0] = spot
-	var near := 5 * Balance.FIELD_SIZE + 5
+	var near := 5 * Night.field_size + 5
 	var far := 0
 	_close(Night.guard(near), Balance.FARMER_GUARD, "둘레 안은 피해 절반")
 	_close(Night.guard(far), 1.0, "둘레 밖은 그대로")
@@ -61,7 +61,7 @@ func _test_guard_and_spray() -> void:
 
 func _test_replant_and_walk() -> void:
 	_start(7)
-	var cell := 5 * Balance.FIELD_SIZE + 5
+	var cell := 5 * Night.field_size + 5
 	var spot := Night.cell_position(cell)
 	Night._damage(cell, 1e12)
 	_equal(Night.is_alive(cell), false, "시들었다")
@@ -114,10 +114,10 @@ func _test_counters() -> void:
 	_close(Balance.farmer_guard(2), Balance.FARMER_GUARD + 0.2, "스며드는 독 2레벨: 약 친 작물 피해 ×0.7")
 	_close(Balance.farmer_guard(9), 1.0, "약이 안 듣는 데서 멈춘다")
 	_start(7)
-	var spot := Night.cell_position(5 * Balance.FIELD_SIZE + 5)
+	var spot := Night.cell_position(5 * Night.field_size + 5)
 	Night.farmers[0] = spot
 	Night._farmer_targets[0] = spot
-	var near := 5 * Balance.FIELD_SIZE + 5
+	var near := 5 * Night.field_size + 5
 	Upgrades.levels[Balance.Upgrade.SEEP] = 3
 	_close(Night.guard(near), Balance.FARMER_GUARD + 0.3, "밤에도 스며드는 독이 든다")
 	# 까마귀 소란: 쪼면 농부가 멈추고, 멈춘 농부는 약을 못 친다
@@ -141,7 +141,8 @@ func _test_counters() -> void:
 		for i in Night.cell_count():
 			golden += 1 if Night.kinds[i] == Balance.Crop.GOLDEN else 0
 		Night.stop()
-	_equal(golden > 20 * 144 * 0.03 and golden < 20 * 144 * 0.09, true, "황금 이삭 6%% 안팎 (%d / 2880)" % golden)
+	var cells := 20 * Night.cell_count()
+	_equal(golden > cells * 0.03 and golden < cells * 0.09, true, "황금 이삭 6%% 안팎 (%d / %d)" % [golden, cells])
 	_close(Balance.crop_vitality(Balance.Crop.GOLDEN, 1) / Balance.crop_vitality(Balance.Crop.PUMPKIN, 1), 10.0, "황금 이삭은 호박의 10배 생기")
 
 
@@ -157,7 +158,7 @@ func _test_guardians() -> void:
 	_close(Balance.guardian_guard(G.GODDESS, 0), 0.3, "여신의 약이 가장 세다")
 	_start(150)
 	_equal(Night.farmer_kinds.back(), G.GODDESS, "밤에도 여신이 나온다")
-	var near := 5 * Balance.FIELD_SIZE + 5
+	var near := 5 * Night.field_size + 5
 	for f in Night.farmers.size():
 		Night.farmers[f] = Night.cell_position(near)
 		Night._farmer_targets[f] = Night.cell_position(near)
