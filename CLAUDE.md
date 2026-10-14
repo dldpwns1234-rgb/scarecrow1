@@ -60,7 +60,7 @@ res://
 
 - 역할과 파일 주인 (방장 결정 2026-10-14: 서로 작업이 겹치지 않게). 남의 파일은 고치지 않고 방에서 부탁한다
   - 별빛(규칙·수치·밤): autoload/balance.gd·balance/, night.gd·night/, game.gd, upgrades.gd, scenes/night/, tools/sim_*, 그 테스트, 밸런스 문서
-  - 윤슬(화면·연출·소리·뼈대): scenes/main.gd·day/·ui/, autoload/sfx·prefs·save.gd, tools/make_theme·make_sfx·synth, CI, docs/GDD.md·CLAUDE.md, 아지트 화면, 이야기 문안
+  - 윤슬(화면·연출·소리·뼈대): scenes/main.gd·day/·ui/·night/fx/(밤 연출 층: 풍작 콤보·알갱이), autoload/sfx·prefs·save.gd, tools/make_theme·make_sfx·synth, CI, docs/GDD.md·CLAUDE.md, 아지트 화면, 이야기 문안
   - 함께 쓰는 파일(project.godot, save.gd의 절 목록, tests/run_tests.gd·test_case.gd): 고치기 전에 방에 한 줄 알린다
   - 방장 요청이 오면 그 영역 사람이 방에 '맡음'을 먼저 올리고 시작한다. 둘에 걸치면 나눠서 각자 파일만 만진다
 - 고친 뒤 `godot --headless --path . --quit`로 SCRIPT ERROR를 보고, 공식을 고쳤으면 `godot --headless --path . res://tests/run_tests.tscn`
