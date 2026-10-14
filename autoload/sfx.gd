@@ -1,7 +1,7 @@
 extends "res://autoload/sfx/player.gd"
 ## 효과음 (GDD 9절). 게임 오토로드의 시그널만 받아 소리를 낸다. 게임 상태는 바꾸지 않는다. 재생·버스·웹 잠금은 sfx/player.gd(1부)에 있다.
 ## 밤: 구름이 칠 때 '쿵'(pulse), 작물이 시들 때 바스락과 동전(wither), 번질 때 보글(spread), 까마귀가 쫄 때 까악(crow), 밭 정복(clear).
-## 낮·밤 전환: 밤이 시작될 때(night_start), 새벽이 올 때(dawn). 배경음도 낮(day)·밤(night) 곡으로 바꾼다. 겨울잠(sleep). 업그레이드 구매(buy)는 버튼을 누른 그 프레임에 오른 레벨에만 낸다
+## 낮·밤 전환: 밤이 시작될 때(night_start), 새벽이 올 때(dawn). 배경음도 낮(day)·밤(night) 곡으로 바꾼다. 겨울잠(sleep). 역병 폭풍의 큰 박자(storm). 업그레이드 구매(buy)는 버튼을 누른 그 프레임에 오른 레벨에만 낸다
 ## (불러오기·데이터 초기화가 레벨을 바꿀 때는 조용하다). 버튼은 트리에 들어올 때 pressed를 잇는다 (화면 파일을 고치지 않는다)
 
 var _levels: Dictionary = {}   # 업그레이드 번호 → 마지막으로 본 레벨
@@ -19,6 +19,7 @@ func _ready() -> void:
 	Night.crow_pecked.connect(func(_index: int) -> void: play("crow"))
 	Night.field_cleared.connect(func(_level: int) -> void: play("clear"))
 	Winter.slept.connect(func(_reward: float) -> void: play("sleep"))
+	Night.storm_pulsed.connect(play.bind("storm"))
 	Game.phase_changed.connect(_on_phase_changed)
 	Upgrades.upgrade_changed.connect(_on_upgrade_changed)
 	get_tree().node_added.connect(_on_node_added)
