@@ -59,14 +59,21 @@ func is_night() -> bool:
 	return phase == Phase.NIGHT
 
 
-## 이번 밤의 길이 (초)
+## 이번 밤의 길이 (초): 긴 밤 + 몽유(꿈의 상점)
 func night_seconds() -> float:
-	return Balance.night_seconds(Upgrades.level(Balance.Upgrade.LONG_NIGHT))
+	return Balance.night_seconds(Upgrades.level(Balance.Upgrade.LONG_NIGHT)) + Winter.extra_seconds()
 
 
 ## 지금까지 바친 생기로 어둠이 약속한 휴식 (초)
 func promised_rest_seconds() -> float:
 	return Balance.promised_rest_seconds(offered)
+
+
+## 겨울잠 뒤 새 철: 생기를 내려놓는다 (바친 생기 합·밤 수·기록은 남는다). Winter.perform()이 부른다
+func start_season() -> void:
+	vitality = 0.0
+	night_haul = 0.0
+	_emit_vitality()
 
 
 ## 낮 → 밤. 이미 밤이면 false

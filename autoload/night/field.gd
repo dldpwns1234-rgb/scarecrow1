@@ -69,8 +69,9 @@ func cloud_radius() -> float:
 	return Balance.cloud_radius(Upgrades.level(Balance.Upgrade.RADIUS))
 
 
+## 독한 포자 × 깊은 잠(꿈의 상점)
 func cloud_dps() -> float:
-	return Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN))
+	return Balance.cap(Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN)) * Winter.damage_multiplier())
 
 
 ## 이 칸이 지금 구름 안인지
@@ -92,6 +93,13 @@ func neighbors(index: int) -> Array[int]:
 	return result
 
 
+## 겨울잠 뒤 새 철: 겨울 씨앗만큼 열린 밭에서 시작한다. Winter.perform()이 부른다
+func start_season(start_level: int) -> void:
+	best_level = clampi(start_level, 1, Balance.MAX_FIELD_LEVEL)
+	field_level = best_level
+	field_level_changed.emit(field_level, best_level)
+
+
 ## 다음 밤의 밭 단계를 고른다 (열린 단계까지)
 func choose_level(level: int) -> bool:
 	if level < 1 or level > best_level:
@@ -109,10 +117,10 @@ func _unlock_next() -> void:
 		field_level_changed.emit(field_level, best_level)
 
 
-## 이 칸의 작물을 시들게 하면 받는 생기 (썩은 냄새 배율 포함)
+## 이 칸의 작물을 시들게 하면 받는 생기 (썩은 냄새·꿈속 수확 배율 포함)
 func crop_vitality(index: int) -> float:
 	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(Balance.Upgrade.PUMPKIN))
-	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)))
+	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * Winter.vitality_multiplier())
 
 
 ## 밭을 새로 심는다: 칸마다 심는 비율(빽빽한 밭)만큼 작물, 종류는 밭 단계의 비율(탐스러운 호박)대로

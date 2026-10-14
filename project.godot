@@ -21,6 +21,8 @@ Upgrades="*res://autoload/upgrades.gd"
 Game="*res://autoload/game.gd"
 ; 밤 한 판의 규칙(밭·구름·번짐·까마귀). Game의 낮·밤 전환을 받고 Game.add_rest()를 부른다
 Night="*res://autoload/night.gd"
+; 겨울잠(회귀)과 꿈의 상점. Night·Game·Upgrades를 새 철로 되돌리고, Night·Game이 꿈의 효과를 묻는다
+Winter="*res://autoload/winter.gd"
 ; 이야기(첫 실행 장면·조각)는 Game을 읽고 Save가 불러오므로 그 사이에
 Story="*res://autoload/story.gd"
 ; 소리 설정은 Save가 불러오므로 그 앞에

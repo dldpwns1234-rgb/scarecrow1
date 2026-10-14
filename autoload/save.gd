@@ -46,6 +46,7 @@ func to_dict() -> Dictionary:
 		"game": Game.to_dict(),
 		"upgrades": Upgrades.to_dict(),
 		"night": Night.to_dict(),
+		"winter": Winter.to_dict(),
 		"prefs": Prefs.to_dict(),
 		"story": Story.to_dict(),
 	}
@@ -55,6 +56,7 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> void:
 	Upgrades.from_dict(_section(data, "upgrades"))
 	Game.from_dict(_section(data, "game"))
+	Winter.from_dict(_section(data, "winter"))
 	Night.from_dict(_section(data, "night"))
 	Prefs.from_dict(_section(data, "prefs"))
 	Story.from_dict(_section(data, "story"))  # Game 뒤에 (옛 저장은 밤 수로 첫 장면을 정한다)
@@ -109,6 +111,7 @@ func reset_data() -> void:
 	Upgrades.reset()
 	Game.reset()
 	Night.reset()
+	Winter.reset()
 	Prefs.reset()
 	Story.reset()
 	save_game()

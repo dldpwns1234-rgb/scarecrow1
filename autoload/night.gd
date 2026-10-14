@@ -56,7 +56,7 @@ func begin(seed: int = -1) -> void:
 	_tick = Balance.cloud_tick(Upgrades.level(Balance.Upgrade.DUSK))
 	_pulse_left = _tick
 	_crow_left.clear()
-	var crows := Balance.crow_count(Upgrades.level(Balance.Upgrade.CROW))
+	var crows := Balance.crow_count(Upgrades.level(Balance.Upgrade.CROW)) + Winter.extra_crows()
 	for i in crows:
 		_crow_left.append(Balance.CROW_INTERVAL * float(i + 1) / float(crows))  # 한꺼번에 쪼지 않게 고르게 흩는다
 	set_cloud(Vector2.ONE * Balance.FIELD_SIZE * 0.5)

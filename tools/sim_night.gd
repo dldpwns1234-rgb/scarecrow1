@@ -1,11 +1,12 @@
 extends Node
 ## 밤 시뮬레이션 (GDD 4절, 밸런스용). 실제 Balance·Upgrades·Game·Night 코드를 화면 없이 그대로 돌린다.
 ##
-##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2]
+##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6]
 ##
 ## 사람 흉내: 밤에는 구름을 '값어치가 가장 몰린 자리'로 옮긴다 (원 안 작물의 생기 ÷ 남은 체력 합이 가장 큰 작물 자리, 0.25초마다 다시 고름).
 ## 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
 ## 가장 높은 단계를 못 깼으면 사람처럼 한 단계 아래에서 retry밤 동안 모은 뒤 다시 도전한다 (못 깨는 밭만 붙들면 수입이 바닥이라 벽이 실제보다 가팔라 보였다).
+## 겨울잠(winter=1): 열린 단계가 stall밤 동안 오르지 않고 겨울잠에 들 수 있으면 들고, 꿈 조각을 싼 것부터 다 쓴다. 철마다 한 줄씩 찍는다.
 ## 낮에 쓰는 시간(day초)을 밤 길이에 더해 실제 시간을 어림한다. 결과는 docs/BALANCE_SIM.md에 적는다
 
 const DT: float = 0.05
@@ -16,6 +17,8 @@ var _day: float = 15.0
 var _log: bool = true
 var _retry: int = 2
 var _farm_left: int = 0  # 한 단계 아래에서 더 모을 밤 수
+var _winter: bool = false
+var _stall: int = 6
 
 
 func _ready() -> void:
@@ -26,11 +29,17 @@ func _ready() -> void:
 	_day = float(args.get("day", "15"))
 	_log = args.get("log", "1") == "1"
 	_retry = int(args.get("retry", "2"))
+	_winter = args.get("winter", "0") == "1"
+	_stall = int(args.get("stall", "6"))
 	var seed := int(args.get("seed", "1"))
 	Upgrades.reset()
 	Game.reset()
 	Night.reset()
+	Winter.reset()
 	var clock := 0.0
+	var season_start := 0.0
+	var since_new := 0
+	var best_seen := Night.best_level
 	print("밤 | 단계 | 생기 | 시든/전체 | 정복 | 누적 분 | 산 것")
 	var firsts: Dictionary = {}
 	for n in nights:
@@ -46,9 +55,20 @@ func _ready() -> void:
 			_farm_left = _retry
 		if cleared and not firsts.has(level):
 			firsts[level] = [n + 1, clock / 60.0]
+		since_new = 0 if Night.best_level > best_seen else since_new + 1
+		best_seen = Night.best_level
 		if _log:
 			print("%d | %d | %s | %d/%d | %s | %.1f | %s" % [n + 1, level, Num.format(Game.last_haul), Night.withered, Night.crops_total,
 				"정복" if cleared else "-", clock / 60.0, bought])
+		if _winter and since_new >= _stall and Winter.can_sleep():
+			var reached := Night.best_level
+			Winter.perform()
+			print("== 겨울잠 %d: %.1f분 철 (누적 %.1f분), 밭 %d단계, 꿈 조각 +%s, 산 꿈: %s" % [Winter.sleeps, (clock - season_start) / 60.0, clock / 60.0,
+				reached, Num.format(Winter.shards), _dream_shop()])
+			season_start = clock
+			since_new = 0
+			best_seen = Night.best_level
+			firsts.clear()
 	print("")
 	print("단계 첫 정복: ", _firsts_text(firsts))
 	print("업그레이드: ", _levels_text())
@@ -113,6 +133,23 @@ func _shop() -> String:
 			break
 		names.append(Balance.upgrade_name(pick))
 	return ",".join(names)
+
+
+## 꿈의 상점을 싼 것부터 다 산다
+func _dream_shop() -> String:
+	var names: Array[String] = []
+	while true:
+		var pick := -1
+		for i in Balance.DREAMS.size():
+			if Winter.can_buy(i) and (pick < 0 or Winter.cost(i) < Winter.cost(pick)):
+				pick = i
+		if pick < 0 or not Winter.buy(pick):
+			break
+		names.append(Balance.dream_name(pick))
+	var parts: Array[String] = []
+	for i in Balance.DREAMS.size():
+		parts.append("%s %d" % [Balance.dream_name(i), Winter.level(i)])
+	return ", ".join(parts)
 
 
 func _firsts_text(firsts: Dictionary) -> String:

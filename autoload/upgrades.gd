@@ -35,6 +35,15 @@ func from_dict(data: Dictionary) -> void:
 		upgrade_changed.emit(i, levels[i])
 
 
+## 겨울잠 뒤 새 철: 나무를 비우고 기억하는 손(꿈의 상점)만큼 넓은 구름·긴 밤·빽빽한 밭을 들고 시작한다. Winter.perform()이 부른다
+func start_season(hands_level: int) -> void:
+	reset()
+	for index: int in [Balance.Upgrade.RADIUS, Balance.Upgrade.LONG_NIGHT, Balance.Upgrade.DENSE]:
+		var cap := Balance.upgrade_max_level(index)
+		levels[index] = mini(hands_level, cap) if cap > 0 else hands_level
+		upgrade_changed.emit(index, levels[index])
+
+
 func level(index: int) -> int:
 	return levels[index]
 
