@@ -24,7 +24,7 @@ const FIELD_REST_GROWTH: float = 2.0   # 밭 단계마다 휴식 ×2 (체력보�
 const CLOUD_TICK: float = 0.5          # 구름은 이 간격(초)마다 원 안의 작물을 한꺼번에 친다 (곡괭이질처럼 박자가 보이게)
 const CLOUD_BASE_RADIUS: float = 1.0   # 칸
 const CLOUD_RADIUS_PER_LEVEL: float = 0.1   # 넓은 구름: 레벨당 기본 반경의 +10%
-const CLOUD_BASE_DPS: float = 3.0      # 원 안 작물 하나가 받는 초당 피해
+const CLOUD_BASE_DPS: float = 6.0      # 원 안 작물 하나가 받는 초당 피해 (밀이 2초 안에 시든다)
 const CLOUD_DPS_PER_LEVEL: float = 0.25     # 독한 포자: 레벨당 기본 피해의 +25%
 
 const SPREAD_PER_LEVEL: float = 0.05   # 번지는 곰팡이: 시든 작물이 옆 칸(상하좌우)마다 번질 확률 +5%p

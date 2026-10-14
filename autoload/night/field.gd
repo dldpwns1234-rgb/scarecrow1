@@ -1,5 +1,5 @@
 extends Node
-## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 심기, 조회, 밭 단계(고른 단계와 열린 단계)와 그 저장.
+## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 심기, 조회, 역병 구름의 자리·반경·피해, 밭 단계(고른 단계와 열린 단계)와 그 저장.
 ## 좌표는 격자 단위다: 칸 (x, y)의 가운데가 (x + 0.5, y + 0.5), 칸 번호 = y × FIELD_SIZE + x. 흐름(시작·박자·시듦·끝)은 night.gd가 상속해서 맡는다
 
 signal field_level_changed(level: int, best: int)
@@ -15,6 +15,7 @@ var max_hp: PackedFloat64Array
 var infected: PackedByteArray     # 번짐에 걸린 작물이면 1
 var crops_total: int = 0          # 이번 밤에 심긴 작물 수
 var withered: int = 0             # 이번 밤에 시든 작물 수
+var cloud: Vector2 = Vector2.ZERO  # 역병 구름 가운데 (격자 단위)
 var rng := RandomNumberGenerator.new()  # 밭 배치·번짐·까마귀. 시뮬레이션과 테스트는 시드를 고정한다
 
 
@@ -53,6 +54,25 @@ func is_alive(index: int) -> bool:
 
 func alive_count() -> int:
 	return crops_total - withered
+
+
+## 구름을 옮긴다 (화면은 커서·손가락 자리를, 봇은 노리는 자리를 넘긴다). 밭 밖으로는 나가지 않는다
+func set_cloud(position: Vector2) -> void:
+	var size := float(Balance.FIELD_SIZE)
+	cloud = Vector2(clampf(position.x, 0.0, size), clampf(position.y, 0.0, size))
+
+
+func cloud_radius() -> float:
+	return Balance.cloud_radius(Upgrades.level(Balance.Upgrade.RADIUS))
+
+
+func cloud_dps() -> float:
+	return Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN))
+
+
+## 이 칸이 지금 구름 안인지
+func in_cloud(index: int) -> bool:
+	return cell_position(index).distance_to(cloud) <= cloud_radius()
 
 
 ## 상하좌우 이웃 칸 번호 (밭 밖은 뺀다)

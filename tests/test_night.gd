@@ -159,6 +159,9 @@ func _test_timeout() -> void:
 	_equal(Game.is_night(), false, "시간이 다 되면 낮")
 	_equal(Game.nights, 1, "밤 수")
 	_close(Game.last_haul, Game.night_haul, "이번 밤 기록")
+	_start()
+	Night.stop()
+	_equal(Game.is_night() or Night.active, false, "새벽까지 쉬기: 밤을 일찍 끝낸다")
 
 
 func _test_save() -> void:

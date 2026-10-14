@@ -14,7 +14,6 @@ signal field_cleared(level: int)                       # 밭 정복: 남은 작�
 
 var active: bool = false
 var time_left: float = 0.0
-var cloud: Vector2 = Vector2.ZERO  # 구름 가운데 (격자 단위)
 var cleared: bool = false          # 이번 밤에 밭을 정복했다
 var _pulse_left: float = 0.0
 var _crow_left: Array[float] = []
@@ -41,25 +40,6 @@ func reset() -> void:
 ## 다음 밤의 밭 단계를 고른다. 밤 중에는 못 바꾼다
 func choose_level(level: int) -> bool:
 	return not active and super(level)
-
-
-## 구름을 옮긴다 (화면은 커서·손가락 자리를, 봇은 노리는 자리를 넘긴다). 밭 밖으로는 나가지 않는다
-func set_cloud(position: Vector2) -> void:
-	var size := float(Balance.FIELD_SIZE)
-	cloud = Vector2(clampf(position.x, 0.0, size), clampf(position.y, 0.0, size))
-
-
-func cloud_radius() -> float:
-	return Balance.cloud_radius(Upgrades.level(Balance.Upgrade.RADIUS))
-
-
-func cloud_dps() -> float:
-	return Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN))
-
-
-## 이 칸이 지금 구름 안인지
-func in_cloud(index: int) -> bool:
-	return cell_position(index).distance_to(cloud) <= cloud_radius()
 
 
 ## 밤 시작: 밭을 새로 심고 시계를 건다 (Game이 밤으로 바뀌면 부른다). seed가 0 이상이면 그 시드로 심는다
@@ -180,6 +160,11 @@ func _clear() -> void:
 			_wither(i, false)
 	_unlock_next()
 	field_cleared.emit(level)
+	_end()
+
+
+## 밤을 일찍 끝낸다 ('새벽까지 쉬기'). 그때까지 받은 휴식은 그대로다
+func stop() -> void:
 	_end()
 
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 까마귀: 오른쪽을 보는 옆모습, 날개를 편 채. 부리 끝이 (86, 46) -->
+  <g stroke="#14121a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M14 52 L30 46 L28 58 Z" fill="#2b2838"/>
+    <ellipse cx="48" cy="52" rx="22" ry="13" fill="#2f2c3d"/>
+    <path d="M40 46 Q30 18 52 10 Q56 30 58 46 Z" fill="#3b374d"/>
+    <circle cx="68" cy="44" r="11" fill="#2f2c3d"/>
+    <path d="M76 40 L88 46 L76 50 Z" fill="#e9c46a"/>
+    <circle cx="70" cy="42" r="3" fill="#f2f2f2" stroke="none"/>
+    <circle cx="71" cy="42" r="1.4" fill="#14121a" stroke="none"/>
+    <path d="M44 64 L42 72 M52 64 L54 72" fill="none" stroke="#e9c46a" stroke-width="3"/>
+  </g>
+</svg>

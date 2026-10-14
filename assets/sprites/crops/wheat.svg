@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 밀: 이삭 다섯 줄기 묶음. 밑동이 (48, 90)에 선다 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="22" ry="6" fill="#5a4a2a" stroke="none" opacity="0.45"/>
+    <path d="M48 88 Q44 60 30 34 M48 88 Q47 56 42 24 M48 88 Q50 54 56 22 M48 88 Q53 60 66 34 M48 88 Q48 66 48 40" fill="none" stroke="#c99a3b" stroke-width="4"/>
+    <path d="M48 88 Q44 60 30 34 M48 88 Q47 56 42 24 M48 88 Q50 54 56 22 M48 88 Q53 60 66 34" fill="none" stroke="#2b2416" stroke-width="1.5" opacity="0.5"/>
+    <ellipse cx="29" cy="31" rx="5" ry="10" fill="#f2c94c" transform="rotate(-28 29 31)"/>
+    <ellipse cx="41" cy="20" rx="5" ry="11" fill="#f2c94c" transform="rotate(-10 41 20)"/>
+    <ellipse cx="57" cy="18" rx="5" ry="11" fill="#f2c94c" transform="rotate(12 57 18)"/>
+    <ellipse cx="67" cy="31" rx="5" ry="10" fill="#f2c94c" transform="rotate(28 67 31)"/>
+    <ellipse cx="48" cy="36" rx="5" ry="10" fill="#e8b93a"/>
+    <path d="M38 70 Q48 64 58 70" fill="none" stroke="#8a5a2b" stroke-width="5"/>
+  </g>
+</svg>
