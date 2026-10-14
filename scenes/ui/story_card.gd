@@ -1,7 +1,7 @@
 extends Control
 ## 이야기 조각 카드 (docs/STORY.md): 낮에 아직 안 본 조각이 있으면 화면을 어둡게 덮고 가운데에 "이야기 조각 N · 제목"과 독백을 띄운다.
 ## '계속'을 누르면 Story.mark_seen()으로 본 것으로 치고, 더 열린 조각이 있으면 다음 장이 이어진다.
-## 다시 읽기(story_book.gd)가 show_fragment()로 이미 본 조각을 띄우기도 한다 (그때는 '닫기'). Story를 읽고 그 함수만 부른다. 상수는 배치·연출용이다
+## 마지막 조각(휴경지의 별)은 카드 대신 엔딩 장면(ending_scene.gd)이 띄운다. 다시 읽기(story_book.gd)가 show_fragment()로 이미 본 조각을 띄우기도 한다 (그때는 '닫기'). Story를 읽고 그 함수만 부른다. 상수는 배치·연출용이다
 
 const SHADE := Color(0.02, 0.02, 0.05, 0.8)
 const WIDTH: float = 900.0
@@ -80,14 +80,20 @@ func show_fragment(index: int) -> void:
 
 ## 낮이고 안 본 조각이 있으면 잠깐 뒤에 띄운다 (이미 떠 있으면 '계속'이 이어 준다)
 func _queue_next() -> void:
-	if visible or _pending or Game.is_night() or Story.next_unseen() < 0:
+	if visible or _pending or Game.is_night() or not _has_card():
 		return
 	_pending = true
 	await get_tree().create_timer(DELAY_SECONDS).timeout
 	_pending = false
-	if not visible and not Game.is_night() and Story.next_unseen() >= 0:
+	if not visible and not Game.is_night() and _has_card():
 		_rereading = false
 		_open(Story.next_unseen())
+
+
+## 카드로 띄울 안 본 조각이 있는지 (마지막 조각은 엔딩 장면 몫)
+func _has_card() -> bool:
+	var next := Story.next_unseen()
+	return next >= 0 and next < Balance.FRAGMENTS.size() - 1
 
 
 func _open(index: int) -> void:
@@ -106,7 +112,7 @@ func _on_button() -> void:
 	if not _rereading:
 		Story.mark_seen(_index)
 		var next := Story.next_unseen()
-		if next >= 0 and not Game.is_night():
+		if _has_card() and not Game.is_night():
 			_open(next)
 			return
 	_rereading = false
