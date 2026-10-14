@@ -1,6 +1,7 @@
 extends PanelContainer
 ## 밤이 끝나 낮으로 돌아오면 오른쪽(어둠의 나무) 위쪽 가운데에 잠깐 뜨는 결과 (왼쪽 위의 이야기·소리 버튼을 가리지 않게): "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
 ## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 "겨울잠이 열렸다", 일꾼이 합류했으면 "아지트가 열렸다"나 "일꾼 합류: 이름"을, 수확일 밤을 정복했으면 "풍년의 여신을 이겼다"처럼 그 밤의 가장 센 지키는 이를 덧붙인다.
+## 지난 밤과 같은 밭이고 더 많이 거뒀으면 첫 줄에 '지난 밤보다 ×1.8' (강해진 맛, 방장 2026-10-14).
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
 
 const KoreanText := preload("res://scenes/ui/korean_text.gd")
@@ -11,6 +12,7 @@ const RIGHT_MARGIN: float = 24.0
 const WIDTH: float = 640.0
 const PADDING: int = 16
 const HOLD_SECONDS: float = 4.0
+const GROWTH_SHOWN: float = 1.1  # 지난 밤보다 이만큼 넘게 거둬야 비교를 보인다
 const FADE_SECONDS: float = 0.6
 const CLEAR_COLOR := Color("e9c46a")
 const HAUL_COLOR := Color("9ad14f")
@@ -21,6 +23,9 @@ var _tween: Tween
 var _cleared_level: int = 0  # 이번 밤에 정복한 단계 (Night.field_cleared). 0이면 정복 못 함
 var _best_before: int = 1    # 밤이 시작될 때 열린 가장 높은 단계. 낮은 단계를 다시 정복하면 새로 열리는 단계가 없다
 var _workers_before: int = 0  # 밤이 시작될 때 일꾼 수 (정복으로 합류한 일꾼을 알린다)
+var _prev_haul: float = 0.0   # 지난 밤에 거둔 생기 (이번 밤이 시작될 때 읽어 둔다)
+var _prev_level: int = 0      # 지난 밤의 밭 단계 (0이면 모름)
+var _level_now: int = 0       # 이번 밤의 밭 단계
 
 
 func _ready() -> void:
@@ -46,6 +51,8 @@ func _on_night_started() -> void:
 	_cleared_level = 0
 	_best_before = Night.best_level
 	_workers_before = Workers.worker_count()
+	_prev_haul = Game.last_haul
+	_level_now = Night.field_level
 
 
 ## 수확일 밤(보스 밤)을 정복했을 때: 그 밤의 가장 센 지키는 이를 이겼다는 한 줄
@@ -70,6 +77,9 @@ func _line(color: Color) -> Label:
 
 func _show_report(haul: float) -> void:
 	_haul.text = "지난 밤  ·  생기 +%s  ·  작물 %d / %d 시듦" % [Num.format(haul), Night.withered, Night.crops_total]
+	if _prev_level == _level_now and _prev_haul > 0.0 and haul >= _prev_haul * GROWTH_SHOWN:
+		_haul.text += "  ·  지난 밤보다 %s" % Num.multiplier(haul / _prev_haul)
+	_prev_level = _level_now
 	_clear.visible = _cleared_level > 0
 	_clear.text = "밭 %d단계 정복!" % _cleared_level
 	if Night.best_level > _best_before:
