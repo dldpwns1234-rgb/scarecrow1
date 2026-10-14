@@ -34,6 +34,14 @@ const INTRO_FRAGMENTS: int = 2  # 첫 실행 장면이 앞의 두 조각을 보�
 const STORY_REST_GOAL: float = 100.0 * 365.25 * 86400.0  # 약속된 휴식 백 년 (balance.gd의 HUNDRED_YEARS_SECONDS와 같다. 사슬 뒤라 여기서는 못 본다)
 
 
+## 약속된 휴식이 백 년까지 얼마나 왔는지 (0~1, 로그 눈금: 1초 = 0, 백 년 = 1). 낮 화면의 금색 막대 (이야기 조각 3·10의 '백 년')
+## 몇 분에서 백 년까지 열 자리 넘게 커지는 수라 그대로 나누면 막대가 끝까지 거의 비어 있다
+func promise_progress(seconds: float) -> float:
+	if seconds <= 1.0:
+		return 0.0
+	return clampf(log(seconds) / log(STORY_REST_GOAL), 0.0, 1.0)
+
+
 func fragment_stat(index: int) -> int:
 	return FRAGMENTS[index]["stat"]
 

@@ -19,6 +19,7 @@ const GAP: int = 24
 const LEFT_WIDTH: float = 420.0
 const PORTRAIT_SIZE := Vector2(150, 150)
 const NIGHT_BUTTON_HEIGHT: float = 88.0
+const PROMISE_BAR_HEIGHT: float = 10.0
 const RECORD_HEIGHT: float = 80.0  # 두 줄 자리. 글이 바뀌어도 아래가 밀리지 않게
 const TITLE_COLOR := Color("e9c46a")
 const REST_COLOR := Color("9ad14f")
@@ -33,6 +34,7 @@ const STORY_BUTTON_SIZE := Vector2(126, 48)
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
 var _rest: Label
 var _promise: Label  # 바친 생기로 어둠이 약속한 휴식 (Game.promised_rest_seconds)
+var _promise_bar: ProgressBar  # 백 년까지 (로그 눈금, Balance.promise_progress)
 var _record: Label
 var _night_button: Button
 var _story: Button  # 이야기 조각 다시 읽기 (Story)
@@ -90,6 +92,13 @@ func _make_left() -> VBoxContainer:
 	column.add_child(_rest)
 	_promise = _label("", 0, TITLE_COLOR)
 	column.add_child(_promise)
+	_promise_bar = ProgressBar.new()
+	_promise_bar.theme_type_variation = "GoalBar"
+	_promise_bar.custom_minimum_size = Vector2(0.0, PROMISE_BAR_HEIGHT)
+	_promise_bar.max_value = 1.0
+	_promise_bar.step = 0.0
+	_promise_bar.show_percentage = false
+	column.add_child(_promise_bar)
 	_record = _label("", 0, NOTE_COLOR)
 	_record.custom_minimum_size = Vector2(0.0, RECORD_HEIGHT)
 	column.add_child(_record)
@@ -117,7 +126,10 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 
 func _refresh() -> void:
 	_rest.text = "생기 %s" % Num.format(Game.vitality)
-	_promise.text = "약속된 휴식  %s" % _long_duration(Game.promised_rest_seconds())
+	var promise := Game.promised_rest_seconds()
+	_promise.text = "약속된 휴식  %s" % _long_duration(promise)
+	_promise_bar.value = Balance.promise_progress(promise)
+	_promise_bar.tooltip_text = "백 년까지 %d%%" % floori(_promise_bar.value * 100.0)
 	if Game.nights == 0:
 		_record.text = "까마귀가 속삭였다.\n\"생기를 모아 오면 쉬게 해 주마.\""
 	else:
