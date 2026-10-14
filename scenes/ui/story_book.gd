@@ -82,3 +82,10 @@ func _refresh() -> void:
 		else:
 			row.text = "%d.  ???" % (i + 1)
 		row.add_theme_color_override("font_disabled_color", LOCKED_COLOR)
+
+## 창 바깥(어두운 곳)을 누르면 닫는다 (창 안의 누름은 창이 받는다)
+func _gui_input(event: InputEvent) -> void:
+	var button := event as InputEventMouseButton
+	if button != null and button.pressed:
+		hide()
+		accept_event()

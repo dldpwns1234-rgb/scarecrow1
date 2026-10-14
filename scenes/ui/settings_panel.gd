@@ -180,3 +180,10 @@ func _set_reset_step(step: int) -> void:
 		_reset_button.add_theme_color_override("font_color", DANGER_COLOR)
 	else:
 		_reset_button.remove_theme_color_override("font_color")
+
+## 창 바깥(어두운 곳)을 누르면 닫는다 (창 안의 누름은 창이 받는다)
+func _gui_input(event: InputEvent) -> void:
+	var button := event as InputEventMouseButton
+	if button != null and button.pressed:
+		hide()
+		accept_event()
