@@ -1,7 +1,7 @@
 extends Control
 ## 밤 화면 오른쪽의 '풍작 콤보' (방장 2026-10-14 "가득 차는 뽕맛"): 작물이 연달아 시들면 '연쇄 ×N'이 오르고 세로 막대가 차오른다.
 ## 꽉 차면 burst를 내고(금빛 터짐·흔들림은 night_fx.gd) '풍작 N'이 오른다. 잠깐 쉬면 막대가 줄고 연쇄가 끊긴다.
-## 시들 때마다 연쇄음이 5음 음계로 한 칸씩 올라간다. 게임 수치에는 영향이 없는 연출이다 (Night 시그널만 받는다). 상수는 배치·연출용이다
+## 시들 때마다 연쇄음이 5음 음계로 한 칸씩 올라간다. 시듦은 모아 두었다 한 프레임에 한 번 셈한다 (연쇄로 한 프레임에 수십 개 시들 때 글·소리를 한 번만). 게임 수치에는 영향이 없는 연출이다 (Night 시그널만 받는다). 상수는 배치·연출용이다
 
 signal burst(level: int)
 
@@ -29,6 +29,7 @@ var level: int = 0          # 이번 밤의 풍작 수
 var _since_wither: float = 99.0
 var _since_burst: float = 99.0
 var _glow: float = 0.0      # 막 찼을 때 번쩍임
+var _pending: int = 0       # 이번 프레임에 시든 수
 var _combo_label: Label
 var _level_label: Label
 
@@ -61,6 +62,7 @@ func _reset() -> void:
 	fill = 0.0
 	combo = 0
 	level = 0
+	_pending = 0
 	_since_wither = 99.0
 	_glow = 0.0
 	_refresh_labels()
@@ -71,9 +73,18 @@ func bar_rect() -> Rect2:
 
 
 func _on_withered() -> void:
-	combo = combo + 1 if _since_wither <= COMBO_WINDOW else 1
+	_pending += 1
+
+
+## 이번 프레임에 시든 것을 한꺼번에: 연쇄·막대를 올리고 연쇄음은 마지막 높이로 한 번, 꽉 차면 터짐 한 번
+func _apply_withers() -> void:
+	if _since_wither > COMBO_WINDOW:
+		combo = 0
+	for i in _pending:
+		combo += 1
+		fill = minf(fill + FILL_PER_WITHER * (1.0 + FILL_COMBO_BONUS * combo), 1.0)
+	_pending = 0
 	_since_wither = 0.0
-	fill = minf(fill + FILL_PER_WITHER * (1.0 + FILL_COMBO_BONUS * combo), 1.0)
 	var step := mini(combo - 1, CHAIN_STEPS - 1)
 	var semitones := 12 * (step / PENTATONIC.size()) + PENTATONIC[step % PENTATONIC.size()]
 	Sfx.play("chain", pow(2.0, semitones / 12.0))
@@ -89,6 +100,8 @@ func _on_withered() -> void:
 
 func _process(delta: float) -> void:
 	delta = minf(delta, Balance.MAX_DELTA)
+	if _pending > 0:
+		_apply_withers()
 	_since_wither += delta
 	_since_burst += delta
 	_glow = maxf(_glow - delta * 2.0, 0.0)
@@ -102,9 +115,13 @@ func _process(delta: float) -> void:
 
 func _refresh_labels() -> void:
 	var rect := bar_rect()
-	_combo_label.text = "연쇄 ×%d" % combo if combo >= SHOW_COMBO_FROM else ""
+	var combo_text := "연쇄 ×%d" % combo if combo >= SHOW_COMBO_FROM else ""
+	if _combo_label.text != combo_text:
+		_combo_label.text = combo_text
 	_combo_label.position = Vector2(rect.get_center().x - 60.0, rect.position.y - 48.0)
-	_level_label.text = "풍작 %d" % level if level > 0 else ""
+	var level_text := "풍작 %d" % level if level > 0 else ""
+	if _level_label.text != level_text:
+		_level_label.text = level_text
 	_level_label.position = Vector2(rect.get_center().x - 60.0, rect.end.y + 6.0)
 
 

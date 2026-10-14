@@ -1,11 +1,9 @@
 extends Node
 ## Sfx 1부: 오디오 버스(SFX·Music)와 음량, 효과음 재생, 배경음, 웹의 첫 입력 잠금. autoload/sfx.gd가 상속해 게임 시그널을 소리에 잇는다. 회귀 용사에서 옮겨 와 소리 목록만 바꿨다.
 ## - 효과음: 소리마다 플레이어 몇 개(동시 재생 수)를 두고, 최소 간격 안의 같은 소리는 버리며, 음높이를 조금씩 흔든다. 작물이 한꺼번에 시들어도 소리가 쌓이지 않는다
-## - 배경음: 곡을 교차 페이드로 바꾼다 (낮 day, 밤 night). 반복은 .wav.import의 loop_mode(2)가 맡는다
-## - 웹: 브라우저는 사용자 입력 전에는 소리를 막는다. 첫 누름(unlock) 전에는 아무것도 틀지 않고, 그때 배경음을 시작한다
-## - 울리는 중인지는 엔진이 아니라 여기 장부(끝나는 시각)로 센다. 소리 장치가 없는 헤드리스(테스트·도구)는 장부만 쓰고 엔진에 틀지 않는다
-##   (헤드리스의 가짜 장치는 재생을 끝내지 않아 끝낼 때 소리 자원이 새고 동시 재생 수도 셀 수 없다)
-## 소리 파일은 tools/make_sfx.gd가 만들고 버스는 default_bus_layout.tres에 있다. 음량 설정은 Prefs가 저장하고 여기서 버스에 건다.
+## - 배경음: 곡을 교차 페이드로 바꾼다 (낮 day, 밤 night, 수확일 harvest). 반복은 .wav.import의 loop_mode(2). 웹은 첫 누름(unlock) 전에는 아무것도 틀지 않는다
+## - 울리는 중인지는 엔진이 아니라 여기 장부(끝나는 시각)로 센다. 헤드리스(테스트·도구)는 장부만 쓴다 (가짜 장치는 재생을 끝내지 않아 자원이 새고 수를 셀 수 없다)
+## 소리 파일은 tools/make_sfx.gd, 버스는 default_bus_layout.tres. 음량 설정은 Prefs가 저장하고 여기서 버스에 건다.
 
 const SFX_DIR := "res://assets/sfx/"
 const MUSIC_FILES := {"day": "res://assets/music/day.wav", "night": "res://assets/music/night.wav", "harvest": "res://assets/music/harvest.wav"}  # tools/make_music.gd가 만든다
@@ -18,13 +16,11 @@ const MUSIC_FADE: float = 1.5     # 곡을 바꿀 때 교차 페이드 (초)
 ## 소리 이름 → [동시 재생 수, 같은 소리의 최소 간격(ms), 음량(dB)]. 자주 나는 소리일수록 적게·작게.
 ## 밤에는 구름이 0.5초마다 치고 작물이 한꺼번에 여럿 시들어서, 쿵·시듦·번짐은 아주 작고 짧은 간격으로 묶는다
 const CUES := {
-	"pulse": [2, 250, -13.0], "wither": [3, 45, -11.0], "spread": [2, 90, -12.0],
-	"crow": [1, 450, -8.0], "night_start": [1, 1000, -4.0], "dawn": [1, 1000, -4.0], "clear": [1, 1000, -2.0],
-	"buy": [2, 50, -7.0], "sleep": [1, 1000, -4.0], "storm": [1, 2000, -6.0], "spray": [2, 300, -15.0], "sprout": [2, 200, -16.0],
-	"skill_storm": [1, 500, -5.0], "skill_flock": [1, 500, -7.0], "skill_sigh": [1, 500, -5.0], "skill_tide": [1, 500, -6.0],
-	"chain": [4, 35, -13.0], "bumper": [1, 800, -3.0],
-	"skill_veil": [1, 500, -6.0], "skill_reap": [1, 500, -5.0], "skill_rain": [1, 500, -7.0], "skill_chain": [1, 500, -6.0],
-	"burst": [3, 60, -9.0], "seeds": [2, 120, -14.0], "zap": [3, 50, -15.0],
+	"pulse": [2, 250, -13.0], "wither": [3, 45, -11.0], "spread": [2, 90, -12.0], "crow": [1, 450, -8.0], "night_start": [1, 1000, -4.0],
+	"dawn": [1, 1000, -4.0], "clear": [1, 1000, -2.0], "buy": [2, 50, -7.0], "sleep": [1, 1000, -4.0], "storm": [1, 2000, -6.0],
+	"spray": [2, 300, -15.0], "sprout": [2, 200, -16.0], "skill_storm": [1, 500, -5.0], "skill_flock": [1, 500, -7.0], "skill_sigh": [1, 500, -5.0],
+	"skill_tide": [1, 500, -6.0], "chain": [4, 35, -13.0], "bumper": [1, 800, -3.0], "skill_veil": [1, 500, -6.0], "skill_reap": [1, 500, -5.0],
+	"skill_rain": [1, 500, -7.0], "skill_chain": [1, 500, -6.0], "burst": [3, 60, -9.0], "seeds": [2, 120, -14.0], "zap": [3, 50, -15.0],
 }
 
 var unlocked: bool = false   # 소리를 낼 수 있는지. 웹은 첫 입력 전 false, 데스크톱은 처음부터 true
@@ -35,6 +31,7 @@ var _silent: bool = false            # 소리 장치가 없다 (헤드리스). �
 var _pools: Dictionary = {}          # 소리 이름 → Array[AudioStreamPlayer]
 var _next: Dictionary = {}           # 소리 이름 → 다 차 있을 때 끊고 다시 쓸 플레이어 번호
 var _last_msec: Dictionary = {}      # 소리 이름 → 마지막으로 낸 시각
+var _frame_of: Dictionary = {}       # 소리 이름 → 마지막으로 요청받은 프레임
 var _busy_until: Dictionary = {}     # 플레이어 → 소리가 끝나는 시각(ms)
 var _music: Dictionary = {}          # 곡 이름 → AudioStreamPlayer
 var _rng := RandomNumberGenerator.new()  # 음높이 전용. 소리를 낼지는 실제 시계가 정하니 전역 난수(장비 드롭)를 쓰면 실행마다 결과가 흔들린다
@@ -75,8 +72,10 @@ func _exit_tree() -> void:
 ## 효과음 하나. 잠겨 있거나 꺼져 있거나 최소 간격 안이면 내지 않고 false. 플레이어가 다 차 있으면 돌아가며 하나를 끊는다.
 ## pitch를 주면 흔들지 않고 그 높이로 낸다 (풍작 콤보의 올라가는 연쇄음)
 func play(cue: String, pitch: float = 0.0) -> bool:
-	if not unlocked or not Prefs.sfx_on or Prefs.sfx_volume <= 0.0 or not _pools.has(cue):
+	var frame := Engine.get_process_frames()  # 같은 프레임의 같은 소리는 맨 앞에서 거른다 (연쇄로 한 프레임에 수십 개 시들 때)
+	if _frame_of.get(cue, -1) == frame or not unlocked or not Prefs.sfx_on or Prefs.sfx_volume <= 0.0 or not _pools.has(cue):
 		return false
+	_frame_of[cue] = frame
 	var now := Time.get_ticks_msec()
 	if _last_msec.has(cue) and now - int(_last_msec[cue]) < int(CUES[cue][1]):
 		return false
@@ -108,6 +107,7 @@ func voice_limit(cue: String) -> int:
 ## 최소 간격 기록과 낸 횟수를 지운다 (테스트용)
 func reset_limits() -> void:
 	_last_msec.clear()
+	_frame_of.clear()
 	played.clear()
 
 

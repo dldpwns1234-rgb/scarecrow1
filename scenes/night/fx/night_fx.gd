@@ -68,11 +68,11 @@ func _on_burst(level: int) -> void:
 	create_tween().tween_property(_flash, "color:a", 0.0, FLASH_SECONDS)
 	_banner.text = "풍작!" if level == 1 else "풍작 ×%d!" % level
 	_banner.modulate.a = 1.0
-	_banner.scale = Vector2.ONE * 1.3
+	var size_up := sqrt(grow)  # 글꼴 크기를 바꾸면 그 크기의 글자를 새로 그려 프레임이 튀어서, 크기는 scale로 키운다
+	_banner.scale = Vector2.ONE * 1.3 * size_up
 	_banner.pivot_offset = size * 0.5
 	var banner := create_tween().set_parallel(true)
-	_banner.add_theme_font_size_override("font_size", roundi(BANNER_FONT_SIZE * sqrt(grow)))
-	banner.tween_property(_banner, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	banner.tween_property(_banner, "scale", Vector2.ONE * size_up, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	banner.tween_property(_banner, "modulate:a", 0.0, BANNER_SECONDS).set_delay(0.3)
 	_shake_screen()
 
