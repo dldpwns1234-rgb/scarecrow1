@@ -48,6 +48,7 @@ func _ready() -> void:
 	add_child(_stop)
 	Night.time_changed.connect(_on_time_changed)
 	Night.night_started.connect(_refresh)
+	Night.wave_started.connect(_refresh.unbind(1))
 	Night.crop_withered.connect(_refresh.unbind(2))
 	Game.vitality_changed.connect(_refresh.unbind(1))
 	resized.connect(_layout)
@@ -89,6 +90,7 @@ func _on_time_changed(seconds_left: float) -> void:
 func _refresh() -> void:
 	_rest.text = "생기 +%s" % Num.format(Game.night_haul)
 	var harvest := "  ·  수확일" if Balance.is_harvest(Night.field_level) else ""
-	_field.text = "밭 %d단계%s  ·  시든 작물 %d / %d" % [Night.field_level, harvest, Night.withered, Night.first_planted]
-	_bar.max_value = maxf(float(Night.first_planted), 1.0)  # 정복 표시(90%)는 처음 심은 수 기준
-	_bar.value = Night.withered
+	var wave := "  ·  물결 %d" % (Night.waves + 1) if Night.waves > 0 else ""
+	_field.text = "밭 %d단계%s%s  ·  시든 작물 %d / %d" % [Night.field_level, harvest, wave, Night.wave_withered(), Night.first_planted]
+	_bar.max_value = maxf(float(Night.first_planted), 1.0)  # 정복 표시(90%)는 이번 물결에 심은 수 기준
+	_bar.value = Night.wave_withered()

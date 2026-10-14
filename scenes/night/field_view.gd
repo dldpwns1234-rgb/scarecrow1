@@ -55,6 +55,7 @@ func _ready() -> void:
 		_crops.add_child(sprite)
 		_sprites[index] = sprite
 	Night.night_started.connect(rebuild)
+	Night.wave_started.connect(_on_wave.unbind(1))
 	Night.crop_hit.connect(_on_hit)
 	Night.crop_withered.connect(_on_withered)
 	Night.crop_infected.connect(_on_infected)
@@ -141,6 +142,14 @@ func _on_withered(index: int, _rest: float) -> void:
 	_place(index)
 	sprite.position.y += WITHER_DROP
 	_ground.queue_redraw()
+
+
+## 정복 뒤 새 물결: 밭 전체가 작게 솟아난다
+func _on_wave() -> void:
+	rebuild()
+	for i in _sprites.size():
+		if _sprites[i].visible:
+			_on_regrown(i)
 
 
 ## 다시 자라는 뿌리: 새 작물이 작게 솟아난다

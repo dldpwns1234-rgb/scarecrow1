@@ -106,7 +106,8 @@ func _test_harvest() -> void:
 			harvest += Night.crop_vitality(i)
 	Night._damage(last, 1e30)
 	_equal(Night.cleared, true, "수확일 정복")
-	_close(Game.last_haul, harvest * (1.0 + Balance.HARVEST_CLEAR_BONUS), "정복하면 이번 밤 생기 +50%")
+	_close(Game.night_haul, harvest * (1.0 + Balance.HARVEST_CLEAR_BONUS), "정복하면 이번 물결 생기 +50%")
+	Night.stop()
 
 
 func _test_counters() -> void:

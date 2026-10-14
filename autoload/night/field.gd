@@ -1,15 +1,12 @@
-extends Node
-## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 심기와 다시 자라기, 조회, 역병 구름의 자리·반경·피해, 밭 단계(고른 단계와 열린 단계)와 그 저장.
+extends "res://autoload/night/levels.gd"
+## Night 1부: 밭 (GDD 4절). 격자의 칸마다 작물 종류·체력·번짐, 심기와 다시 자라기·물결, 조회, 역병 구름의 자리·반경·피해, 밭 단계의 저장 (단계 자체는 night/levels.gd).
 ## 좌표는 격자 단위다: 칸 (x, y)의 가운데가 (x + 0.5, y + 0.5), 칸 번호 = y × FIELD_SIZE + x. 흐름(시작·박자·시듦·끝)은 night.gd가 상속해서 맡는다
 
-signal field_level_changed(level: int, best: int)
 signal crop_regrown(index: int)  # 다시 자라는 뿌리: 시든 칸에 새 작물
 
 const EMPTY: int = -1
 const NEIGHBORS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
-var field_level: int = 1          # 이번 밤(또는 다음 밤)의 밭 단계
-var best_level: int = 1           # 열린 가장 높은 밭 단계
 var kinds: PackedInt32Array       # 칸마다 작물 종류 (Balance.Crop), 맨땅은 EMPTY
 var hp: PackedFloat64Array        # 남은 체력. 0이면 시들었다
 var max_hp: PackedFloat64Array
@@ -23,7 +20,7 @@ var rng := RandomNumberGenerator.new()  # 밭 배치·번짐·까마귀. 시뮬�
 
 
 func to_dict() -> Dictionary:
-	return {"field_level": field_level, "best_level": best_level}
+	return {"field_level": field_level, "best_level": best_level, "auto_advance": auto_advance}
 
 
 ## 없는 필드는 1로. 고른 단계는 열린 단계를 넘지 않는다. 불러오면 늘 낮이라 밭은 비어 있다
@@ -31,6 +28,7 @@ func from_dict(data: Dictionary) -> void:
 	reset()
 	best_level = clampi(int(data.get("best_level", 1)), 1, Balance.MAX_FIELD_LEVEL)
 	field_level = clampi(int(data.get("field_level", best_level)), 1, best_level)
+	auto_advance = bool(data.get("auto_advance", false))
 	field_level_changed.emit(field_level, best_level)
 
 
@@ -38,6 +36,7 @@ func from_dict(data: Dictionary) -> void:
 func reset() -> void:
 	field_level = 1
 	best_level = 1
+	auto_advance = false
 	_clear_field()
 	field_level_changed.emit(field_level, best_level)
 
@@ -93,30 +92,6 @@ func neighbors(index: int) -> Array[int]:
 	return result
 
 
-## 겨울잠 뒤 새 철: 겨울 씨앗만큼 열린 밭에서 시작한다. Winter.perform()이 부른다
-func start_season(start_level: int) -> void:
-	best_level = clampi(start_level, 1, Balance.MAX_FIELD_LEVEL)
-	field_level = best_level
-	field_level_changed.emit(field_level, best_level)
-
-
-## 다음 밤의 밭 단계를 고른다 (열린 단계까지)
-func choose_level(level: int) -> bool:
-	if level < 1 or level > best_level:
-		return false
-	field_level = level
-	field_level_changed.emit(field_level, best_level)
-	return true
-
-
-## 지금 단계를 정복했으면 다음 단계를 열고 그리로 옮긴다 (가장 높은 단계를 깼을 때만)
-func _unlock_next() -> void:
-	if field_level == best_level and best_level < Balance.MAX_FIELD_LEVEL:
-		best_level += 1
-		field_level = best_level
-		field_level_changed.emit(field_level, best_level)
-
-
 ## 이 칸의 작물을 시들게 하면 받는 생기 (수확일·썩은 냄새·꿈속 수확 배율 포함)
 func crop_vitality(index: int) -> float:
 	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(Balance.Upgrade.PUMPKIN))
@@ -148,6 +123,21 @@ func _add_goldens(n: int) -> void:
 		kinds[cell] = Balance.Crop.GOLDEN
 		max_hp[cell] = Balance.crop_hp(Balance.Crop.GOLDEN, field_level, Upgrades.level(Balance.Upgrade.FERTILE)) * Balance.harvest_hp(field_level)
 		hp[cell] = max_hp[cell]
+
+
+## 다음 물결: 밭을 새로 심는다 (밤 중에 정복하면). 시든 수와 심은 수는 밤 전체로 이어 센다
+func _replant_wave() -> void:
+	var fill := Balance.field_fill(Upgrades.level(Balance.Upgrade.DENSE))
+	var before := crops_total
+	for i in cell_count():
+		kinds[i] = EMPTY
+		hp[i] = 0.0
+		infected[i] = 0
+		regrow_left[i] = 0.0
+		if rng.randf() < fill:
+			_grow(i)
+	_add_goldens(Workers.watch_goldens())
+	first_planted = crops_total - before
 
 
 ## 칸 하나에 작물을 심는다 (밤 시작과 다시 자라기). 체력은 밭 단계와 비옥한 어둠대로

@@ -170,13 +170,33 @@ func _test_clear() -> void:
 	Night._damage(_first_crop(), 1e9)
 	Night.field_cleared.disconnect(on_clear)
 	_equal(levels, [1], "시든 수가 처음 심은 수의 90%면 정복")
-	_equal(Night.alive_count(), 0, "남은 작물이 저절로 쓰러진다")
-	_equal(Night.active, false, "밤이 끝난다")
-	_equal(Game.is_night(), false, "낮으로 돌아온다")
+	_equal(Night.active, true, "정복해도 밤은 이어진다 (방장 2026-10-14)")
+	_equal(Night.waves, 1, "물결 1")
+	_equal(Night.alive_count(), Night.first_planted, "남은 작물은 쓰러지고 밭이 새로 심겼다")
+	_equal(Night.first_planted, Night.cell_count(), "꽉 찬 밭으로 다시")
+	_equal(Night.wave_withered(), 0, "새 물결은 0부터 센다")
 	_equal(Night.best_level, 2, "다음 단계가 열린다")
-	_equal(Night.field_level, 2, "다음 밤은 새 단계")
-	_equal(Night.choose_level(1), true, "낮은 단계를 고를 수 있다")
+	_equal(Night.field_level, 1, "자동으로 넘어가지 않는다 (낮에 고른다)")
+	_equal(Night.choose_level(2), false, "밤 중에는 못 고른다")
+	for i in Night.cell_count():  # 둘째 물결도 정복: 단계는 더 열리지 않는다
+		if Night.is_alive(i):
+			Night._damage(i, 1e9)
+	_equal(Night.waves, 2, "물결 2")
+	_equal(Night.best_level, 2, "같은 밤에 단계가 두 번 열리지 않는다")
+	Night.stop()
+	_equal(Night.choose_level(2), true, "낮에 새 단계를 고른다")
 	_equal(Night.choose_level(3), false, "안 열린 단계는 못 고른다")
+	# 자동으로 다음 밭
+	_start()
+	Night.set_auto_advance(true)
+	for i in Night.cell_count():
+		if Night.waves > 0:
+			break
+		if Night.is_alive(i):
+			Night._damage(i, 1e9)
+	_equal(Night.field_level, 2, "자동이면 다음 밤은 새 단계")
+	_equal(Night.to_dict()["auto_advance"], true, "자동 스위치는 저장된다")
+	Night.stop()
 
 
 func _test_timeout() -> void:

@@ -1,20 +1,15 @@
-extends "res://autoload/night/critters.gd"
+extends "res://autoload/night/waves.gd"
 ## 밤 한 판의 흐름 (GDD 4절): 시작(밭 심기·시계), 역병 구름의 박자, 번짐, 시듦과 생기, 다시 자라기, 밭 정복(수확일 보너스), 끝.
-## 밭 자체(칸·심기·밭 단계)는 night/field.gd, 까마귀와 농부는 night/critters.gd.
+## 밭 단계는 night/levels.gd, 밭(칸·심기)은 night/field.gd, 까마귀와 지키는 이는 night/critters.gd, 시듦·번짐·정복·물결은 night/waves.gd.
 ## 화면(scenes/night/)은 시그널을 받아 그리고 set_cloud()로 구름 자리만 넘긴다. 화면 없이도 돈다: 시뮬레이션 봇이 set_cloud()와 tick()을 직접 부른다.
 ## 수치는 Balance, 생기는 Game.add_vitality(), 밤 끝은 Game.finish_night(). 상태 변경은 이 오토로드의 함수로만 한다
 
 signal night_started()
-signal crop_hit(index: int, hp: float, damage: float)  # 구름·번짐·까마귀가 친 순간 (연출용)
-signal crop_withered(index: int, vitality: float)
-signal crop_infected(index: int)
 signal pulsed()                                        # 구름이 한 번 쳤다 (박자 연출)
 signal storm_pulsed()                                  # 그 박자가 역병 폭풍의 큰 박자였다 (pulsed 바로 앞에 난다)
 signal time_changed(seconds_left: float)
-signal field_cleared(level: int)                       # 밭 정복: 남은 작물이 쓰러지고 다음 단계가 열렸다. 정복한 단계를 넘긴다
 
 var time_left: float = 0.0
-var cleared: bool = false          # 이번 밤에 밭을 정복했다
 var _pulse_left: float = 0.0
 var _tick: float = Balance.CLOUD_TICK  # 이번 밤의 박자 간격 (어스름)
 var _storm_left: float = 0.0           # 역병 폭풍까지 남은 초 (없으면 0)
@@ -52,6 +47,9 @@ func begin(seed: int = -1) -> void:
 	_plant()
 	active = true
 	cleared = false
+	waves = 0
+	_wave_withered = 0
+	_wave_haul = 0.0
 	time_left = Game.night_seconds()
 	_tick = Balance.cloud_tick(Upgrades.level(Balance.Upgrade.DUSK))
 	_pulse_left = _tick
@@ -112,63 +110,6 @@ func _pulse(storm: bool = false) -> void:
 ## 새벽 전 몰아치기 중인지 (밤 끝 몇 초)
 func in_frenzy() -> bool:
 	return active and time_left <= Balance.frenzy_seconds(Upgrades.level(Balance.Upgrade.FRENZY))
-
-
-func _damage(index: int, amount: float) -> void:
-	hp[index] = maxf(hp[index] - amount, 0.0)
-	crop_hit.emit(index, hp[index], amount)
-	if hp[index] <= 0.0:
-		_wither(index, true)
-
-
-## 시듦: 생기를 주고 옆 칸으로 번지고, 다시 자라는 뿌리가 있으면 시계를 건다. 시든 수가 처음 심은 수의 90%에 닿으면 밭 정복
-func _wither(index: int, spread: bool) -> void:
-	hp[index] = 0.0
-	infected[index] = 0
-	withered += 1
-	var gained := crop_vitality(index)
-	Game.add_vitality(gained)
-	crop_withered.emit(index, gained)
-	if cleared:
-		return
-	regrow_left[index] = Balance.regrow_delay(Upgrades.level(Balance.Upgrade.REGROW))
-	if spread:
-		_spread_from(index)
-	if withered >= clear_target():
-		_clear()
-
-
-## 밭 정복에 필요한 시든 작물 수
-func clear_target() -> int:
-	return ceili(first_planted * Balance.CLEAR_RATIO)
-
-
-func _spread_from(index: int) -> void:
-	var chance := Balance.spread_chance(Upgrades.level(Balance.Upgrade.SPREAD))
-	if chance <= 0.0:
-		return
-	for n in neighbors(index):
-		if is_alive(n) and infected[n] == 0 and rng.randf() < chance:
-			_infect(n)
-
-
-func _infect(index: int) -> void:
-	infected[index] = 1
-	crop_infected.emit(index)
-
-
-## 밭 정복: 남은 작물이 저절로 쓰러지고(생기는 준다) 다음 밭 단계가 열린다. 수확일이면 이번 밤 생기를 더 얹는다
-func _clear() -> void:
-	cleared = true
-	var level := field_level
-	for i in kinds.size():
-		if is_alive(i):
-			_wither(i, false)
-	if Balance.is_harvest(level):
-		Game.add_vitality(Game.night_haul * Balance.HARVEST_CLEAR_BONUS)
-	_unlock_next()
-	field_cleared.emit(level)
-	_end()
 
 
 ## 밤을 일찍 끝낸다 ('새벽까지 쉬기'). 그때까지 거둔 생기는 그대로다

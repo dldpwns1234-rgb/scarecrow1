@@ -1,7 +1,7 @@
 extends "res://tools/sim_day.gd"
 ## 밤 시뮬레이션 (GDD 4절, 밸런스용). 실제 Balance·Upgrades·Game·Night 코드를 화면 없이 그대로 돌린다.
 ##
-##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6]
+##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6 --waves=1]
 ##
 ## 사람 흉내: 밤에는 구름을 '값어치가 가장 몰린 자리'로 옮긴다 (원 안 작물의 생기 ÷ 남은 체력 합이 가장 큰 작물 자리, 0.25초마다 다시 고름).
 ## 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
@@ -21,6 +21,7 @@ var _farm_left: int = 0  # 가장 높은 단계에서 진 뒤 아래에서 더 �
 var _play_level: int = 1  # 다음 밤에 나갈 단계
 var _winter: bool = false
 var _stall: int = 6
+var _waves: int = 1  # 이만큼 정복하면 '새벽까지 쉬기'로 밤을 끝낸다 (0이면 밤 끝까지 물결을 쓸어 담는다)
 
 
 func _ready() -> void:
@@ -33,6 +34,7 @@ func _ready() -> void:
 	_retry = int(args.get("retry", "2"))
 	_winter = args.get("winter", "0") == "1"
 	_stall = int(args.get("stall", "6"))
+	_waves = int(args.get("waves", "1"))
 	var seed := int(args.get("seed", "1"))
 	Upgrades.reset()
 	Game.reset()
@@ -113,6 +115,8 @@ func _play() -> float:
 		Night.set_cloud(Night.cloud + (step if step.length() <= reach else step.normalized() * reach))
 		Night.tick(DT)
 		elapsed += DT
+		if _waves > 0 and Night.waves >= _waves and Night.active:
+			Night.stop()
 	return elapsed
 
 
