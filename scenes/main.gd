@@ -3,6 +3,7 @@ extends Control
 
 const DayScreen := preload("res://scenes/day/day_screen.gd")
 const NightScreen := preload("res://scenes/night/night_screen.gd")
+const NightReport := preload("res://scenes/day/night_report.gd")
 
 var _day: Control
 var _night: Control
@@ -15,6 +16,7 @@ func _ready() -> void:
 	for screen: Control in [_day, _night]:
 		screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		add_child(screen)
+	add_child(NightReport.new())  # 밤이 끝나면 낮 화면 위에 잠깐 뜨는 결과
 	Game.phase_changed.connect(_on_phase_changed.unbind(1))
 	_on_phase_changed()
 
