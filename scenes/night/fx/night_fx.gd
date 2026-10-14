@@ -1,11 +1,10 @@
 extends Control
 ## 밤 화면 연출 층 (윤슬, 방장 2026-10-14 "가득 차는 뽕맛"): 생기 알갱이(sparks.gd)와 풍작 콤보(combo_meter.gd)를 얹고,
-## 덩굴 번개(strikes.gd)도 얹는다. 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
+## 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
 ## night_screen.gd가 field를 넘겨 붙인다. 입력은 받지 않는다. Night 시그널만 받는 연출이다. 상수는 연출용이다
 
 const Sparks := preload("res://scenes/night/fx/sparks.gd")
 const ComboMeter := preload("res://scenes/night/fx/combo_meter.gd")
-const Strikes := preload("res://scenes/night/fx/strikes.gd")
 
 const FLASH_ALPHA: float = 0.28
 const FLASH_SECONDS: float = 0.35
@@ -23,10 +22,7 @@ var field: Node2D:
 		field = value
 		if _sparks != null:
 			_sparks.field = value
-		if _strikes != null:
-			_strikes.field = value
 var _sparks: Sparks
-var _strikes: Strikes
 var _meter: ComboMeter
 var _flash: ColorRect
 var _banner: Label
@@ -36,9 +32,6 @@ var _shake: Tween
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_strikes = Strikes.new()
-	_strikes.field = field
-	add_child(_strikes)
 	_sparks = Sparks.new()
 	_sparks.field = field
 	add_child(_sparks)
