@@ -14,6 +14,8 @@ const DECAY_DELAY: float = 0.8            # 이만큼 쉬면 막대가 줄기 �
 const DECAY_PER_SECOND: float = 0.35
 const BURST_COOLDOWN: float = 1.2         # 터짐 사이 최소 간격
 const SHOW_COMBO_FROM: int = 3            # 연쇄가 이만큼은 돼야 '연쇄 ×N'을 보인다
+const LABEL_WIDTH: float = 120.0          # 글 칸의 기본 폭 (막대 가운데에 맞춘다)
+const SCREEN_EDGE: float = 8.0            # 글이 길어져도(연쇄 ×6000, 방장 #543) 화면 오른쪽에서 이만큼 띄운다
 const PENTATONIC: Array[int] = [0, 2, 4, 7, 9]
 const CHAIN_STEPS: int = 12               # 연쇄음이 올라가는 칸 수 (두 옥타브 남짓), 그 뒤로는 맨 위에 머문다
 const BACK := Color(0.05, 0.06, 0.1, 0.7)
@@ -54,7 +56,7 @@ func _label(font_size: int) -> Label:
 	label.add_theme_color_override("font_outline_color", OUTLINE)
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.size = Vector2(120, 40)
+	label.size = Vector2(LABEL_WIDTH, 40)
 	return label
 
 
@@ -115,14 +117,21 @@ func _process(delta: float) -> void:
 
 func _refresh_labels() -> void:
 	var rect := bar_rect()
-	var combo_text := "연쇄 ×%d" % combo if combo >= SHOW_COMBO_FROM else ""
+	var combo_text := "연쇄 ×%s" % Num.format(combo) if combo >= SHOW_COMBO_FROM else ""
 	if _combo_label.text != combo_text:
 		_combo_label.text = combo_text
-	_combo_label.position = Vector2(rect.get_center().x - 60.0, rect.position.y - 48.0)
+	_place_label(_combo_label, rect, rect.position.y - 48.0)
 	var level_text := "풍작 %d" % level if level > 0 else ""
 	if _level_label.text != level_text:
 		_level_label.text = level_text
-	_level_label.position = Vector2(rect.get_center().x - 60.0, rect.end.y + 6.0)
+	_place_label(_level_label, rect, rect.end.y + 6.0)
+
+
+## 막대 가운데에 맞추되, 글이 길어지면 화면 오른쪽 밖으로 나가지 않게 왼쪽으로 민다
+func _place_label(label: Label, rect: Rect2, y: float) -> void:
+	var width := maxf(LABEL_WIDTH, label.get_minimum_size().x)
+	label.size = Vector2(width, label.size.y)
+	label.position = Vector2(minf(rect.get_center().x - width * 0.5, size.x - width - SCREEN_EDGE), y)
 
 
 func _draw() -> void:
