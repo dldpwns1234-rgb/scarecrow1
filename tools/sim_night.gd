@@ -69,6 +69,7 @@ func _ready() -> void:
 			Winter.perform()
 			print("== 겨울잠 %d: %.1f분 철 (누적 %.1f분), 밭 %d단계, 꿈 조각 +%s, 산 꿈: %s" % [Winter.sleeps, (clock - season_start) / 60.0, clock / 60.0,
 				reached, Num.format(reward), _dream_shop()])
+			print("   바친 생기 %s, 약속된 휴식 %.1f일" % [Num.format(Game.offered), Game.promised_rest_seconds() / 86400.0])
 			season_start = clock
 			_play_level = Night.best_level
 			since_new = 0

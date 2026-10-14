@@ -5,8 +5,10 @@ extends "res://autoload/balance/story.gd"
 const NIGHT_BASE_SECONDS: float = 20.0      # 밤 한 판의 길이. 짧게 시작한다 (방장 2026-10-14)
 const NIGHT_SECONDS_PER_LEVEL: float = 3.0  # 긴 밤 레벨당
 ## 약속된 휴식 (이야기, 방장 2026-10-14): 어둠은 바친 생기가 많을수록 더 오래 쉬게 해 주겠다고 약속한다.
-## 초 = 60 × 바친 생기 합의 세제곱근. 생기 1천이면 10분, 100만이면 1시간 40분, 1.5e23이면 백 년 (짚돌이가 서 있던 시간)
-const PROMISE_SECONDS_PER_ROOT: float = 60.0
+## 초 = 60 × 바친 생기^0.135. 생기 1천이면 2.5분, 첫 겨울잠(1e16) 2시간, 둘째(1e22) 17시간, 1e57이면 백 년 (이야기의 끝, 봇은 여섯째 철·4시간쯤).
+## 처음엔 세제곱근이었다: 생기가 철마다 1만 배 넘게 불어나서 둘째 철(1시간)에 백 년을 넘었다 (docs/BALANCE_SIM.md)
+const PROMISE_SECONDS_BASE: float = 60.0
+const PROMISE_EXPONENT: float = 0.135
 const HUNDRED_YEARS_SECONDS: float = 100.0 * 365.25 * 86400.0
 
 
@@ -17,4 +19,4 @@ func night_seconds(long_night_level: int) -> float:
 
 ## 바친 생기 합으로 약속된 휴식 (초)
 func promised_rest_seconds(offered: float) -> float:
-	return cap(PROMISE_SECONDS_PER_ROOT * pow(maxf(offered, 0.0), 1.0 / 3.0))
+	return cap(PROMISE_SECONDS_BASE * pow(maxf(offered, 0.0), PROMISE_EXPONENT))
