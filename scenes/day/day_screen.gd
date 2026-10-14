@@ -27,7 +27,7 @@ var _rest: Label
 var _promise: Label  # 바친 생기로 어둠이 약속한 휴식 (Game.promised_rest_seconds)
 var _record: Label
 var _night_button: Button
-var _sound: Button  # 효과음 켬/끔 (Prefs)
+var _sound: Button  # 소리 켬/끔: 효과음과 배경음을 함께 (Prefs)
 
 
 func _ready() -> void:
@@ -61,7 +61,7 @@ func _make_left() -> VBoxContainer:
 	top.add_child(title)
 	_sound = Button.new()
 	_sound.custom_minimum_size = SOUND_BUTTON_SIZE
-	_sound.pressed.connect(func() -> void: Prefs.set_sfx_on(not Prefs.sfx_on))
+	_sound.pressed.connect(_toggle_sound)
 	top.add_child(_sound)
 	var portrait := TextureRect.new()
 	portrait.texture = PORTRAIT
@@ -105,7 +105,7 @@ func _refresh() -> void:
 		_record.text = "까마귀가 속삭였다.\n\"생기를 모아 오면 쉬게 해 주마.\""
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
-	_sound.text = "소리 켬" if Prefs.sfx_on else "소리 끔"
+	_sound.text = "소리 켬" if Prefs.sfx_on or Prefs.music_on else "소리 끔"
 	_night_button.text = "밤으로 나가기  ·  밭 %d단계  (%d초)" % [Night.field_level, roundi(Game.night_seconds())]
 
 
@@ -116,3 +116,10 @@ func _long_duration(seconds: float) -> String:
 	if seconds >= DAY_SECONDS:
 		return "%d일 %d시간" % [floori(seconds / DAY_SECONDS), floori(fmod(seconds, DAY_SECONDS) / 3600.0)]
 	return Num.format_duration(seconds)
+
+
+## 하나라도 켜져 있으면 둘 다 끄고, 둘 다 꺼져 있으면 둘 다 켠다
+func _toggle_sound() -> void:
+	var on := not (Prefs.sfx_on or Prefs.music_on)
+	Prefs.set_sfx_on(on)
+	Prefs.set_music_on(on)

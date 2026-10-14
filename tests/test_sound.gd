@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 효과음과 소리 설정: 시그널에 소리가 붙는지, 같은 소리의 최소 간격, 꺼짐, 구매는 버튼 프레임에만, 새벽은 밤 뒤에만, 소리 설정 저장
+## 효과음과 소리 설정: 시그널에 소리가 붙는지, 낮·밤 곡, 같은 소리의 최소 간격, 꺼짐, 구매는 버튼 프레임에만, 새벽은 밤 뒤에만, 소리 설정 저장
 
 
 func run() -> void:
@@ -9,6 +9,7 @@ func run() -> void:
 	Sfx.reset_limits()
 	Game.start_night()
 	_equal(int(Sfx.played.get("night_start", 0)), 1, "밤이 시작되면 소리")
+	_equal(Sfx.music_track, "night", "밤에는 밤 곡")
 	Night.pulsed.emit()
 	Night.pulsed.emit()
 	_equal(int(Sfx.played.get("pulse", 0)), 1, "최소 간격 안의 같은 소리는 하나만")
@@ -16,6 +17,7 @@ func run() -> void:
 	_equal(int(Sfx.played.get("wither", 0)), 1, "시듦 소리")
 	Game.finish_night()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "새벽 소리")
+	_equal(Sfx.music_track, "day", "낮에는 낮 곡")
 	Save.reset_data()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "데이터 초기화의 낮은 조용하다")
 

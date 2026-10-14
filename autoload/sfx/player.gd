@@ -1,14 +1,14 @@
 extends Node
 ## Sfx 1부: 오디오 버스(SFX·Music)와 음량, 효과음 재생, 배경음, 웹의 첫 입력 잠금. autoload/sfx.gd가 상속해 게임 시그널을 소리에 잇는다. 회귀 용사에서 옮겨 와 소리 목록만 바꿨다.
 ## - 효과음: 소리마다 플레이어 몇 개(동시 재생 수)를 두고, 최소 간격 안의 같은 소리는 버리며, 음높이를 조금씩 흔든다. 작물이 한꺼번에 시들어도 소리가 쌓이지 않는다
-## - 배경음: 곡을 교차 페이드로 바꾼다 (지금은 곡이 없다). 반복은 .wav.import의 loop_mode(2)가 맡는다
+## - 배경음: 곡을 교차 페이드로 바꾼다 (낮 day, 밤 night). 반복은 .wav.import의 loop_mode(2)가 맡는다
 ## - 웹: 브라우저는 사용자 입력 전에는 소리를 막는다. 첫 누름(unlock) 전에는 아무것도 틀지 않고, 그때 배경음을 시작한다
 ## - 울리는 중인지는 엔진이 아니라 여기 장부(끝나는 시각)로 센다. 소리 장치가 없는 헤드리스(테스트·도구)는 장부만 쓰고 엔진에 틀지 않는다
 ##   (헤드리스의 가짜 장치는 재생을 끝내지 않아 끝낼 때 소리 자원이 새고 동시 재생 수도 셀 수 없다)
 ## 소리 파일은 tools/make_sfx.gd가 만들고 버스는 default_bus_layout.tres에 있다. 음량 설정은 Prefs가 저장하고 여기서 버스에 건다.
 
 const SFX_DIR := "res://assets/sfx/"
-const MUSIC_FILES := {}  # 배경음은 아직 없다 (M4). 곡을 넣으면 "이름": "res://assets/music/이름.wav"
+const MUSIC_FILES := {"day": "res://assets/music/day.wav", "night": "res://assets/music/night.wav"}  # tools/make_music.gd가 만든다
 const BUS_SFX := &"SFX"
 const BUS_MUSIC := &"Music"
 const PITCH_JITTER: float = 0.06  # 음높이를 ±6% 안에서 흔든다 (같은 소리가 기계처럼 되풀이되지 않게)
