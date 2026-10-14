@@ -20,6 +20,7 @@ const SELECT_MARGIN: float = 5.0
 const REVEAL_SECONDS: float = 0.35
 const CARD_TEXT_PADDING: float = 40.0  # 카드 안 좌우 여백 (테마 버튼 여백 포함)
 const MIN_CARD_FONT: int = 13
+const EDGE_MARK: float = 10.0     # 판 밖의 살 수 있는 카드를 가리키는 가장자리 세모 크기
 
 var selected_index: int = -1
 var center_index: int = -1        # 데이터에 어둠의 계약(branch "center")이 있으면 그 번호. 가운데 원이 그 카드 노릇을 한다
@@ -27,6 +28,7 @@ var _cells: Array[Vector2i] = []
 var _cards: Array[Button] = []
 var _shown: Array[bool] = []
 var _center_label: Label
+var _marks: Control  # 카드 위층: 판 밖 살 수 있는 카드를 가리키는 세모
 
 
 func _ready() -> void:
@@ -54,11 +56,12 @@ func _ready() -> void:
 		add_child(card)
 		_cards.append(card)
 		_shown.append(false)
+	_marks = Control.new()
+	_marks.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_marks.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_marks.draw.connect(_draw_edge_marks)
+	add_child(_marks)
 	resized.connect(_place)
-
-
-func card(index: int) -> Button:
-	return _cards[index]
 
 
 ## 카드 글과 보이기를 다시 맞춘다. 새로 나타난 카드는 떠오른다
@@ -118,6 +121,7 @@ func _place() -> void:
 		if _cards[i].visible and not _is_revealing(_cards[i]):
 			_cards[i].scale = Vector2.ONE * zoom
 	queue_redraw()
+	_marks.queue_redraw()
 
 
 func _card_center(index: int) -> Vector2:
@@ -140,6 +144,20 @@ func _draw() -> void:
 		draw_arc(center, radius + SELECT_MARGIN * 1.5, 0.0, TAU, 48, SELECT_COLOR, LINE_WIDTH)
 	elif _cards[selected_index].visible:
 		draw_rect(Rect2(_card_center(selected_index) - CARD_SIZE * 0.5 * zoom, CARD_SIZE * zoom).grow(SELECT_MARGIN), SELECT_COLOR, false, LINE_WIDTH)
+
+
+## 판 밖에 있는 살 수 있는 카드(금칠) 쪽 가장자리에 금빛 세모: 64칸 나무를 당겨 보고 있어도 살 것을 놓치지 않게 (방장 #529)
+func _draw_edge_marks() -> void:
+	var view := Rect2(Vector2.ZERO, size)
+	var inner := view.grow(-EDGE_MARK * 1.5)
+	for i in _cards.size():
+		var point := _card_center(i)
+		if not _cards[i].visible or _cards[i].theme_type_variation != "AccentButton" or view.has_point(point):
+			continue
+		var at := point.clamp(inner.position, inner.end)
+		var dir := (point - at).normalized()
+		var side := dir.orthogonal() * EDGE_MARK * 0.7
+		_marks.draw_colored_polygon(PackedVector2Array([at + dir * EDGE_MARK, at - dir * EDGE_MARK * 0.5 + side, at - dir * EDGE_MARK * 0.5 - side]), SELECT_COLOR)
 
 
 ## 짧게 누른 자리의 카드를 고른다 (끌기와 줌은 1부)
