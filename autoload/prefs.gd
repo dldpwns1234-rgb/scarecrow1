@@ -25,6 +25,15 @@ func set_music_on(on: bool) -> void:
 		audio_changed.emit()
 
 
+## 음량 0~1 (설정 화면의 −/+)
+func set_sfx_volume(volume: float) -> void:
+	_set_audio(sfx_on, music_on, volume, music_volume)
+
+
+func set_music_volume(volume: float) -> void:
+	_set_audio(sfx_on, music_on, sfx_volume, volume)
+
+
 func reset() -> void:
 	_set_audio(true, true, DEFAULT_SFX_VOLUME, DEFAULT_MUSIC_VOLUME)
 

@@ -1,6 +1,6 @@
 extends Control
 ## 첫 실행 장면 (docs/STORY.md 조각 1·2): 화면을 덮고 짚돌이의 독백이 한 줄씩 넘어간다. 셋째 줄부터 까마귀 모습의 어둠이 어깨에 내려앉고,
-## 마지막 줄의 '계약한다'를 누르면 Story.mark_intro_seen()으로 닫힌다. 어디를 눌러도 다음 줄로 간다. Story를 읽고 그 함수만 부른다. 상수는 배치·연출용이다
+## 마지막 줄의 '계약한다'를 누르면 Story.mark_intro_seen()으로 닫힌다. 데이터 초기화로 첫 장면이 지워지면 다시 처음부터 뜬다. 어디를 눌러도 다음 줄로 간다. Story를 읽고 그 함수만 부른다. 상수는 배치·연출용이다
 
 const SCARECROW := preload("res://icon.svg")
 const CROW := preload("res://assets/sprites/crow.svg")
@@ -61,6 +61,17 @@ func _ready() -> void:
 	_next.position = Vector2((get_viewport_rect().size.x - BUTTON_SIZE.x) * 0.5, get_viewport_rect().size.y * 0.82)
 	_next.pressed.connect(_advance)
 	add_child(_next)
+	_show_line()
+	Story.story_changed.connect(_on_story_changed)
+
+
+func _on_story_changed() -> void:
+	if Story.intro_seen or visible:
+		return
+	_line = 0
+	_crow.visible = false
+	modulate.a = 1.0
+	visible = true
 	_show_line()
 
 

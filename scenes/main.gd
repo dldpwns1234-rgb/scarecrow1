@@ -10,6 +10,7 @@ const StoryBook := preload("res://scenes/ui/story_book.gd")
 const StoryCard := preload("res://scenes/ui/story_card.gd")
 const WinterConfirm := preload("res://scenes/day/winter_confirm.gd")
 const WinterScene := preload("res://scenes/ui/winter_scene.gd")
+const SettingsPanel := preload("res://scenes/ui/settings_panel.gd")
 
 var _day: Control
 var _night: Control
@@ -34,6 +35,9 @@ func _ready() -> void:
 	(_day as DayScreen).book_requested.connect(book.open)
 	book.read_requested.connect(card.show_fragment)
 	add_child(WinterScene.new())  # 겨울잠에 들면 눈 내리는 전환. 카드보다 위라 '겨울잠' 이야기 카드는 눈이 걷히면 보인다
+	var settings := SettingsPanel.new()  # 소리·저장 문자열·데이터 초기화 (낮 화면 '설정')
+	add_child(settings)
+	(_day as DayScreen).settings_requested.connect(settings.open)
 	add_child(IntroCard.new())  # 처음 켤 때만: 까마귀 모습의 어둠이 계약을 건다 (맨 위)
 	Game.phase_changed.connect(_on_phase_changed.unbind(1))
 	_on_phase_changed()

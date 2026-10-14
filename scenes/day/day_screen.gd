@@ -1,9 +1,10 @@
 extends MarginContainer
 ## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·생기·약속된 휴식·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기',
 ## 오른쪽에 칩 [어둠의 나무](upgrade_tree.gd) [꿈의 상점](dream_shop.gd, 겨울잠이 열리면). 칩이 하나뿐이면 칩 줄은 숨는다 (sub_tabs.gd).
-## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 왼쪽 위 '이야기 N / 10'은 book_requested로 다시 읽기를 연다(main.gd). 상수는 배치용이다.
+## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 왼쪽 위 '이야기 N / 10'은 book_requested로 다시 읽기를, '설정'은 settings_requested로 설정 창을 연다(main.gd). 상수는 배치용이다.
 
 signal book_requested()
+signal settings_requested()
 signal winter_requested()  # 꿈의 상점의 '겨울잠에 들기'. main.gd가 확인 창을 연다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -26,7 +27,7 @@ const REST_FONT_SIZE: int = 40
 const TITLE_FONT_SIZE: int = 28
 const DAY_SECONDS: float = 86400.0
 const YEAR_SECONDS: float = 31536000.0
-const SOUND_BUTTON_SIZE := Vector2(100, 48)
+const SETTINGS_BUTTON_SIZE := Vector2(100, 48)
 const STORY_BUTTON_SIZE := Vector2(126, 48)
 
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
@@ -34,7 +35,6 @@ var _rest: Label
 var _promise: Label  # 바친 생기로 어둠이 약속한 휴식 (Game.promised_rest_seconds)
 var _record: Label
 var _night_button: Button
-var _sound: Button  # 소리 켬/끔: 효과음과 배경음을 함께 (Prefs)
 var _story: Button  # 이야기 조각 다시 읽기 (Story)
 
 
@@ -58,7 +58,6 @@ func _ready() -> void:
 	Game.night_finished.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)
 	Night.field_level_changed.connect(_gate.queue)
-	Prefs.audio_changed.connect(_gate.queue)
 	Story.story_changed.connect(_gate.queue)
 	_refresh()
 
@@ -76,10 +75,11 @@ func _make_left() -> VBoxContainer:
 	_story.custom_minimum_size = STORY_BUTTON_SIZE
 	_story.pressed.connect(book_requested.emit)
 	top.add_child(_story)
-	_sound = Button.new()
-	_sound.custom_minimum_size = SOUND_BUTTON_SIZE
-	_sound.pressed.connect(_toggle_sound)
-	top.add_child(_sound)
+	var settings := Button.new()  # 소리·저장 내보내기·데이터 초기화
+	settings.text = "설정"
+	settings.custom_minimum_size = SETTINGS_BUTTON_SIZE
+	settings.pressed.connect(settings_requested.emit)
+	top.add_child(settings)
 	var portrait := TextureRect.new()
 	portrait.texture = PORTRAIT
 	portrait.custom_minimum_size = PORTRAIT_SIZE
@@ -122,7 +122,6 @@ func _refresh() -> void:
 		_record.text = "까마귀가 속삭였다.\n\"생기를 모아 오면 쉬게 해 주마.\""
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
-	_sound.text = "소리 켬" if Prefs.sfx_on or Prefs.music_on else "소리 끔"
 	_story.text = "이야기 %d/%d" % [Story.unlocked_count, Balance.FRAGMENTS.size()]
 	_night_button.text = "밤으로 나가기  ·  밭 %d단계  (%d초)" % [Night.field_level, roundi(Game.night_seconds())]
 
@@ -135,9 +134,3 @@ func _long_duration(seconds: float) -> String:
 		return "%d일 %d시간" % [floori(seconds / DAY_SECONDS), floori(fmod(seconds, DAY_SECONDS) / 3600.0)]
 	return Num.format_duration(seconds)
 
-
-## 하나라도 켜져 있으면 둘 다 끄고, 둘 다 꺼져 있으면 둘 다 켠다
-func _toggle_sound() -> void:
-	var on := not (Prefs.sfx_on or Prefs.music_on)
-	Prefs.set_sfx_on(on)
-	Prefs.set_music_on(on)
