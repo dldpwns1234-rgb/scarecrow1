@@ -26,3 +26,13 @@ func run() -> void:
 	_equal(placed[5].y, -2, "둘째 자식은 같은 줄에서 옆으로 비켜 선다")
 	_equal(placed[6].x, -1, "branch 키(왼쪽)를 따른다")
 	_equal(placed[6].y != 0, true, "왼쪽 칸이 차 있으면 옆으로 비켜 선다")
+
+	var with_center: Array[Dictionary] = [
+		{"requires": -1, "branch": "center"},
+		{"requires": 0, "branch": "right"}, {"requires": 0, "branch": "down"}, {"requires": 1},
+	]
+	var around := TreeLayout.cells(with_center)
+	_equal(around[0], Vector2i.ZERO, "branch center는 가운데")
+	_equal(around[1], Vector2i(1, 0), "가운데의 자식은 자기 branch 방향으로")
+	_equal(around[2], Vector2i(0, 1), "다른 자식은 다른 방향")
+	_equal(around[3], Vector2i(2, 0), "그 다음은 부모 방향을 따라간다")

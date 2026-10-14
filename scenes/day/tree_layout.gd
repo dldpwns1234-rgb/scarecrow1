@@ -1,6 +1,7 @@
 extends RefCounted
 ## 스킬트리 배치 (방장 2026-10-14: 사방으로 뻗는 나무). 가운데(0, 0)는 '어둠의 계약'이고, 뿌리 업그레이드(requires -1)는 갈래 방향으로 한 칸 나간다.
 ## 갈래 방향은 데이터의 "branch"(up·right·down·left)를 따르고, 없으면 뿌리 순서대로 위·오른쪽·아래·왼쪽에 둔다.
+## "branch": "center"인 줄(데이터에 넣은 어둠의 계약)은 가운데 자리이고, 그 자식들이 갈래의 첫 칸이 된다.
 ## 자식은 부모에서 갈래 방향으로 한 칸 더 나가고, 그 칸이 차 있으면 옆(갈래에 수직)으로 비켜 선다. 화면과 떨어진 순수 계산이라 테스트한다
 
 const DIRECTIONS := {"up": Vector2i(0, -1), "right": Vector2i(1, 0), "down": Vector2i(0, 1), "left": Vector2i(-1, 0)}
@@ -8,7 +9,7 @@ const ORDER: PackedStringArray = ["up", "right", "down", "left"]
 const MAX_SIDE_STEP: int = 6  # 옆으로 비켜 설 칸 수의 한계. 넘으면 갈래 방향으로 더 나간다
 
 
-## 업그레이드마다 격자 칸. 가운데 (0, 0)은 비워 둔다. requires는 늘 앞 번호다 (Balance가 지킨다)
+## 업그레이드마다 격자 칸. 가운데 (0, 0)은 어둠의 계약 자리라 다른 칸은 쓰지 않는다. requires는 늘 앞 번호다 (Balance가 지킨다)
 static func cells(upgrades: Array[Dictionary]) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	var dirs: Array[Vector2i] = []
@@ -16,14 +17,18 @@ static func cells(upgrades: Array[Dictionary]) -> Array[Vector2i]:
 	var roots := 0
 	for i in upgrades.size():
 		var need: int = upgrades[i]["requires"]
+		var key: String = upgrades[i].get("branch", "")
+		if key == "center":  # 가운데 '어둠의 계약'이 데이터에 있으면 가운데 원 자리
+			result.append(Vector2i.ZERO)
+			dirs.append(Vector2i.ZERO)
+			continue
 		var dir: Vector2i
 		var from := Vector2i.ZERO
-		if need < 0:
-			var key: String = upgrades[i].get("branch", ORDER[roots % ORDER.size()])
-			dir = DIRECTIONS.get(key, Vector2i(0, -1))
+		if need < 0 or dirs[need] == Vector2i.ZERO:  # 갈래의 첫 칸: 자기 branch, 없으면 순서대로
+			dir = DIRECTIONS.get(key if not key.is_empty() else ORDER[roots % ORDER.size()], Vector2i(0, -1))
 			roots += 1
 		else:
-			dir = dirs[need]
+			dir = DIRECTIONS.get(key, dirs[need])  # branch가 있으면 거기서 꺾는다
 			from = result[need]
 		var cell := _free_cell(from, dir, taken)
 		taken[cell] = true

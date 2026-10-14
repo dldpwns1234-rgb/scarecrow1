@@ -23,6 +23,7 @@ const REVEAL_SECONDS: float = 0.35
 
 var pan: Vector2 = Vector2.ZERO   # 가운데 노드가 판 가운데에서 얼마나 옮겨졌는지
 var selected_index: int = -1
+var center_index: int = -1        # 데이터에 어둠의 계약(branch "center")이 있으면 그 번호. 가운데 원이 그 카드 노릇을 한다
 var _cells: Array[Vector2i] = []
 var _cards: Array[Button] = []
 var _shown: Array[bool] = []
@@ -36,6 +37,10 @@ func _ready() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_cells = TreeLayout.cells(Balance.UPGRADES)
+	for i in Balance.UPGRADES.size():
+		if Balance.UPGRADES[i].get("branch", "") == "center":
+			center_index = i
+			selected_index = i
 	_center_label = Label.new()
 	_center_label.text = "어둠의\n계약"
 	_center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -72,7 +77,7 @@ func refresh(texts: PackedStringArray, styles: PackedStringArray, tints: Array[C
 		card.text = texts[i]
 		card.theme_type_variation = styles[i]
 		card.self_modulate = tints[i]
-		var show := _is_revealed(i)
+		var show := _is_revealed(i) and i != center_index  # 가운데 줄은 원으로 그린다
 		if show and not _shown[i]:
 			_reveal(card)
 		card.visible = show
@@ -111,12 +116,12 @@ func _draw() -> void:
 		if not _cards[i].visible:
 			continue
 		var need := Balance.upgrade_requires(i)
-		var from := center if need < 0 else _card_center(need)
+		var from := center if need < 0 or need == center_index else _card_center(need)
 		var bought := need < 0 or Upgrades.level(need) > 0
 		draw_line(from, _card_center(i), LINE_OPEN if bought else LINE_DIM, LINE_WIDTH)
 	draw_circle(center, CENTER_RADIUS, CENTER_FILL)
 	draw_arc(center, CENTER_RADIUS, 0.0, TAU, 48, CENTER_RING, LINE_WIDTH)
-	if selected_index < 0:
+	if selected_index < 0 or selected_index == center_index:
 		draw_arc(center, CENTER_RADIUS + SELECT_MARGIN * 1.5, 0.0, TAU, 48, SELECT_COLOR, LINE_WIDTH)
 	elif _cards[selected_index].visible:
 		draw_rect(Rect2(_card_center(selected_index) - CARD_SIZE * 0.5, CARD_SIZE).grow(SELECT_MARGIN), SELECT_COLOR, false, LINE_WIDTH)
@@ -148,7 +153,7 @@ func _gui_input(event: InputEvent) -> void:
 
 func _tap(point: Vector2) -> void:
 	if point.distance_to(center_point()) <= CENTER_RADIUS:
-		_choose(-1)
+		_choose(center_index)
 		return
 	for i in _cards.size():
 		if _cards[i].visible and Rect2(_cards[i].position, CARD_SIZE).has_point(point):
