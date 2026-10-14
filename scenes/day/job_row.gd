@@ -1,9 +1,10 @@
 extends PanelContainer
 ## 아지트의 일자리 한 줄 (hideout.gd): 그림, 이름·효과(맞는 일꾼), 칸(일하는 일꾼 토큰과 빈 칸), 헛간 확장 버튼.
-## 일꾼 토큰을 끌어 놓거나(_drop_data), 일꾼을 고른 뒤 줄을 누르면(pressed) 그 일자리에 놓는다. 표시는 hideout이 refresh()로 시킨다. 상수는 배치용이다
+## 일꾼 토큰을 끌어 놓거나(dropped), 일꾼을 고른 뒤 줄을 누르면(pressed) hideout이 그 일자리에 놓는다 (칸이 차 있으면 자리를 바꾼다). 표시는 hideout이 refresh()로 시킨다. 상수는 배치용이다
 
 signal pressed(job: int)
 signal token_tapped(worker: int)
+signal dropped(worker: int, job: int)
 
 const WorkerToken := preload("res://scenes/day/worker_token.gd")
 const KoreanText := preload("res://scenes/ui/korean_text.gd")
@@ -102,6 +103,14 @@ func refresh(selected: int) -> void:
 		empty.add_theme_stylebox_override("panel", style)
 		empty.custom_minimum_size = WorkerToken.SIZE
 		empty.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var plus := Label.new()  # 빈 칸 표시 (여기에 놓을 수 있다)
+		plus.text = "+"
+		plus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		plus.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		plus.add_theme_color_override("font_color", NOTE_COLOR)
+		plus.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		plus.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		empty.add_child(plus)
 		_slots.add_child(empty)
 		_tokens.append(empty)
 	var maxed := Workers.extra_slots[job] >= Balance.MAX_EXTRA_SLOTS
@@ -121,4 +130,4 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	Workers.assign(int((data as Dictionary)["worker"]), job)
+	dropped.emit(int((data as Dictionary)["worker"]), job)

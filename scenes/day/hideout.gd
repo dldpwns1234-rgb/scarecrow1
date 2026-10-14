@@ -1,6 +1,7 @@
 extends VBoxContainer
 ## 낮 화면 오른쪽 [아지트] 칸 (GDD 8절 M2, 대화방 #419): 일자리 세 줄(job_row.gd)과 아래의 쉬는 일꾼 줄.
-## 일꾼 토큰(worker_token.gd)을 끌어 일자리 줄에 놓거나, 토큰을 눌러 고른 뒤 일자리 줄을 누른다. 쉬는 줄에 놓거나 고른 뒤 쉬는 줄을 누르면 쉬게 한다.
+## 일꾼 토큰(worker_token.gd)을 끌어 일자리 줄에 놓거나, 토큰을 눌러 고른 뒤 일자리 줄을 누른다. 칸이 다 찼으면 그 자리의 일꾼과 바꾼다
+## (방장 2026-10-14: 까악이를 놓은 뒤 허수아비를 같은 일자리에 놓으면 아무 반응이 없었다). 쉬는 줄에 놓거나 고른 뒤 쉬는 줄을 누르면 쉬게 한다.
 ## Workers의 함수만 부르고 workers_changed를 받아 다시 그린다. 상수는 배치용이다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -20,6 +21,7 @@ var _rest: HBoxContainer
 var _rest_panel: PanelContainer
 var _hint: Label
 var _selected: int = -1  # 고른 일꾼 (누르고 놓기)
+var _notice: String = ""  # 다음 그리기에 한 번 보일 알림 (자리를 바꿨다)
 
 
 func _ready() -> void:
@@ -31,6 +33,7 @@ func _ready() -> void:
 		row.custom_minimum_size = Vector2(0.0, ROW_HEIGHT)
 		row.pressed.connect(_on_job_pressed)
 		row.token_tapped.connect(_on_token_tapped)
+		row.dropped.connect(_place)
 		add_child(row)
 		_rows.append(row)
 	_rest_panel = PanelContainer.new()
@@ -78,7 +81,10 @@ func _refresh() -> void:
 			_rest.add_child(token)
 			token.set_selected(w == _selected)
 			resting += 1
-	if _selected >= 0:
+	if not _notice.is_empty():
+		_hint.text = _notice
+		_notice = ""
+	elif _selected >= 0:
 		var name := Workers.worker_name(_selected)
 		_hint.text = "%s%s 놓을 일자리를 누른다 (쉬는 줄을 누르면 쉰다)" % [name, KoreanText.particle(name, "을", "를")]
 	elif Workers.worker_count() == 0:
@@ -97,8 +103,28 @@ func _on_job_pressed(job: int) -> void:
 		return
 	var worker := _selected
 	_selected = -1
-	if not Workers.assign(worker, job):
-		_refresh()  # 칸이 다 찼다
+	_place(worker, job)
+
+
+## 일꾼을 일자리에 놓는다. 칸이 다 찼으면 그 자리의 첫 일꾼과 바꾼다 (그 일꾼은 옮겨 온 자리로, 쉬던 일꾼이면 쉬는 줄로)
+func _place(worker: int, job: int) -> void:
+	if Workers.worker_job(worker) == job or Workers.assign(worker, job):
+		return
+	var from := Workers.worker_job(worker)
+	var occupant := -1
+	for w in Workers.worker_count():
+		if Workers.worker_job(w) == job:
+			occupant = w
+			break
+	if occupant < 0:
+		return
+	Workers.unassign(occupant)
+	Workers.assign(worker, job)
+	if from >= 0:
+		Workers.assign(occupant, from)
+	var name := Workers.worker_name(occupant)
+	_notice = "%s%s 자리를 바꿨다" % [name, KoreanText.particle(name, "과", "와")]
+	_gate.queue()
 
 
 func _on_rest_input(event: InputEvent) -> void:
