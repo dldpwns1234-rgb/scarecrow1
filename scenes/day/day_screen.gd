@@ -1,9 +1,9 @@
 extends MarginContainer
-## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·휴식·밤 기록과 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_list.gd).
+## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·휴식·밤 기록과 '밤으로 나가기', 오른쪽에 업그레이드 나무(upgrade_tree.gd).
 ## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 상수는 배치용이다.
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
-const UpgradeList := preload("res://scenes/day/upgrade_list.gd")
+const UpgradeTree := preload("res://scenes/day/upgrade_tree.gd")
 const PORTRAIT := preload("res://icon.svg")
 
 const MARGIN: int = 24
@@ -33,7 +33,7 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", GAP)
 	add_child(row)
 	row.add_child(_make_left())
-	var list := UpgradeList.new()
+	var list := UpgradeTree.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(list)
 	Game.rest_changed.connect(_gate.queue)
