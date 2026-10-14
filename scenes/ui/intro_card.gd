@@ -23,11 +23,13 @@ const CROW_FEET := Vector2(0.5, 0.74)  # 까마귀 그림에서 발 자리 (비�
 const TEXT_FONT_SIZE: int = 30
 const FADE_SECONDS: float = 0.4
 const BUTTON_SIZE := Vector2(260, 72)
+const TEXT_HEIGHT: float = 130.0
 
 var _line: int = 0
 var _text: Label
 var _crow: TextureRect
 var _next: Button
+var _scarecrow: TextureRect
 
 
 func _ready() -> void:
@@ -39,30 +41,37 @@ func _ready() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
-	var scarecrow := _figure(SCARECROW, FIGURE_SIZE)
-	scarecrow.position = Vector2(0.5, 0.34) * get_viewport_rect().size - FIGURE_SIZE * 0.5
-	add_child(scarecrow)
+	_scarecrow = _figure(SCARECROW, FIGURE_SIZE)
+	add_child(_scarecrow)
 	_crow = _figure(CROW, CROW_SIZE)
 	_crow.modulate = CROW_TINT
-	_crow.position = scarecrow.position + SHOULDER * FIGURE_SIZE - CROW_FEET * CROW_SIZE
 	_crow.visible = false
 	add_child(_crow)
 	_text = Label.new()
 	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.add_theme_font_size_override("font_size", TEXT_FONT_SIZE)
-	_text.size = Vector2(get_viewport_rect().size.x * 0.8, 130)
-	_text.position = Vector2(get_viewport_rect().size.x * 0.1, get_viewport_rect().size.y * 0.6)
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_text)
 	_next = Button.new()
 	_next.custom_minimum_size = BUTTON_SIZE
 	_next.size = BUTTON_SIZE
-	_next.position = Vector2((get_viewport_rect().size.x - BUTTON_SIZE.x) * 0.5, get_viewport_rect().size.y * 0.82)
 	_next.pressed.connect(_advance)
 	add_child(_next)
 	_show_line()
 	Story.story_changed.connect(_on_story_changed)
+	resized.connect(_layout)
+	_layout()
+
+
+## 화면 크기에 맞춰 놓는다. 웹은 켜진 뒤 캔버스 크기가 바뀌고 폰마다 비율이 달라서(aspect expand) 크기가 바뀔 때마다 다시 놓는다
+func _layout() -> void:
+	var area := size if size.x > 0.0 else get_viewport_rect().size
+	_scarecrow.position = Vector2(0.5, 0.34) * area - FIGURE_SIZE * 0.5
+	_crow.position = _scarecrow.position + SHOULDER * FIGURE_SIZE - CROW_FEET * CROW_SIZE
+	_text.size = Vector2(area.x * 0.8, TEXT_HEIGHT)
+	_text.position = Vector2(area.x * 0.1, area.y * 0.6)
+	_next.position = Vector2((area.x - BUTTON_SIZE.x) * 0.5, area.y * 0.82)
 
 
 func _on_story_changed() -> void:
