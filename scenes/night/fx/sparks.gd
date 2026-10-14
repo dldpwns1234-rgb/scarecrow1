@@ -31,9 +31,9 @@ func _on_withered(index: int) -> void:
 	_spawn(field.call("cell_screen", index), PER_WITHER, SPEED, -PI * 0.85, -PI * 0.15)
 
 
-## 풍작: 한 점에서 사방으로 크게
-func burst_at(at: Vector2) -> void:
-	_spawn(at, PER_BURST, BURST_SPEED, 0.0, TAU)
+## 풍작: 한 점에서 사방으로 크게. scale은 알갱이 수 배율 (그 밤의 풍작이 거듭될수록 커진다)
+func burst_at(at: Vector2, scale: float = 1.0) -> void:
+	_spawn(at, roundi(PER_BURST * scale), BURST_SPEED * sqrt(scale), 0.0, TAU)
 
 
 func _spawn(at: Vector2, count: int, speed: Vector2, angle_from: float, angle_to: float) -> void:
