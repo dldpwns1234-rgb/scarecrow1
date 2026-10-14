@@ -85,7 +85,7 @@ func _draw() -> void:
 		if Night.is_stunned(f):
 			continue  # 멈춘 이는 약을 못 친다
 		var kind := Night.farmer_kinds[f]
-		var radii := Iso.ellipse_radii(Balance.guardian_radius(kind))
+		var radii := Iso.ellipse_radii(Night.guard_radius(f))  # 썩은 약통이 줄인 둘레
 		var goddess := kind == Balance.Guardian.GODDESS
 		var center := Iso.to_screen(origin, Night.farmers[f])
 		var points := PackedVector2Array()

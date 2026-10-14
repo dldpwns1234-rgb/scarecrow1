@@ -49,10 +49,12 @@ func _test_plant() -> void:
 	_close(Night.max_hp[wheat], Balance.crop_hp(Balance.Crop.WHEAT, 1), "밀 체력")
 	_close(Balance.crop_hp(Balance.Crop.WHEAT, 3), 10.0 * pow(Balance.FIELD_HP_GROWTH, 2), "밭 단계마다 체력 ×성장")
 	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 2), 12.0 * Balance.FIELD_VITALITY_GROWTH, "밭 단계마다 생기 ×성장")
-	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * 1.5 * 1.5, "비옥한 어둠: 체력 ×1.5씩")
-	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), 1.7 * 1.7, "비옥한 어둠: 생기 ×1.7씩")
+	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * pow(Balance.FERTILE_HP, 2), "비옥한 어둠: 체력 ×배율씩")
+	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), pow(Balance.FERTILE_VITALITY, 2), "비옥한 어둠: 생기 ×배율씩")
 	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 12.0 * 2.0, "탐스러운 호박: 호박 생기 +25%씩")
-	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0, "탐스러운 호박은 밀에는 안 듣는다")
+	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0 + float(Balance.CROPS[Balance.Crop.WHEAT]["bonus_step"]) * 4, "누런 밀은 밀 생기를 올린다")
+	_equal(Balance.crop_bonus_upgrade(Balance.Crop.PUMPKIN), Balance.Upgrade.PUMPKIN, "호박 생기는 탐스러운 호박")
+	_equal(Balance.crop_bonus_upgrade(Balance.Crop.SUNFLOWER), -1, "해바라기 칸은 생기가 아니라 씨앗을 키운다")
 	for level: int in [1, 5, 100]:
 		var weights := Balance.crop_weights(level, 10)
 		var total := 0.0

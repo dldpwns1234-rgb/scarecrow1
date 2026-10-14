@@ -53,6 +53,7 @@ func _grow(index: int) -> void:
 	hp[index] = max_hp[index]
 	infected[index] = 0
 	regrow_left[index] = 0.0
+	regrown[index] = 0
 	crops_total += 1
 
 
@@ -62,7 +63,7 @@ func _pick_crop(index: int) -> int:
 	if rng.randf() < Balance.golden_chance(Upgrades.level(Balance.Upgrade.GOLDEN)):
 		return Balance.Crop.GOLDEN
 	var follow := _cluster_neighbor(index)
-	if follow >= 0 and rng.randf() < Balance.cluster_chance(follow):
+	if follow >= 0 and rng.randf() < Balance.cluster_chance(follow, Upgrades.level(Balance.Upgrade.TURNIP)):
 		return follow
 	var weights := Balance.crop_weights(field_level, Upgrades.level(Balance.Upgrade.PUMPKIN))
 	for crop in weights.size():
@@ -90,4 +91,5 @@ func _tick_regrow(dt: float) -> void:
 		regrow_left[i] -= dt
 		if regrow_left[i] <= 0.0:
 			_grow(i)
+			regrown[i] = 1
 			crop_regrown.emit(i)

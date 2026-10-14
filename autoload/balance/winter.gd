@@ -4,13 +4,15 @@ extends "res://autoload/balance/workers.gd"
 ## 비용 1·2·3…에 ×2 배율이면 첫 겨울잠의 199조각으로 피해·생기가 ×4천씩 붙어 둘째 철이 78단계까지 내달렸다
 
 const WINTER_MIN_LEVEL: int = 12        # 겨울잠 조건: 열린 밭 단계 12 이상 (봇은 17분쯤)
-const SHARD_BASE: float = 3.0           # 꿈 조각 = 내림(3 × 1.3^(열린 단계 − 12)): 12단계 3, 20단계 24, 25단계 90, 30단계 340
-const SHARD_GROWTH: float = 1.3
+const SHARD_BASE: float = 10.0          # 꿈 조각 = 내림(10 × 1.09^(열린 단계 − 12)): 12단계 10, 45단계 170, 80단계 3500
+## 옛 3 × 1.3^n이면 첫 겨울잠(78단계)에 조각 1억 개로 깊은 잠·꿈속 수확을 25레벨씩 사서 둘째 철부터 숫자가 다시 폭발했다 (방장 2026-10-15 #529).
+## 꿈 배율이 단계마다 붙는 빠르기(ln 1.6 × ln 조각 성장 / ln 꿈 비용 성장 ≈ 0.10)가 벽 기울기보다 작으면 철마다 덜 가고, 크면 철마다 더 간다 (docs/BALANCE_SIM.md)
+const SHARD_GROWTH: float = 1.09
 
 enum Dream { DEEP_SLEEP, DREAM_HARVEST, WINTER_SEED, HANDS, DREAM_CROW, SLEEPWALK }
 const DREAMS: Array[Dictionary] = [
-	{"name": "깊은 잠", "note": "구름 피해 ×1.6", "max_level": 0, "base_cost": 1.0, "growth": 2.0},
-	{"name": "꿈속 수확", "note": "생기 ×1.6", "max_level": 0, "base_cost": 1.0, "growth": 2.0},
+	{"name": "깊은 잠", "note": "구름 피해 ×1.6", "max_level": 0, "base_cost": 1.0, "growth": 1.48},
+	{"name": "꿈속 수확", "note": "생기 ×1.6", "max_level": 0, "base_cost": 1.0, "growth": 1.48},
 	{"name": "겨울 씨앗", "note": "겨울잠 뒤 밭 3단계를 더 열고 시작", "max_level": 5, "base_cost": 2.0, "growth": 2.0},
 	{"name": "기억하는 손", "note": "겨울잠 뒤 넓은 구름·긴 밤·빽빽한 밭을 1레벨씩 들고 시작", "max_level": 5, "base_cost": 1.0, "growth": 1.8},
 	{"name": "꿈의 까마귀", "note": "까마귀 +1 (어둠의 나무와 따로)", "max_level": 3, "base_cost": 5.0, "growth": 3.0},

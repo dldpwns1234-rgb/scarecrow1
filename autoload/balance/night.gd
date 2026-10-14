@@ -13,7 +13,7 @@ const DUSK_TICK_CUT: float = 0.05      # 어스름: 레벨당 박자 간격 −5
 const CLOUD_BASE_RADIUS: float = 1.0   # 칸
 const CLOUD_RADIUS_PER_LEVEL: float = 0.1   # 넓은 구름: 레벨당 기본 반경의 +10%
 const CLOUD_BASE_DPS: float = 6.0      # 원 안 작물 하나가 받는 초당 피해 (밀이 2초 안에 시든다)
-const TOXIN_MULTIPLIER: float = 1.3    # 독한 포자: 레벨당 구름 피해 ×1.3 (복리)
+const TOXIN_MULTIPLIER: float = 1.3  # 독한 포자: 레벨당 구름 피해 배율 (복리). 비용(×1.38)과 함께 벽을 만드는 칸이라 옛 값 그대로
 
 const SPREAD_PER_LEVEL: float = 0.05   # 번지는 곰팡이: 시든 작물이 옆 칸(상하좌우)마다 번질 확률 +5%p
 const ROT_BASE_SHARE: float = 0.3      # 번짐에 걸린 작물이 받는 초당 피해 = 구름 피해 × (0.3 + 썩은 뿌리 0.15/레벨)

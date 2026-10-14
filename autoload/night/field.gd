@@ -13,6 +13,8 @@ var infected: PackedByteArray     # 번짐에 걸린 작물이면 1
 var crops_total: int = 0          # 이번 밤에 심긴 작물 수 (다시 자란 것 포함)
 var first_planted: int = 0        # 밤이 시작할 때 심긴 수. 밭 정복의 기준
 var regrow_left: PackedFloat64Array  # 시든 칸이 다시 자라기까지 남은 초 (0이면 안 자란다)
+var regrown: PackedByteArray      # 다시 자라는 뿌리로 다시 자란 작물이면 1 (무성한 뿌리)
+var _kill_bonus: float = 1.0      # 지금 치는 쪽이 주는 생기 배율 (까마귀가 쪼는 동안 썩은 고기)
 var withered: int = 0             # 이번 밤에 시든 작물 수
 var cloud: Vector2 = Vector2.ZERO  # 역병 구름 가운데 (격자 단위)
 var rng := RandomNumberGenerator.new()  # 밭 배치·번짐·까마귀. 시뮬레이션과 테스트는 시드를 고정한다
@@ -91,11 +93,23 @@ func neighbors(index: int) -> Array[int]:
 	return result
 
 
-## 이 칸의 작물을 시들게 하면 받는 생기 (수확일·썩은 냄새·꿈속 수확 배율 포함)
-func crop_vitality(index: int) -> float:
-	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(Balance.Upgrade.PUMPKIN))
+## 이 칸의 작물을 시들게 하면 받는 생기 (그 작물의 칸·수확일·썩은 냄새·꿈속 수확 배율 포함).
+## rotten이면 번진 채 시들었다 (끈적한 포자). 다시 자란 작물(무성한 뿌리), 까마귀가 쪼아 시든 작물(썩은 고기), 물결의 기세도 곱한다
+func crop_vitality(index: int, rotten: bool = false) -> float:
+	var bonus := Balance.crop_bonus_upgrade(kinds[index])
+	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(bonus) if bonus >= 0 else 0)
 	value *= Balance.harvest_vitality(field_level, Upgrades.level(Balance.Upgrade.BOUNTY)) * Winter.vitality_multiplier()
-	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)))
+	value *= Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * _kill_bonus * _wave_multiplier()
+	if rotten:
+		value *= Balance.sticky_multiplier(Upgrades.level(Balance.Upgrade.STICKY))
+	if index < regrown.size() and regrown[index] == 1:
+		value *= Balance.roots_multiplier(Upgrades.level(Balance.Upgrade.ROOTS))
+	return Balance.cap(value)
+
+
+## night/waves.gd가 채운다 (물결의 기세)
+func _wave_multiplier() -> float:
+	return 1.0
 
 
 func _clear_field() -> void:
@@ -111,6 +125,8 @@ func _clear_field() -> void:
 	infected.resize(cell_count())
 	regrow_left = PackedFloat64Array()
 	regrow_left.resize(cell_count())
+	regrown = PackedByteArray()
+	regrown.resize(cell_count())
 	crops_total = 0
 	first_planted = 0
 	withered = 0

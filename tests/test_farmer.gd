@@ -150,13 +150,17 @@ func _test_guardians() -> void:
 	var G := Balance.Guardian
 	_equal(Balance.guardians(4), [] as Array[int], "4단계엔 아무도 없다")
 	_equal(Balance.guardians(7), [G.FARMER] as Array[int], "7단계: 농부")
-	_equal(Balance.guardians(41), [G.INSPECTOR, G.INSPECTOR, G.INSPECTOR] as Array[int], "40단계부터 감독관")
-	_equal(Balance.guardians(91)[0], G.OFFICIAL, "90단계부터 관리")
-	_equal(Balance.guardians(150).back(), G.GODDESS, "150단계 수확일: 마지막 한 명이 여신")
-	_equal(Balance.guardians(151).has(G.GODDESS), false, "수확일이 아니면 여신이 없다")
-	_equal(Balance.guardians(145).has(G.GODDESS), false, "150 전 수확일엔 여신이 없다")
+	var inspector := int(Balance.GUARDIANS[G.INSPECTOR]["from"])
+	var official := int(Balance.GUARDIANS[G.OFFICIAL]["from"])
+	var goddess := int(Balance.GUARDIANS[G.GODDESS]["from"])  # 수확일(5의 배수)에 맞춰 둔다
+	_equal(Balance.guardians(inspector + 1)[0], G.INSPECTOR, "%d단계부터 감독관" % inspector)
+	_equal(Balance.guardians(inspector - 1)[0], G.FARMER, "그 전엔 농부")
+	_equal(Balance.guardians(official + 1)[0], G.OFFICIAL, "%d단계부터 관리" % official)
+	_equal(Balance.guardians(goddess).back(), G.GODDESS, "%d단계 수확일: 마지막 한 명이 여신" % goddess)
+	_equal(Balance.guardians(goddess + 1).has(G.GODDESS), false, "수확일이 아니면 여신이 없다")
+	_equal(Balance.guardians(goddess - 5).has(G.GODDESS), false, "%d 전 수확일엔 여신이 없다" % goddess)
 	_close(Balance.guardian_guard(G.GODDESS, 0), 0.3, "여신의 약이 가장 세다")
-	_start(150)
+	_start(goddess)
 	_equal(Night.farmer_kinds.back(), G.GODDESS, "밤에도 여신이 나온다")
 	var near := 5 * Night.field_size + 5
 	for f in Night.farmers.size():

@@ -20,6 +20,15 @@ func skill_level(skill: int) -> int:
 	return Upgrades.level(Balance.skill_upgrade(skill))
 
 
+## 스킬의 '센'·'잦은' 칸 레벨 (방장 2026-10-15 #529)
+func skill_power(skill: int) -> int:
+	return Upgrades.level(Balance.skill_power_upgrade(skill))
+
+
+func skill_often(skill: int) -> int:
+	return Upgrades.level(Balance.skill_often_upgrade(skill))
+
+
 func is_skill_unlocked(skill: int) -> bool:
 	return skill_level(skill) > 0
 
@@ -35,7 +44,7 @@ func use_skill(skill: int) -> bool:
 	var level := skill_level(skill)
 	charge[skill] = 0
 	rest_left[skill] = Balance.skill_rest(skill, level)
-	active_left[skill] = Balance.skill_duration(skill, level)
+	active_left[skill] = Balance.skill_duration(skill, level, skill_power(skill))
 	match skill:
 		Balance.Skill.STORM:
 			storm_pulsed.emit()
@@ -43,7 +52,7 @@ func use_skill(skill: int) -> bool:
 			if _crow_left.is_empty():
 				_summoned = Balance.FLOCK_SUMMONED
 				for i in _summoned:
-					_crow_left.append(Balance.CROW_INTERVAL * float(i + 1) / float(_summoned) / Balance.FLOCK_SPEED)
+					_crow_left.append(Balance.CROW_INTERVAL * float(i + 1) / float(_summoned) / Balance.flock_speed(skill_power(skill)))
 		Balance.Skill.SIGH:
 			_sigh(level)
 		Balance.Skill.TIDE:
@@ -63,7 +72,7 @@ func cloud_radius() -> float:
 
 ## 구름 피해: 역병 폭풍 동안 ×1.5
 func cloud_dps() -> float:
-	return Balance.cap(super() * (Balance.STORM_DAMAGE if is_skill_active(Balance.Skill.STORM) else 1.0))
+	return Balance.cap(super() * (Balance.storm_damage(skill_power(Balance.Skill.STORM)) if is_skill_active(Balance.Skill.STORM) else 1.0))
 
 
 ## 구름 박자 하나가 작물 hits개를 쳤다: 켜져 있지 않은 타수형마다 그만큼 차고, 다 차면 터진다 (몰린 곳을 칠수록 빨리 찬다)
@@ -72,7 +81,7 @@ func _count_cloud_hits(hits: int) -> void:
 		if not Balance.counts_hits(skill) or not is_skill_unlocked(skill) or is_skill_active(skill):
 			continue
 		charge[skill] += hits
-		if charge[skill] >= Balance.skill_need(skill, skill_level(skill)):
+		if charge[skill] >= Balance.skill_need(skill, skill_level(skill), skill_often(skill)):
 			use_skill(skill)
 
 
@@ -81,7 +90,7 @@ func _roll_wither_skills() -> void:
 	for skill in rest_left.size():
 		if not active or Balance.counts_hits(skill) or not is_skill_unlocked(skill) or is_skill_active(skill) or rest_left[skill] > 0.0:
 			continue
-		if rng.randf() < Balance.skill_chance(skill, skill_level(skill)):
+		if rng.randf() < Balance.skill_chance(skill, skill_level(skill), skill_often(skill)):
 			use_skill(skill)
 
 
@@ -121,7 +130,7 @@ func _end_skill(skill: int) -> void:
 
 
 func _crow_speed() -> float:
-	return Balance.FLOCK_SPEED if is_skill_active(Balance.Skill.FLOCK) else 1.0
+	return Balance.flock_speed(skill_power(Balance.Skill.FLOCK)) if is_skill_active(Balance.Skill.FLOCK) else 1.0
 
 
 func _veiled() -> bool:
@@ -130,9 +139,12 @@ func _veiled() -> bool:
 
 ## 짚돌이의 한숨: 구름 안 작물에 한꺼번에 (지키는 이의 약은 듣는다)
 func _sigh(level: int) -> void:
-	var damage := Balance.sigh_damage(cloud_dps(), level)
+	var damage := Balance.sigh_damage(cloud_dps(), level, skill_power(Balance.Skill.SIGH))
 	var radius := cloud_radius()
+	var wave := waves_cleared()
 	for i in kinds.size():
+		if waves_cleared() != wave:
+			return
 		if active and is_alive(i) and cell_position(i).distance_to(cloud) <= radius:
 			_damage(i, damage * guard(i))
 
@@ -143,7 +155,7 @@ func _tide(level: int) -> void:
 	for i in kinds.size():
 		if is_alive(i) and infected[i] == 0:
 			candidates.append(i)
-	var count := ceili(alive_count() * Balance.tide_share(level))
+	var count := ceili(alive_count() * Balance.tide_share(level, skill_power(Balance.Skill.TIDE)))
 	for _i in mini(count, candidates.size()):
 		var pick := rng.randi_range(0, candidates.size() - 1)
 		_infect(candidates[pick])
@@ -152,7 +164,7 @@ func _tide(level: int) -> void:
 
 ## 수확의 낫: 체력이 최대의 몫 아래로 준 작물을 밭 어디서든 쓰러뜨린다 (고른 뒤 친다: 도중에 정복하면 새 물결은 안 친다)
 func _reap(level: int) -> void:
-	var share := Balance.reap_share(level)
+	var share := Balance.reap_share(level, skill_power(Balance.Skill.REAP))
 	var picks: Array[int] = []
 	for i in kinds.size():
 		if is_alive(i) and hp[i] <= max_hp[i] * share:
@@ -167,8 +179,11 @@ func _reap(level: int) -> void:
 
 ## 썩은 비 한 번: 살아 있는 작물마다 (지키는 이의 약은 듣는다)
 func _rain(seconds: float) -> void:
-	var amount := Balance.rain_dps(cloud_dps(), skill_level(Balance.Skill.RAIN)) * seconds
+	var amount := Balance.rain_dps(cloud_dps(), skill_level(Balance.Skill.RAIN), skill_power(Balance.Skill.RAIN)) * seconds
+	var wave := waves_cleared()
 	for i in kinds.size():
+		if waves_cleared() != wave:
+			return
 		if active and is_alive(i):
 			_damage(i, amount * guard(i))
 

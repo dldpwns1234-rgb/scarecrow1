@@ -29,7 +29,7 @@ func _fling_seeds(index: int) -> void:
 		if is_alive(i) and infected[i] == 0 and cell_position(i).distance_to(at) <= Balance.SEED_RADIUS:
 			picks.append(i)
 	var targets := PackedInt32Array()
-	for _i in mini(Balance.SEED_COUNT, picks.size()):
+	for _i in mini(Balance.seed_count(Upgrades.level(Balance.Upgrade.SUNFLOWER)), picks.size()):
 		var pick := rng.randi_range(0, picks.size() - 1)
 		targets.append(picks[pick])
 		picks.remove_at(pick)
@@ -40,28 +40,29 @@ func _fling_seeds(index: int) -> void:
 		_infect(target)
 
 
-## 수박: 터져서 둘레의 작물마다 수박 최대 체력의 몫만큼 친다 (지키는 이의 약은 듣는다)
+## 수박: 터져서 둘레의 작물마다 구름 피해 몇 초 몫을 친다 (지키는 이의 약은 듣는다)
 func _burst(index: int) -> void:
 	var at := cell_position(index)
-	var amount := max_hp[index] * Balance.BURST_SHARE
+	var amount := Balance.burst_damage(cloud_dps(), Upgrades.level(Balance.Upgrade.MELON))
 	crop_burst.emit(index, Balance.BURST_RADIUS)
 	for i in kinds.size():
 		if i != index and is_alive(i) and cell_position(i).distance_to(at) <= Balance.BURST_RADIUS:
 			_damage(i, amount * guard(i))
 
 
-## 포도: 덩굴로 이어진 옆 포도가 제 최대 체력의 몫을 잃는다
+## 포도: 덩굴로 이어진 옆 포도가 구름 피해 몇 초 몫을 받는다
 func _snap_vine(index: int) -> void:
+	var amount := Balance.vine_damage(cloud_dps(), Upgrades.level(Balance.Upgrade.GRAPE))
 	for n in neighbors(index):
 		if is_alive(n) and kinds[n] == Balance.Crop.GRAPE:
 			chain_struck.emit(index, n)
-			_damage(n, max_hp[n] * Balance.VINE_SHARE * guard(n))
+			_damage(n, amount * guard(n))
 
 
-## 연쇄 시듦: 옆 작물마다 제 최대 체력의 몫을 잃는다
+## 연쇄 시듦: 옆 작물마다 구름 피해 몇 초 몫
 func _chain_from(index: int) -> void:
-	var share := Balance.chain_share(skill_level(Balance.Skill.CHAIN))
+	var amount := Balance.chain_damage(cloud_dps(), skill_level(Balance.Skill.CHAIN), skill_power(Balance.Skill.CHAIN))
 	for n in neighbors(index):
 		if is_alive(n):
 			chain_struck.emit(index, n)
-			_damage(n, max_hp[n] * share * guard(n))
+			_damage(n, amount * guard(n))

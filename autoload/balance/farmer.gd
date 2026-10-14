@@ -7,9 +7,9 @@ enum Guardian { FARMER, INSPECTOR, OFFICIAL, GODDESS }
 ## from: 나오는 밭 단계. speed 칸/초, radius 약 둘레(칸), guard 둘레 안 피해 배율, replant 다시 심는 간격(초)
 const GUARDIANS: Array[Dictionary] = [
 	{"name": "농부", "from": 5, "speed": 1.5, "radius": 1.5, "guard": 0.5, "replant": 4.0},
-	{"name": "농협 감독관", "from": 40, "speed": 1.6, "radius": 2.2, "guard": 0.45, "replant": 3.5},
-	{"name": "농업부 관리", "from": 90, "speed": 2.4, "radius": 1.8, "guard": 0.4, "replant": 2.0},
-	{"name": "풍년의 여신", "from": 150, "speed": 1.0, "radius": 3.0, "guard": 0.3, "replant": 1.0},  # 수확일 밤에만, 더하는 한 명이 여신
+	{"name": "농협 감독관", "from": 25, "speed": 1.6, "radius": 2.2, "guard": 0.45, "replant": 3.5},
+	{"name": "농업부 관리", "from": 45, "speed": 2.4, "radius": 1.8, "guard": 0.4, "replant": 2.0},
+	{"name": "풍년의 여신", "from": 70, "speed": 1.0, "radius": 3.0, "guard": 0.3, "replant": 1.0},  # 수확일 밤에만, 더하는 한 명이 여신
 ]
 const FARMER_FROM_LEVEL: int = 5         # 지키는 이가 나오는 밭 단계
 const FARMER_MORE_LEVELS: Array[int] = [15, 30]  # 이 단계부터 한 명씩 더
@@ -20,8 +20,8 @@ const FARMER_REPLANT_INTERVAL: float = 4.0
 const SEEP_PER_LEVEL: float = 0.1        # 스며드는 독: 레벨당 둘레 안 피해 배율 +0.1
 const RACKET_STUN_PER_LEVEL: float = 0.4 # 까마귀 소란: 쫄 때마다 지키는 이 하나가 레벨당 0.4초 멈춘다
 const HARVEST_INTERVAL: int = 5          # 5의 배수 단계가 수확일
-const HARVEST_HP: float = 3.0            # 수확일 작물 체력 ×3
-const HARVEST_VITALITY: float = 3.0      # 수확일 작물 생기 ×3
+const HARVEST_HP: float = 1.5  # 수확일 작물 체력 배율 (옛 ×3. 단계마다 체력이 덜 오르니 줄였다)
+const HARVEST_VITALITY: float = 2.0  # 수확일 작물 생기 배율 (보스 밤의 보상)
 const HARVEST_CLEAR_BONUS: float = 0.5   # 수확일을 정복하면 이번 밤 생기 +50%
 const BOUNTY_PER_LEVEL: float = 0.5      # 풍요의 저주: 레벨당 수확일 생기 +50% (더하기. ×1.5 복리면 첫 철에 200단계 끝까지 내달렸다)
 

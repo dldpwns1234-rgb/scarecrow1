@@ -81,26 +81,38 @@ func tick(dt: float) -> void:
 ## 밤 끝 몰아치기 동안은 구름 피해 두 배 (역병 폭풍 스킬은 night/skills.gd가 반경·피해를 키운다). 구름이 친 작물 수는 타수형 스킬이 센다
 func _pulse() -> void:
 	var dps := cloud_dps()
-	var hit := dps * _tick * (Balance.FRENZY_MULTIPLIER if in_frenzy() else 1.0)
+	var hit := dps * _tick * (Balance.frenzy_multiplier(Upgrades.level(Balance.Upgrade.FRENZY_POWER)) if in_frenzy() else 1.0)
+	if rng.randf() < Balance.double_chance(Upgrades.level(Balance.Upgrade.DOUBLE)):
+		hit *= 2.0  # 두 번 치는 구름
+	var echo := Balance.echo_share(Upgrades.level(Balance.Upgrade.ECHO))  # 메아리 포자: 둘레 한 칸 띠
 	var rot := Balance.rot_dps(dps, Upgrades.level(Balance.Upgrade.ROT)) * _tick
 	var radius := cloud_radius()
 	var struck := 0
+	var wave := waves_cleared()
 	pulsed.emit()
 	for i in kinds.size():
-		if not active:
-			return
+		if not active or waves_cleared() != wave:
+			return  # 이 박자에 정복했으면 새로 심긴 물결은 치지 않는다 (치면 한 박자에 물결 수십 개가 쓸렸다)
 		if not is_alive(i):
 			continue
 		var amount := 0.0
-		if cell_position(i).distance_to(cloud) <= radius:
+		var distance := cell_position(i).distance_to(cloud)
+		if distance <= radius:
 			amount += hit
 			struck += 1
+		elif echo > 0.0 and distance <= radius + Balance.ECHO_WIDTH:
+			amount += hit * echo
 		if infected[i] == 1:
 			amount += rot
 		if amount > 0.0:
 			_damage(i, amount * guard(i))
 	if struck > 0 and active:
 		_count_cloud_hits(struck)  # 타수형 스킬: 친 작물 하나가 한 타
+
+
+## 새벽 미루기: 밭을 정복할 때마다 밤이 늘어난다
+func _on_conquered() -> void:
+	time_left += Balance.dawn_seconds(Upgrades.level(Balance.Upgrade.DAWN))
 
 
 ## 새벽 전 몰아치기 중인지 (밤 끝 몇 초)

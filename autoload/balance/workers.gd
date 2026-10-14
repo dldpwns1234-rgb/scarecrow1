@@ -1,4 +1,4 @@
-extends "res://autoload/balance/skills.gd"
+extends "res://autoload/balance/branches.gd"
 ## Balance 2.7부: 아지트 일꾼 (GDD 8절 M2, 대화방 #419). 까마귀와 지친 허수아비를 일자리 칸에 놓는다.
 ## 일꾼은 밭 기록(겨울잠을 넘어 가장 높이 연 단계)과 겨울잠 횟수로 늘고, 일자리 칸은 헛간 확장(생기, 영구)으로 는다. 수치는 시뮬레이션으로 맞춘다
 
@@ -19,8 +19,8 @@ const DRY_PER_SHARE: float = 0.15          # 포자 말리기: 한 몫당 구름
 const CARRY_PER_SHARE: float = 0.01        # 생기 나르기: 한 몫당 초당 지난 밤 생기의 1%
 const BASE_SLOTS: int = 1                  # 일자리마다 처음 칸 수
 const MAX_EXTRA_SLOTS: int = 3             # 헛간 확장으로 늘릴 수 있는 칸
-const EXPAND_BASE_COST: float = 5000.0     # 확장 비용 = 5천 × 40^(그 일자리의 확장 횟수) 생기
-const EXPAND_GROWTH: float = 40.0
+const EXPAND_BASE_COST: float = 38.0  # 확장 비용 = 기본 × 성장^(그 일자리의 확장 횟수) 생기 (옛 5천 × 40^n을 상한 칸처럼 눌렀다)
+const EXPAND_GROWTH: float = 1.528
 
 
 func job_name(job: int) -> String:

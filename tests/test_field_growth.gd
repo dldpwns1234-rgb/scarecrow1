@@ -69,7 +69,7 @@ func _test_cluster() -> void:
 
 func _test_crop_habits() -> void:
 	_start(1)
-	# 수박: 둘레 1.5칸 작물마다 수박 최대 체력의 35%
+	# 수박: 둘레 1.5칸 작물마다 구름 피해 몇 초 몫
 	var melon := _cell(3, 3)
 	_set_crop(melon, Balance.Crop.WATERMELON)
 	for y in range(2, 6):
@@ -83,7 +83,7 @@ func _test_crop_habits() -> void:
 	Night.crop_burst.disconnect(on_burst)
 	_equal(bursts, [melon], "수박이 터진다")
 	var pumpkin_hp := Balance.crop_hp(Balance.Crop.PUMPKIN, 1)
-	_close(Night.hp[_cell(4, 4)], pumpkin_hp - Night.max_hp[melon] * Balance.BURST_SHARE, "대각선 옆 호박도 맞는다")
+	_close(Night.hp[_cell(4, 4)], pumpkin_hp - Balance.burst_damage(Night.cloud_dps(), 0), "대각선 옆 호박도 맞는다")
 	_close(Night.hp[_cell(5, 3)], pumpkin_hp, "두 칸 떨어진 호박은 멀쩡하다")
 	# 해바라기: 둘레의 작물 둘이 번짐에 걸린다
 	_start(1)
@@ -94,13 +94,13 @@ func _test_crop_habits() -> void:
 	for i in Night.cell_count():
 		infected += Night.infected[i]
 	_equal(infected, Balance.SEED_COUNT, "씨앗이 튀어 둘이 번진다")
-	# 포도: 이어진 옆 포도가 제 체력의 50%를 잃고, 그게 시들면 다음 포도로 이어진다
+	# 포도: 이어진 옆 포도가 구름 피해 몇 초 몫을 받고, 그게 시들면 다음 포도로 이어진다
 	_start(1)
 	for x in 4:
-		_set_crop(_cell(x, 1), Balance.Crop.GRAPE, 1.0 if x != 1 else 0.4)
+		_set_crop(_cell(x, 1), Balance.Crop.GRAPE, 1.0 if x != 1 else 0.2)
 	Night._damage(_cell(0, 1), Night.hp[_cell(0, 1)])
-	_equal(Night.is_alive(_cell(1, 1)), false, "체력이 반 아래인 옆 포도는 덩굴을 타고 시든다")
-	_close(Night.hp[_cell(2, 1)], Night.max_hp[_cell(2, 1)] * (1.0 - Balance.VINE_SHARE), "그다음 포도도 반을 잃는다")
+	_equal(Night.is_alive(_cell(1, 1)), false, "체력이 적게 남은 옆 포도는 덩굴을 타고 시든다")
+	_close(Night.hp[_cell(2, 1)], Night.max_hp[_cell(2, 1)] - Balance.vine_damage(Night.cloud_dps(), 0), "그다음 포도도 맞는다")
 	_close(Night.hp[_cell(3, 1)], Night.max_hp[_cell(3, 1)], "끊긴 덩굴 너머는 멀쩡하다")
 
 
@@ -151,7 +151,7 @@ func _test_chain() -> void:
 	Night._damage(_cell(3, 3), Night.hp[_cell(3, 3)])
 	Night.chain_struck.disconnect(on_chain)
 	_equal(hits.size(), 4, "옆 넷을 친다")
-	_close(Night.hp[_cell(4, 3)], Night.max_hp[_cell(4, 3)] * (1.0 - Balance.chain_share(1)), "제 체력의 30%")
+	_close(Night.hp[_cell(4, 3)], Night.max_hp[_cell(4, 3)] - Balance.chain_damage(Night.cloud_dps(), 1), "구름 피해 몇 초 몫")
 	# 연쇄로 정복하면 남은 일은 버리고, 새로 심긴 물결은 멀쩡하다
 	_start(1)
 	Upgrades.levels[Balance.Upgrade.CHAIN] = 1

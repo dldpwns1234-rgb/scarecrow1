@@ -27,10 +27,11 @@ func _damage(index: int, amount: float) -> void:
 
 ## 시듦: 생기를 주고 옆 칸으로 번지고, 다시 자라는 뿌리가 있으면 시계를 건다. 이번 물결에서 시든 수가 심은 수의 90%에 닿으면 밭 정복
 func _wither(index: int, spread: bool) -> void:
+	var rotten := infected[index] == 1
 	hp[index] = 0.0
 	infected[index] = 0
 	withered += 1
-	var gained := crop_vitality(index)
+	var gained := crop_vitality(index, rotten)
 	Game.add_vitality(gained)
 	crop_withered.emit(index, gained)
 	if _clearing:
@@ -52,6 +53,16 @@ func _wither(index: int, spread: bool) -> void:
 
 func waves_cleared() -> int:
 	return waves
+
+
+## 물결의 기세: 이번 밤에 정복한 물결 수만큼 생기가 오른다
+func _wave_multiplier() -> float:
+	return Balance.waves_multiplier(Upgrades.level(Balance.Upgrade.WAVES), waves)
+
+
+## night.gd가 채운다 (새벽 미루기: 정복하면 밤이 늘어난다)
+func _on_conquered() -> void:
+	pass
 
 
 ## 밭 정복에 필요한 시든 작물 수 (이번 물결)
@@ -89,8 +100,9 @@ func _clear() -> void:
 			_wither(i, false)
 	_clearing = false
 	if Balance.is_harvest(level):
-		Game.add_vitality((Game.night_haul - _wave_haul) * Balance.HARVEST_CLEAR_BONUS)
+		Game.add_vitality((Game.night_haul - _wave_haul) * Balance.harvest_clear_bonus(Upgrades.level(Balance.Upgrade.HARVEST_MOON)))  # 수확의 달이 더한다
 	_unlock_next()
+	_on_conquered()
 	waves += 1
 	field_cleared.emit(level)
 	_replant_wave()

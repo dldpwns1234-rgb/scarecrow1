@@ -8,7 +8,10 @@ func run() -> void:
 	var T: int = Balance.Upgrade.TOXIN
 	var N: int = Balance.Upgrade.LONG_NIGHT
 	_close(Balance.upgrade_cost(R, 0), 10.0, "넓은 구름 첫 비용")
-	_close(Balance.upgrade_cost(R, 1), 22.0, "다음 비용은 ×2.2")
+	_close(Balance.upgrade_cost(R, 1), floor(10.0 * float(Balance.UPGRADES[R]["growth"])), "다음 비용은 ×성장")
+	_equal(Balance.UPGRADES.size() >= 60, true, "어둠의 나무는 60칸 넘게 (방장 2026-10-15: 두세 배로)")
+	for i in Balance.UPGRADES.size():
+		_equal(Balance.upgrade_requires(i) < i, true, "%s: 앞 칸은 늘 앞 번호" % Balance.upgrade_name(i))
 	_equal(Upgrades.is_unlocked(R), true, "뿌리는 처음부터 열림")
 	_equal(Upgrades.is_unlocked(N), true, "긴 밤도 뿌리 (왼쪽 갈래)")
 	_equal(Upgrades.is_unlocked(T), false, "독한 포자는 넓은 구름이 있어야")
