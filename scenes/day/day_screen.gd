@@ -26,6 +26,7 @@ const TITLE_COLOR := Color("e9c46a")
 const REST_COLOR := Color("9ad14f")
 const NOTE_COLOR := Color("b8bcc8")
 const REST_FONT_SIZE: int = 40
+const CARRY_FONT_SIZE: int = 22
 const TITLE_FONT_SIZE: int = 28
 const DAY_SECONDS: float = 86400.0
 const YEAR_SECONDS: float = 31536000.0
@@ -34,6 +35,7 @@ const STORY_BUTTON_SIZE := Vector2(126, 48)
 
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
 var _rest: Label
+var _carry: Label  # 아지트의 생기 나르기 '+N/초' (없으면 빈칸)
 var _promise: Label  # 바친 생기로 어둠이 약속한 휴식 (Game.promised_rest_seconds)
 var _promise_bar: ProgressBar  # 백 년까지 (로그 눈금, Balance.promise_progress)
 var _record: Label
@@ -90,8 +92,16 @@ func _make_left() -> VBoxContainer:
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	column.add_child(portrait)
+	var vitality_row := HBoxContainer.new()
+	vitality_row.add_theme_constant_override("separation", GAP / 2)
+	column.add_child(vitality_row)
 	_rest = _label("", REST_FONT_SIZE, REST_COLOR)
-	column.add_child(_rest)
+	_rest.autowrap_mode = TextServer.AUTOWRAP_OFF
+	vitality_row.add_child(_rest)
+	_carry = _label("", CARRY_FONT_SIZE, REST_COLOR.darkened(0.25))
+	_carry.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_carry.size_flags_vertical = Control.SIZE_SHRINK_END
+	vitality_row.add_child(_carry)
 	_promise = _label("", 0, TITLE_COLOR)
 	column.add_child(_promise)
 	_promise_bar = ProgressBar.new()
@@ -127,7 +137,9 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 
 
 func _refresh() -> void:
+	var carry := Balance.carry_per_second(Game.last_haul, Workers.shares(Balance.Job.CARRY)) if Workers.is_open() else 0.0
 	_rest.text = "생기 %s" % Num.format(Game.vitality)
+	_carry.text = "+%s/초" % Num.format(carry) if carry > 0.0 else ""
 	var promise := Game.promised_rest_seconds()
 	_promise.text = "약속된 휴식  %s" % _long_duration(promise)
 	_promise_bar.value = Balance.promise_progress(promise)

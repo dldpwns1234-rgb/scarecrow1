@@ -1,6 +1,6 @@
 extends PanelContainer
 ## 밤이 끝나 낮으로 돌아오면 오른쪽(어둠의 나무) 위쪽 가운데에 잠깐 뜨는 결과 (왼쪽 위의 이야기·소리 버튼을 가리지 않게): "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
-## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 셋째 줄에 "겨울잠이 열렸다".
+## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 "겨울잠이 열렸다", 일꾼이 합류했으면 "아지트가 열렸다"나 "일꾼 합류: 이름"을 덧붙인다.
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
 
 const TOP: float = 20.0
@@ -18,6 +18,7 @@ var _clear: Label
 var _tween: Tween
 var _cleared_level: int = 0  # 이번 밤에 정복한 단계 (Night.field_cleared). 0이면 정복 못 함
 var _best_before: int = 1    # 밤이 시작될 때 열린 가장 높은 단계. 낮은 단계를 다시 정복하면 새로 열리는 단계가 없다
+var _workers_before: int = 0  # 밤이 시작될 때 일꾼 수 (정복으로 합류한 일꾼을 알린다)
 
 
 func _ready() -> void:
@@ -42,6 +43,7 @@ func _ready() -> void:
 func _on_night_started() -> void:
 	_cleared_level = 0
 	_best_before = Night.best_level
+	_workers_before = Workers.worker_count()
 
 
 func _line(color: Color) -> Label:
@@ -59,6 +61,12 @@ func _show_report(haul: float) -> void:
 		_clear.text += "  %d단계가 열렸다" % Night.best_level
 	if Winter.sleeps == 0 and _best_before < Balance.WINTER_MIN_LEVEL and Balance.can_winter(Night.best_level):
 		_clear.text += "\n겨울잠이 열렸다  ·  오른쪽 위 꿈의 상점"  # 첫 겨울잠 전에 한 번
+	if Workers.worker_count() > _workers_before:
+		var names := PackedStringArray()
+		for w in range(_workers_before, Workers.worker_count()):
+			names.append(Workers.worker_name(w))
+		var opened := "아지트가 열렸다  ·  " if _workers_before == 0 else ""
+		_clear.text += "\n%s일꾼 합류: %s" % [opened, ", ".join(names)]
 	reset_size()
 	size.x = WIDTH
 	position = Vector2(LEFT_SPAN + (get_parent_area_size().x - LEFT_SPAN - RIGHT_MARGIN - WIDTH) * 0.5, TOP)
