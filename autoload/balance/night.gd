@@ -7,7 +7,7 @@ const FIELD_SIZE: int = 12             # 밭 12 × 12칸
 const BASE_FILL: float = 0.3           # 첫 밭은 듬성듬성 (방장 2026-10-14: 구름을 어디로 끌지 고르는 재미)
 const FILL_PER_LEVEL: float = 0.07     # 빽빽한 밭: 레벨당 심는 비율 +7%p (10레벨이면 꽉 찬다)
 const CLEAR_RATIO: float = 0.9         # 시든 작물이 처음 심은 수의 이만큼에 닿으면 밭 정복 (다시 자란 작물이 시든 것도 친다. 남은 수로 재면 다시 자라기가 정복을 막았다)
-const MAX_FIELD_LEVEL: int = 200
+const MAX_FIELD_LEVEL: int = 800       # 작물 체력(10 × 2.2^(단계 − 1))이 1e300에 닿기 전 (봇은 일곱째 철에 200단계를 넘었다)
 
 enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN }
 const CROPS: Array[Dictionary] = [
@@ -47,6 +47,12 @@ const FEATHER_PER_LEVEL: float = 0.15  # 검은 깃털: 쪼인 작물이 번짐�
 
 const REGROW_BASE_DELAY: float = 15.0  # 다시 자라는 뿌리: 시든 칸에 이만큼(초) 뒤 새 작물 (레벨마다 ×0.9)
 const REGROW_DELAY_STEP: float = 0.9
+const STORM_BASE_INTERVAL: float = 10.0  # 역병 폭풍: 10초마다 (레벨마다 1초 빨리)
+const STORM_INTERVAL_CUT: float = 1.0
+const STORM_RADIUS: float = 2.0         # 폭풍 박자의 반경 배율
+const FRENZY_BASE_SECONDS: float = 5.0  # 새벽 전 몰아치기: 밤 끝 5초 (레벨마다 +1초) 동안
+const FRENZY_SECONDS_PER_LEVEL: float = 1.0
+const FRENZY_MULTIPLIER: float = 2.0
 const VITALITY_PER_LEVEL: float = 0.2  # 썩은 냄새: 레벨당 생기 +20% (더하기. 복리로 두면 독한 포자와 함께 수입이 비용을 앞질러 벽이 사라졌다)
 
 
@@ -130,6 +136,20 @@ func regrow_delay(regrow_level: int) -> float:
 	if regrow_level <= 0:
 		return 0.0
 	return REGROW_BASE_DELAY * pow(REGROW_DELAY_STEP, regrow_level - 1)
+
+
+## 역병 폭풍: 이만큼(초)마다 구름이 크게 친다 (0레벨이면 0, 없음)
+func storm_interval(storm_level: int) -> float:
+	if storm_level <= 0:
+		return 0.0
+	return STORM_BASE_INTERVAL - STORM_INTERVAL_CUT * (storm_level - 1)
+
+
+## 새벽 전 몰아치기: 밤 끝 이만큼(초) 동안 구름 피해 ×2 (0레벨이면 0)
+func frenzy_seconds(frenzy_level: int) -> float:
+	if frenzy_level <= 0:
+		return 0.0
+	return FRENZY_BASE_SECONDS + FRENZY_SECONDS_PER_LEVEL * (frenzy_level - 1)
 
 
 ## 생기 배율: 1 + 0.2 × 썩은 냄새

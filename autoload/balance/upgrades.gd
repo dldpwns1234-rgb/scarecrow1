@@ -5,7 +5,7 @@ extends "res://autoload/balance/core.gd"
 ## 효과의 공식은 balance/night.gd가 레벨을 받아 계산한다. 저장 순서라 새 업그레이드는 뒤에만 붙인다 (첫 배포 전에 한 번 다시 짰다, 2026-10-14).
 ## 상한 있는 칸은 비용이 가파르게(×2.2~4) 오른다: 완만하면 15분 안에 다 팔려 수입이 폭발했다 (docs/BALANCE_SIM.md)
 
-enum Upgrade { RADIUS, LONG_NIGHT, FERTILE, CROW, TOXIN, SPREAD, ROT, REGROW, DUSK, DENSE, ROT_VALUE, PUMPKIN, BEAK, FEATHER, RACKET, SEEP, GOLDEN }
+enum Upgrade { RADIUS, LONG_NIGHT, FERTILE, CROW, TOXIN, SPREAD, ROT, REGROW, DUSK, DENSE, ROT_VALUE, PUMPKIN, BEAK, FEATHER, RACKET, SEEP, GOLDEN, STORM, FRENZY, BOUNTY, CROW_KING }
 const UPGRADES: Array[Dictionary] = [
 	# 네 갈래의 뿌리
 	{"name": "넓은 구름", "note": "역병 구름 반경 +10%", "max_level": 10, "base_cost": 10.0, "growth": 2.2, "requires": -1, "branch": "up"},
@@ -30,6 +30,11 @@ const UPGRADES: Array[Dictionary] = [
 	{"name": "까마귀 소란", "note": "까마귀가 쫄 때마다 농부 하나가 0.4초 멈춘다 (멈춘 농부는 약을 못 친다)", "max_level": 5, "base_cost": 2000.0, "growth": 3.0, "requires": Upgrade.BEAK},
 	{"name": "스며드는 독", "note": "농부가 약 친 작물도 피해가 덜 줄어든다 (+10%p)", "max_level": 5, "base_cost": 3000.0, "growth": 3.0, "requires": Upgrade.ROT},
 	{"name": "황금 이삭", "note": "황금 작물이 더 자주 (+0.5%p). 황금 작물은 생기가 아주 많다", "max_level": 10, "base_cost": 500.0, "growth": 2.4, "requires": Upgrade.PUMPKIN},
+	# 갈래 끝 칸 (후반에 고를 거리)
+	{"name": "역병 폭풍", "note": "10초마다 구름이 두 배로 부풀어 한 번 크게 친다 (레벨마다 1초 빨리)", "max_level": 5, "base_cost": 1e5, "growth": 4.0, "requires": Upgrade.SEEP},
+	{"name": "새벽 전 몰아치기", "note": "밤 끝 5초 동안 구름 피해 ×2 (레벨마다 +1초)", "max_level": 5, "base_cost": 5e4, "growth": 4.0, "requires": Upgrade.DUSK},
+	{"name": "풍요의 저주", "note": "수확일 작물 생기 +50%", "max_level": 0, "base_cost": 2e4, "growth": 1.8, "requires": Upgrade.GOLDEN},
+	{"name": "까마귀 왕", "note": "까마귀가 생기가 많은 작물(황금 이삭·호박)부터 노린다", "max_level": 1, "base_cost": 2e5, "growth": 1.0, "requires": Upgrade.RACKET},
 ]
 
 

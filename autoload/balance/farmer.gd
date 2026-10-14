@@ -14,6 +14,7 @@ const HARVEST_INTERVAL: int = 5          # 5의 배수 단계가 수확일
 const HARVEST_HP: float = 3.0            # 수확일 작물 체력 ×3
 const HARVEST_VITALITY: float = 3.0      # 수확일 작물 생기 ×3
 const HARVEST_CLEAR_BONUS: float = 0.5   # 수확일을 정복하면 이번 밤 생기 +50%
+const BOUNTY_PER_LEVEL: float = 0.5      # 풍요의 저주: 레벨당 수확일 생기 +50% (더하기. ×1.5 복리면 첫 철에 200단계 끝까지 내달렸다)
 
 
 ## 이 밭 단계에 나오는 농부 수 (수확일이면 한 명 더)
@@ -47,6 +48,6 @@ func harvest_hp(field_level: int) -> float:
 	return HARVEST_HP if is_harvest(field_level) else 1.0
 
 
-## 수확일 작물 생기 배율
-func harvest_vitality(field_level: int) -> float:
-	return HARVEST_VITALITY if is_harvest(field_level) else 1.0
+## 수확일 작물 생기 배율 (풍요의 저주: 레벨마다 +50%, 더하기)
+func harvest_vitality(field_level: int, bounty_level: int = 0) -> float:
+	return HARVEST_VITALITY * (1.0 + BOUNTY_PER_LEVEL * bounty_level) if is_harvest(field_level) else 1.0

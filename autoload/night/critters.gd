@@ -67,23 +67,35 @@ func is_stunned(f: int) -> bool:
 	return f < _stun_left.size() and _stun_left[f] > 0.0
 
 
-## 까마귀 한 마리가 살아 있는 작물 하나를 쫀다 (아무 칸이나, 약은 안 듣는다). 검은 깃털이면 쪼인 작물이 번짐에 걸릴 수 있다
+## 까마귀 한 마리가 살아 있는 작물 하나를 쫀다 (아무 칸이나, 까마귀 왕이면 생기가 가장 많은 작물. 약은 안 듣는다). 검은 깃털이면 쪼인 작물이 번짐에 걸릴 수 있다
 func _peck() -> void:
+	var target := _crow_target()
+	if target < 0:
+		return
+	crow_pecked.emit(target)
+	_stun_farmer()
+	_damage(target, Balance.crow_damage(cloud_dps(), Upgrades.level(Balance.Upgrade.BEAK)))
+	if is_alive(target) and infected[target] == 0 and rng.randf() < Balance.feather_chance(Upgrades.level(Balance.Upgrade.FEATHER)):
+		_infect(target)
+
+
+func _crow_target() -> int:
 	var count := alive_count()
 	if count <= 0:
-		return
+		return -1
+	if Upgrades.level(Balance.Upgrade.CROW_KING) > 0:
+		var best := -1
+		for i in kinds.size():
+			if is_alive(i) and (best < 0 or crop_vitality(i) > crop_vitality(best)):
+				best = i
+		return best
 	var pick := rng.randi_range(0, count - 1)
 	for i in kinds.size():
-		if not is_alive(i):
-			continue
-		if pick == 0:
-			crow_pecked.emit(i)
-			_stun_farmer()
-			_damage(i, Balance.crow_damage(cloud_dps(), Upgrades.level(Balance.Upgrade.BEAK)))
-			if is_alive(i) and infected[i] == 0 and rng.randf() < Balance.feather_chance(Upgrades.level(Balance.Upgrade.FEATHER)):
-				_infect(i)
-			return
-		pick -= 1
+		if is_alive(i):
+			if pick == 0:
+				return i
+			pick -= 1
+	return -1
 
 
 ## 까마귀 소란: 농부 하나(무작위)를 멈춘다. 이미 멈춰 있으면 더 긴 쪽

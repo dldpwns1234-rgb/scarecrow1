@@ -12,12 +12,15 @@ const PUFF_SIZE: float = 0.45      # 덩이 반지름 = 타원 세로 반지름 
 const SPIN_SPEED: float = 0.6      # 덩이가 테두리를 도는 빠르기 (라디안/초)
 const PULSE_SCALE: float = 1.12
 const PULSE_DURATION: float = 0.22
+const STORM_DURATION: float = 0.45
+const FRENZY_FILL := Color(0.95, 0.45, 0.35, 0.35)
 const ELLIPSE_POINTS: int = 40
 const SPORE_RATE: int = 24          # 초당 떨어지는 포자
 
 var origin: Vector2 = Vector2.ZERO
 var _spin: float = 0.0
 var _pulse: float = 0.0  # 1에서 0으로 줄어드는 박자 빛
+var _storm: float = 0.0  # 역병 폭풍 박자의 빛 (1에서 0으로)
 var _spores: CPUParticles2D
 
 
@@ -37,6 +40,7 @@ func _ready() -> void:
 	_spores.position = Vector2(0.0, -24.0)
 	add_child(_spores)
 	Night.pulsed.connect(_on_pulsed)
+	Night.storm_pulsed.connect(func() -> void: _storm = 1.0)
 
 
 func _process(delta: float) -> void:
@@ -45,6 +49,7 @@ func _process(delta: float) -> void:
 		return
 	_spin += SPIN_SPEED * delta
 	_pulse = maxf(_pulse - delta / PULSE_DURATION, 0.0)
+	_storm = maxf(_storm - delta / STORM_DURATION, 0.0)
 	position = Iso.to_screen(origin, Night.cloud)
 	var radii := Iso.ellipse_radii(Night.cloud_radius())
 	_spores.emission_sphere_radius = radii.y
@@ -56,12 +61,15 @@ func _on_pulsed() -> void:
 
 
 func _draw() -> void:
-	var radii := Iso.ellipse_radii(Night.cloud_radius()) * lerpf(1.0, PULSE_SCALE, _pulse)
+	var radii := Iso.ellipse_radii(Night.cloud_radius()) * lerpf(1.0, PULSE_SCALE, _pulse) * lerpf(1.0, Balance.STORM_RADIUS, _storm)
 	var points := PackedVector2Array()
 	for i in ELLIPSE_POINTS:
 		var angle := TAU * i / ELLIPSE_POINTS
 		points.append(Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
-	draw_colored_polygon(points, FILL.lerp(PULSE_FILL, _pulse))
+	var fill := FILL.lerp(PULSE_FILL, _pulse)
+	if Night.in_frenzy():
+		fill = fill.lerp(FRENZY_FILL, 0.6)  # 새벽 전 몰아치기: 붉게 끓는다
+	draw_colored_polygon(points, fill)
 	points.append(points[0])
 	draw_polyline(points, RIM, 3.0, true)
 	var puff := radii.y * PUFF_SIZE

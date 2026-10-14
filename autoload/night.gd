@@ -9,6 +9,7 @@ signal crop_hit(index: int, hp: float, damage: float)  # 구름·번짐·까마�
 signal crop_withered(index: int, vitality: float)
 signal crop_infected(index: int)
 signal pulsed()                                        # 구름이 한 번 쳤다 (박자 연출)
+signal storm_pulsed()                                  # 그 박자가 역병 폭풍의 큰 박자였다 (pulsed 바로 앞에 난다)
 signal time_changed(seconds_left: float)
 signal field_cleared(level: int)                       # 밭 정복: 남은 작물이 쓰러지고 다음 단계가 열렸다. 정복한 단계를 넘긴다
 
@@ -16,6 +17,7 @@ var time_left: float = 0.0
 var cleared: bool = false          # 이번 밤에 밭을 정복했다
 var _pulse_left: float = 0.0
 var _tick: float = Balance.CLOUD_TICK  # 이번 밤의 박자 간격 (어스름)
+var _storm_left: float = 0.0           # 역병 폭풍까지 남은 초 (없으면 0)
 
 
 func _ready() -> void:
@@ -53,6 +55,7 @@ func begin(seed: int = -1) -> void:
 	time_left = Game.night_seconds()
 	_tick = Balance.cloud_tick(Upgrades.level(Balance.Upgrade.DUSK))
 	_pulse_left = _tick
+	_storm_left = Balance.storm_interval(Upgrades.level(Balance.Upgrade.STORM))
 	_setup_critters()
 	set_cloud(Vector2.ONE * Balance.FIELD_SIZE * 0.5)
 	night_started.emit()
@@ -65,9 +68,14 @@ func tick(dt: float) -> void:
 		return
 	time_left -= dt
 	_pulse_left -= dt
+	if _storm_left > 0.0:
+		_storm_left -= dt
 	while active and _pulse_left <= 0.0:
 		_pulse_left += _tick
-		_pulse()
+		var storm := _storm_left < 0.0
+		if storm:
+			_storm_left += Balance.storm_interval(Upgrades.level(Balance.Upgrade.STORM))
+		_pulse(storm)
 	_tick_regrow(dt)
 	_tick_critters(dt)
 	if not active:
@@ -77,12 +85,15 @@ func tick(dt: float) -> void:
 		_end()
 
 
-## 구름 박자: 원 안의 작물은 구름 피해, 번짐에 걸린 작물은 번짐 피해 (한 박자 몫). 농부 둘레 안은 절반
-func _pulse() -> void:
+## 구름 박자: 원 안의 작물은 구름 피해, 번짐에 걸린 작물은 번짐 피해 (한 박자 몫). 농부 둘레 안은 절반.
+## 역병 폭풍 박자는 반경 두 배, 밤 끝 몰아치기 동안은 구름 피해 두 배
+func _pulse(storm: bool = false) -> void:
 	var dps := cloud_dps()
-	var hit := dps * _tick
+	var hit := dps * _tick * (Balance.FRENZY_MULTIPLIER if in_frenzy() else 1.0)
 	var rot := Balance.rot_dps(dps, Upgrades.level(Balance.Upgrade.ROT)) * _tick
-	var radius := cloud_radius()
+	var radius := cloud_radius() * (Balance.STORM_RADIUS if storm else 1.0)
+	if storm:
+		storm_pulsed.emit()
 	pulsed.emit()
 	for i in kinds.size():
 		if not active:
@@ -96,6 +107,11 @@ func _pulse() -> void:
 			amount += rot
 		if amount > 0.0:
 			_damage(i, amount * guard(i))
+
+
+## 새벽 전 몰아치기 중인지 (밤 끝 몇 초)
+func in_frenzy() -> bool:
+	return active and time_left <= Balance.frenzy_seconds(Upgrades.level(Balance.Upgrade.FRENZY))
 
 
 func _damage(index: int, amount: float) -> void:

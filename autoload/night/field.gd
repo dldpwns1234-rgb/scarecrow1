@@ -120,7 +120,7 @@ func _unlock_next() -> void:
 ## 이 칸의 작물을 시들게 하면 받는 생기 (수확일·썩은 냄새·꿈속 수확 배율 포함)
 func crop_vitality(index: int) -> float:
 	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(Balance.Upgrade.PUMPKIN))
-	value *= Balance.harvest_vitality(field_level) * Winter.vitality_multiplier()
+	value *= Balance.harvest_vitality(field_level, Upgrades.level(Balance.Upgrade.BOUNTY)) * Winter.vitality_multiplier()
 	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)))
 
 
