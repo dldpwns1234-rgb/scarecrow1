@@ -80,8 +80,14 @@ func _on_story_changed() -> void:
 	_line = 0
 	_crow.visible = false
 	modulate.a = 1.0
+	_set_blocking(true)
 	visible = true
 	_show_line()
+
+
+func _set_blocking(on: bool) -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP if on else Control.MOUSE_FILTER_IGNORE
+	_next.mouse_filter = mouse_filter
 
 
 func _figure(texture: Texture2D, figure_size: Vector2) -> TextureRect:
@@ -104,6 +110,7 @@ func _gui_input(event: InputEvent) -> void:
 func _advance() -> void:
 	if _line >= LINES.size() - 1:
 		Story.mark_intro_seen()
+		_set_blocking(false)  # 사라지는 동안 누른 것은 아래 화면으로 간다 (웹은 페이드가 늦을 수 있다)
 		var tween := create_tween()
 		tween.tween_property(self, "modulate:a", 0.0, FADE_SECONDS)
 		tween.tween_callback(hide)
