@@ -31,8 +31,9 @@ jobs:
         run: |
           set -euo pipefail
           BASE="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
-          curl -fsSL -o godot.zip "${BASE}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          curl -fsSL -o templates.tpz "${BASE}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          # 내려받기가 가끔 끊겨 빌드가 실패했다(3ec1f1f). 다시 시도한다
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o godot.zip "${BASE}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o templates.tpz "${BASE}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           unzip -q godot.zip
           sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           sudo chmod +x /usr/local/bin/godot
