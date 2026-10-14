@@ -15,13 +15,16 @@
 ```
 res://
   autoload/
-    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(어둠의 나무) → night(밭·작물·구름·번짐·까마귀)
-                 → winter(겨울잠·꿈의 상점) → story(이야기 조각 10개의 조건·문안, 윤슬) → balance.gd(밤 길이, 약속된 휴식). 앞 스크립트는 뒤 스크립트의 것을 못 본다. 바깥에서는 Balance.만 쓴다
+    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(어둠의 나무) → crops(작물 종류) → night(밭·구름·번짐·까마귀)
+                 → farmer(지키는 이·수확일) → skills(밤 스킬) → workers(아지트 일꾼) → winter(겨울잠·꿈의 상점) → story(이야기 조각 10개의 조건·문안, 윤슬) → balance.gd(밤 길이, 약속된 휴식).
+                 앞 스크립트는 뒤 스크립트의 것을 못 본다. 바깥에서는 Balance.만 쓴다
     num.gd       (Num) 한국식 숫자 표기 (회귀 용사 그대로)
     upgrades.gd  (Upgrades) 어둠의 나무 레벨, 열림(앞 업그레이드), 구매
     game.gd      (Game) 낮·밤 전환, 생기(재화)와 바친 생기 합(약속된 휴식), 밤 기록. 밤 쪽은 작물이 시들면 add_vitality(), 시간이 끝나면 finish_night()를 부른다
-    night.gd     (Night) 밤 한 판의 규칙(밭·구름·번짐·까마귀·밭 단계). night/field.gd 등을 상속한다
+    night.gd     (Night) 밤 한 판의 규칙. night/ 아래를 상속으로 잇는다: levels(밭 단계·자동 넘김) → field(밭) → planting(심기) → critters(까마귀·지키는 이)
+                 → skills(밤 스킬) → crops(수박·해바라기·포도) → waves(시듦·정복·물결) → night.gd
     winter.gd    (Winter) 겨울잠(회귀)과 꿈 조각·꿈의 상점
+    workers.gd   (Workers) 아지트 일꾼: 까마귀·지친 허수아비의 일자리 배치와 효과, 헛간 확장
     story.gd     (Story) 첫 실행 장면을 봤는지, 이야기 조각의 열린 수(줄지 않는다)·본 수
     prefs.gd     (Prefs) 소리 켬/끔과 음량
     save.gd      (Save) 저장·불러오기·내보내기·가져오기·초기화. 저장할 오토로드를 늘리면 to_dict·from_dict·reset_data 세 곳을 함께 고친다. save/web_hooks.gd가 브라우저 이벤트로 저장한다
@@ -36,7 +39,7 @@ res://
   assets/fonts/  한글 폰트 (고도 기본 폰트에 한글이 없다)
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
-  tools/make_sfx.gd, make_music.gd  효과음 18개·배경음 3곡(day·night·harvest) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
+  tools/make_sfx.gd, make_music.gd  효과음 25개·배경음 3곡(day·night·harvest) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
   tests/run_tests.tscn  헤드리스 테스트 러너. test_case.gd를 상속한 스위트를 돌린다
   icon.svg       짚돌이 (아이콘이자 헛간 초상화)
 ```
