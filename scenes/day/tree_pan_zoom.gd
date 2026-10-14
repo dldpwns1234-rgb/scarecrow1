@@ -5,7 +5,7 @@ extends Control
 
 const TAP_SLOP: float = 18.0
 const PAN_MARGIN: float = 160.0   # 보이는 카드 바깥으로 이만큼까지만 끌린다
-const MIN_ZOOM: float = 0.3
+const MIN_ZOOM: float = 0.2     # 나무가 64칸을 넘어도 전체 보기에 다 들어오게 (방장 #529)
 const MAX_ZOOM: float = 1.25
 const WHEEL_STEP: float = 1.12    # 휠 한 칸에 줌이 이만큼 곱해진다
 const FIT_MARGIN: float = 40.0    # 전체 보기에서 가장자리 여백

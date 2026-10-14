@@ -7,8 +7,8 @@ extends "res://scenes/day/tree_pan_zoom.gd"
 signal selected(index: int)  # -1이면 가운데 (어둠의 계약)
 
 const TreeLayout := preload("res://scenes/day/tree_layout.gd")
-const CARD_SIZE := Vector2(150, 96)
-const STEP := Vector2(196, 136)   # 격자 한 칸의 간격
+const CARD_SIZE := TreeLayout.CARD
+const STEP := TreeLayout.STEP     # 격자 한 칸의 간격 (배치가 선이 카드를 지나는지 따질 때도 쓴다)
 const CENTER_RADIUS: float = 58.0
 const LINE_WIDTH: float = 4.0
 const LINE_OPEN := Color("e9c46a")

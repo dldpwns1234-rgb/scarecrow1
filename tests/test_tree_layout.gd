@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 스킬트리 배치 (scenes/day/tree_layout.gd): 사방으로 뻗기, 겹치지 않기, branch 키, 가운데 비우기
+## 스킬트리 배치 (scenes/day/tree_layout.gd): 사방으로 뻗기, 겹치지 않기, 선이 카드를 지나가지 않기, branch 키, 가운데 비우기
 
 const TreeLayout := preload("res://scenes/day/tree_layout.gd")
 
@@ -12,6 +12,15 @@ func run() -> void:
 		_equal(seen.has(cell), false, "칸이 겹치지 않는다 %s" % cell)
 		_equal(cell == Vector2i.ZERO, false, "가운데는 어둠의 계약 자리")
 		seen[cell] = true
+	_equal(TreeLayout.card_crossings(Balance.UPGRADES, cells), 0, "가지 선이 남의 카드를 지나가지 않는다 (방장 #529: 칸이 64개가 되자 가로질렀다)")
+
+	var grown: Array[Dictionary] = Balance.UPGRADES.duplicate()
+	var base := grown.size()
+	for k in 10:  # 뒤에 열 칸을 더 붙여도 (깊은 칸들 아래에 하나씩)
+		grown.append({"requires": base - 1 - k * 4})
+	var grown_cells := TreeLayout.cells(grown)
+	_equal(TreeLayout.card_crossings(grown, grown_cells), 0, "열 칸을 더 붙여도 선이 카드를 지나가지 않는다")
+	_equal(grown_cells.slice(0, base) == cells, true, "뒤에 칸을 붙여도 앞 칸은 움직이지 않는다")
 
 	var sample: Array[Dictionary] = [
 		{"requires": -1}, {"requires": -1}, {"requires": -1}, {"requires": -1},
