@@ -2,6 +2,7 @@ extends SceneTree
 ## 테마 생성기 1부: 그림 틀 (방장 2026-10-15 '진짜 게임처럼', 아트 방향 '달빛 동화 그림책풍'). tools/make_theme.gd가 상속해 마지막에 _dress()를 부른다.
 ## 납작한 단색 상자 대신 SVG 9칸 늘림 그림을 입힌다: 단추는 볏짚 끈 나무판(눌리면 내려앉음), 주요 단추는 금칠 판, 패널은 바느질한 삼베.
 ## 타입 변형 WoodPanel(볏짚 끈 나무판: 결과 알림·확인 창·설정), Parchment(낡은 종이: 이야기 카드·다시 읽기, 글은 짙은 갈색은 화면이 정한다).
+## 글꼴은 주아체 Jua(둥글고 굵음, OFL, 방장 2026-10-15 고름). 주아체에 없는 드문 글자는 Noto Sans KR이 대신 그린다.
 ## 그림은 assets/ui/*.svg (손으로 그린 SVG가 원본). 9칸 늘림이라 가장자리 폭(margin)만큼은 그대로, 가운데는 늘어난다
 
 const WOOD := "res://assets/ui/button_wood.svg"
@@ -10,6 +11,8 @@ const GOLD := "res://assets/ui/button_gold.svg"
 const BURLAP := "res://assets/ui/frame_burlap.svg"
 const WOOD_FRAME := "res://assets/ui/frame_wood.svg"
 const PARCHMENT := "res://assets/ui/frame_parchment.svg"
+const JUA := "res://assets/fonts/Jua-Regular.ttf"
+const NOTO := "res://assets/fonts/NotoSansKR-Regular.ttf"
 const BUTTON_EDGE: int = 16          # 단추 그림의 가장자리 폭
 const BUTTON_SHADOW: int = 10        # 단추 아래 그늘 두께 (글을 그만큼 위로)
 const PANEL_EDGE: int = 20
@@ -29,6 +32,12 @@ var _art_count: int = 0  # 저장할 때 서브 리소스 id를 고정한다 (�
 
 ## Button·AccentButton·PanelContainer·Panel의 상자를 그림 틀로 바꾼다 (다른 타입 변형은 그대로)
 func _dress(theme: Theme) -> void:
+	var font := FontVariation.new()
+	_art_count += 1
+	font.resource_scene_unique_id = "art_%d" % _art_count
+	font.base_font = load(JUA)
+	font.fallbacks = [load(NOTO)]
+	theme.default_font = font
 	var wood := _box(WOOD, BUTTON_EDGE, BUTTON_TEXT, BUTTON_SHADOW)
 	for state: String in ["normal"]:
 		theme.set_stylebox(state, "Button", wood)
@@ -50,7 +59,10 @@ func _dress(theme: Theme) -> void:
 	theme.set_stylebox("panel", "Panel", burlap)
 	theme.add_type("WoodPanel")
 	theme.set_type_variation("WoodPanel", "PanelContainer")
-	theme.set_stylebox("panel", "WoodPanel", _box(WOOD_FRAME, FRAME_EDGE, FRAME_TEXT))
+	var wood_frame := _box(WOOD_FRAME, FRAME_EDGE, FRAME_TEXT)
+	wood_frame.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT  # 큰 창에서 판자 결이 뭉개지지 않고 되풀이되게
+	wood_frame.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	theme.set_stylebox("panel", "WoodPanel", wood_frame)
 	theme.add_type("Parchment")
 	theme.set_type_variation("Parchment", "PanelContainer")
 	theme.set_stylebox("panel", "Parchment", _box(PARCHMENT, FRAME_EDGE, FRAME_TEXT))

@@ -36,7 +36,7 @@ res://
     night/       night_screen(밤 밭)
     ui/          refresh_gate(시그널은 표시만, 보일 때 프레임당 한 번 갱신), tap_scroll(버튼 위에서도 끌어 스크롤), sub_tabs(칩 줄 하위 탭) — 회귀 용사에서 옮겨 옴.
                  intro_card(첫 실행 장면), night_hint(첫 밤 안내), story_card(이야기 조각 카드), story_book(다시 읽기), ending_scene(엔딩), winter_scene(겨울잠 전환), settings_panel·sound_panel(설정), korean_text(한글 줄바꿈·조사)
-  assets/fonts/  한글 폰트 (고도 기본 폰트에 한글이 없다)
+  assets/fonts/  한글 글꼴: 주아체 Jua(기본, OFL, 라이선스 Jua-OFL.txt)와 주아체에 없는 글자를 대신 그리는 Noto Sans KR. 테마(tools/theme_art.gd)가 정한다
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
   tools/make_sfx.gd, make_music.gd  효과음 25개·배경음 3곡(day·night·harvest) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`

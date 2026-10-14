@@ -8,8 +8,10 @@
 [ext_resource type="Texture2D" path="res://assets/ui/frame_burlap.svg" id="6_5jbdf"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_parchment.svg" id="7_86uey"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_wood.svg" id="8_5jbdf"]
+[ext_resource type="FontFile" path="res://assets/fonts/Jua-Regular.ttf" id="9_unkgg"]
+[ext_resource type="FontFile" path="res://assets/fonts/NotoSansKR-Regular.ttf" id="10_66ixa"]
 
-[sub_resource type="StyleBoxTexture" id="art_6"]
+[sub_resource type="StyleBoxTexture" id="art_7"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -21,7 +23,7 @@ texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 modulate_color = Color(1.15, 1.1, 1.05, 1)
 
-[sub_resource type="StyleBoxTexture" id="art_5"]
+[sub_resource type="StyleBoxTexture" id="art_6"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -32,7 +34,7 @@ texture_margin_top = 16.0
 texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 
-[sub_resource type="StyleBoxTexture" id="art_7"]
+[sub_resource type="StyleBoxTexture" id="art_8"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -57,7 +59,7 @@ border_width_bottom = 2
 border_color = Color(0.23137255, 0.26666668, 0.34509805, 1)
 anti_aliasing = false
 
-[sub_resource type="StyleBoxTexture" id="art_4"]
+[sub_resource type="StyleBoxTexture" id="art_5"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -71,7 +73,7 @@ modulate_color = Color(0.55, 0.55, 0.6, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_unkgg"]
 
-[sub_resource type="StyleBoxTexture" id="art_2"]
+[sub_resource type="StyleBoxTexture" id="art_3"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -83,7 +85,7 @@ texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 modulate_color = Color(1.15, 1.1, 1.05, 1)
 
-[sub_resource type="StyleBoxTexture" id="art_1"]
+[sub_resource type="StyleBoxTexture" id="art_2"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
@@ -94,7 +96,7 @@ texture_margin_top = 16.0
 texture_margin_right = 16.0
 texture_margin_bottom = 16.0
 
-[sub_resource type="StyleBoxTexture" id="art_3"]
+[sub_resource type="StyleBoxTexture" id="art_4"]
 content_margin_left = 14.0
 content_margin_top = 14.0
 content_margin_right = 14.0
@@ -308,7 +310,7 @@ bg_color = Color(0.13725491, 0.15686275, 0.21176471, 1)
 border_color = Color(0.13725491, 0.15686275, 0.21176471, 1)
 anti_aliasing = false
 
-[sub_resource type="StyleBoxTexture" id="art_8"]
+[sub_resource type="StyleBoxTexture" id="art_9"]
 content_margin_left = 16.0
 content_margin_top = 12.0
 content_margin_right = 16.0
@@ -321,7 +323,7 @@ texture_margin_bottom = 20.0
 axis_stretch_horizontal = 2
 axis_stretch_vertical = 2
 
-[sub_resource type="StyleBoxTexture" id="art_10"]
+[sub_resource type="StyleBoxTexture" id="art_11"]
 content_margin_left = 26.0
 content_margin_top = 22.0
 content_margin_right = 26.0
@@ -562,7 +564,7 @@ border_color = Color(0.23137255, 0.26666668, 0.34509805, 1)
 expand_margin_top = 44.0
 anti_aliasing = false
 
-[sub_resource type="StyleBoxTexture" id="art_9"]
+[sub_resource type="StyleBoxTexture" id="art_10"]
 content_margin_left = 26.0
 content_margin_top = 22.0
 content_margin_right = 26.0
@@ -572,16 +574,23 @@ texture_margin_left = 28.0
 texture_margin_top = 28.0
 texture_margin_right = 28.0
 texture_margin_bottom = 28.0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="FontVariation" id="art_1"]
+fallbacks = Array[Font]([ExtResource("10_66ixa")])
+base_font = ExtResource("9_unkgg")
 
 [resource]
+default_font = SubResource("art_1")
 default_font_size = 22
 AccentButton/base_type = &"Button"
 AccentButton/colors/font_color = Color(0.16862746, 0.14117648, 0.08627451, 1)
 AccentButton/colors/font_focus_color = Color(0.16862746, 0.14117648, 0.08627451, 1)
 AccentButton/colors/font_hover_color = Color(0.16862746, 0.14117648, 0.08627451, 1)
-AccentButton/styles/hover = SubResource("art_6")
-AccentButton/styles/normal = SubResource("art_5")
-AccentButton/styles/pressed = SubResource("art_7")
+AccentButton/styles/hover = SubResource("art_7")
+AccentButton/styles/normal = SubResource("art_6")
+AccentButton/styles/pressed = SubResource("art_8")
 AcceptDialog/styles/panel = SubResource("style_40")
 Button/colors/font_color = Color(0.9529412, 0.9019608, 0.78431374, 1)
 Button/colors/font_disabled_color = Color(0.6392157, 0.59607846, 0.5294118, 1)
@@ -590,11 +599,11 @@ Button/colors/font_hover_color = Color(1, 0.95686275, 0.84705883, 1)
 Button/colors/font_hover_pressed_color = Color(0.9529412, 0.9019608, 0.78431374, 1)
 Button/colors/font_pressed_color = Color(0.9529412, 0.9019608, 0.78431374, 1)
 Button/font_sizes/font_size = 20
-Button/styles/disabled = SubResource("art_4")
+Button/styles/disabled = SubResource("art_5")
 Button/styles/focus = SubResource("StyleBoxEmpty_unkgg")
-Button/styles/hover = SubResource("art_2")
-Button/styles/normal = SubResource("art_1")
-Button/styles/pressed = SubResource("art_3")
+Button/styles/hover = SubResource("art_3")
+Button/styles/normal = SubResource("art_2")
+Button/styles/pressed = SubResource("art_4")
 CheckButton/colors/font_color = Color(0.94509804, 0.93333334, 0.89411765, 1)
 CheckButton/colors/font_disabled_color = Color(0.4862745, 0.5137255, 0.5882353, 1)
 CheckButton/colors/font_focus_color = Color(0.94509804, 0.93333334, 0.89411765, 1)
@@ -638,10 +647,10 @@ NavButton/styles/hover = SubResource("style_9")
 NavButton/styles/hover_pressed = SubResource("style_10")
 NavButton/styles/normal = SubResource("style_8")
 NavButton/styles/pressed = SubResource("style_10")
-Panel/styles/panel = SubResource("art_8")
-PanelContainer/styles/panel = SubResource("art_8")
+Panel/styles/panel = SubResource("art_9")
+PanelContainer/styles/panel = SubResource("art_9")
 Parchment/base_type = &"PanelContainer"
-Parchment/styles/panel = SubResource("art_10")
+Parchment/styles/panel = SubResource("art_11")
 Pill/base_type = &"Label"
 Pill/font_sizes/font_size = 24
 Pill/styles/normal = SubResource("style_18")
@@ -675,4 +684,4 @@ VScrollBar/styles/scroll_focus = SubResource("style_31")
 Window/colors/title_color = Color(0.94509804, 0.93333334, 0.89411765, 1)
 Window/styles/embedded_border = SubResource("style_42")
 WoodPanel/base_type = &"PanelContainer"
-WoodPanel/styles/panel = SubResource("art_9")
+WoodPanel/styles/panel = SubResource("art_10")
