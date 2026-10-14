@@ -81,7 +81,7 @@ func _show_report(haul: float) -> void:
 		_haul.text += "  ·  지난 밤보다 %s" % Num.multiplier(haul / _prev_haul)
 	_prev_level = _level_now
 	_clear.visible = _cleared_level > 0
-	_clear.text = "밭 %d단계 정복!" % _cleared_level
+	_clear.text = "밭 %d단계 정복!" % _cleared_level if Night.waves <= 1 else "밭 %d단계 %d번 정복!" % [_cleared_level, Night.waves]  # 정복해도 밤이 이어져 물결마다 다시 정복한다
 	if Night.best_level > _best_before:
 		_clear.text += "  %d단계가 열렸다" % Night.best_level
 	if _cleared_level > 0 and Balance.is_harvest(_cleared_level):

@@ -4,8 +4,8 @@ extends Control
 
 const SCARECROW := preload("res://icon.svg")
 const CROW := preload("res://assets/sprites/crow.svg")
-const SIZE := Vector2(150, 150)
-const CROW_SIZE := Vector2(58, 58)
+const SIZE := Vector2(128, 128)  # 밭 고르기의 스위치 자리를 내주려고 150에서 줄였다
+const CROW_SIZE := Vector2(50, 50)
 const SHOULDER := Vector2(0.76, 0.43)   # 짚돌이 그림에서 오른 어깨 자리 (비율, intro_card와 같다)
 const CROW_FEET := Vector2(0.5, 0.74)
 const DARK_TINT := Color(0.35, 0.22, 0.55)
