@@ -1,6 +1,6 @@
 extends VBoxContainer
 ## 낮 화면 오른쪽: 어둠의 나무 (GDD 6절, 방장 2026-10-14: 사방으로 뻗고 앞 칸을 사야 다음 칸이 나타난다).
-## 위에 제목과 '가운데로', 가운데에 끌어서 둘러보는 판(tree_board.gd), 아래에 고른 카드의 효과와 구매 버튼 (폰에서 잘못 눌러 사지 않게 구매는 여기서만).
+## 위에 제목과 '전체 보기'·'가운데로'(줌은 휠·두 손가락 집기도), 가운데에 끌어서 둘러보는 판(tree_board.gd), 아래에 고른 카드의 효과와 구매 버튼 (폰에서 잘못 눌러 사지 않게 구매는 여기서만).
 ## 카드는 Balance.UPGRADES로 만든다. Upgrades의 함수만 부르고 표시만 한다. 상수는 배치용이다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -35,6 +35,11 @@ func _ready() -> void:
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_theme_color_override("font_color", HEADER_COLOR)
 	top.add_child(header)
+	var fit := Button.new()  # 나무가 커지면 한눈에 (방장 2026-10-15). 휠·두 손가락으로도 줌
+	fit.text = "전체 보기"
+	fit.custom_minimum_size = CENTER_BUTTON_SIZE
+	fit.pressed.connect(func() -> void: _board.fit_all())
+	top.add_child(fit)
 	var recenter := Button.new()
 	recenter.text = "가운데로"
 	recenter.custom_minimum_size = CENTER_BUTTON_SIZE
@@ -85,7 +90,7 @@ func _select(index: int) -> void:
 
 
 func _recenter() -> void:
-	_board.pan = Vector2.ZERO
+	_board.reset_view()
 	_refresh()
 
 
