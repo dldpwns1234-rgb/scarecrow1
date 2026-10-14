@@ -34,6 +34,8 @@ func run() -> void:
 	for skill in Balance.SKILLS.size():
 		Night.skill_used.emit(skill)
 	_equal(int(Sfx.played.get("skill_storm", 0)) + int(Sfx.played.get("skill_flock", 0)) + int(Sfx.played.get("skill_sigh", 0)) + int(Sfx.played.get("skill_tide", 0)), Balance.SKILLS.size(), "스킬마다 소리")
+	Sfx.play("chain", 2.0)
+	_close(Sfx.last_pitch, 2.0, "높이를 주면 흔들지 않고 그 높이 (풍작 콤보의 연쇄음)")
 	Save.reset_data()
 	_equal(int(Sfx.played.get("dawn", 0)), 1, "데이터 초기화의 낮은 조용하다")
 

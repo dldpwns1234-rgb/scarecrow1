@@ -27,6 +27,8 @@ const SOUNDS: Dictionary = {
 	"skill_flock": [0.9, 0.5],
 	"skill_sigh": [1.2, 0.55],
 	"skill_tide": [1.0, 0.5],
+	"chain": [0.35, 0.4],
+	"bumper": [1.6, 0.65],
 }
 
 const C5: float = 72.0  # MIDI 음 번호 기준
@@ -168,6 +170,21 @@ func _skill_tide(s: Synth) -> void:
 		var start := 0.07 * i
 		s.tone(start, 0.06, _n(-7.0 + i), _n(0.0 + i), 0.35, 0.003, 0.04, Synth.Wave.SOFT, 0.02)
 	s.noise(0.0, 0.9, 0.35, 500.0, 1600.0, 0.2, 0.4)
+
+
+## 풍작 콤보의 연쇄음: 짧고 맑은 퉁김. 재생할 때 5음 음계로 높이를 올린다 (scenes/night/fx/combo_meter.gd)
+func _chain(s: Synth) -> void:
+	s.pluck(0.0, _n(-5.0), 0.5, 0.07)
+	s.bell(0.0, _n(7.0), 0.15, 0.06)
+
+
+## 풍작 (콤보 막대가 꽉 참): 아래에서 위로 쏟아지는 종 화음, 휙 하는 바람, 낮은 쿵
+func _bumper(s: Synth) -> void:
+	s.tone(0.0, 0.4, 100.0, 55.0, 0.7, 0.004, 0.25)
+	s.noise(0.0, 0.6, 0.35, 600.0, 2400.0, 0.02, 0.25)
+	var notes: PackedFloat32Array = [0.0, 4.0, 7.0, 12.0, 16.0, 19.0]
+	for i in notes.size():
+		s.bell(0.05 * i, _n(notes[i]), 0.4, 0.5 if i == notes.size() - 1 else 0.25)
 
 
 ## 업그레이드 구매: 작은 동전 딸깍 (회귀 용사와 같다)

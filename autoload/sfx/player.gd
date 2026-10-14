@@ -23,6 +23,7 @@ const CUES := {
 	"buy": [2, 50, -7.0], "sleep": [1, 1000, -4.0],
 	"storm": [1, 2000, -6.0], "spray": [2, 300, -15.0], "sprout": [2, 200, -16.0],
 	"skill_storm": [1, 500, -5.0], "skill_flock": [1, 500, -7.0], "skill_sigh": [1, 500, -5.0], "skill_tide": [1, 500, -6.0],
+	"chain": [4, 35, -13.0], "bumper": [1, 800, -3.0],
 }
 
 var unlocked: bool = false   # 소리를 낼 수 있는지. 웹은 첫 입력 전 false, 데스크톱은 처음부터 true
@@ -70,8 +71,9 @@ func _exit_tree() -> void:
 			player.stream = null
 
 
-## 효과음 하나. 잠겨 있거나 꺼져 있거나 최소 간격 안이면 내지 않고 false. 플레이어가 다 차 있으면 돌아가며 하나를 끊는다
-func play(cue: String) -> bool:
+## 효과음 하나. 잠겨 있거나 꺼져 있거나 최소 간격 안이면 내지 않고 false. 플레이어가 다 차 있으면 돌아가며 하나를 끊는다.
+## pitch를 주면 흔들지 않고 그 높이로 낸다 (풍작 콤보의 올라가는 연쇄음)
+func play(cue: String, pitch: float = 0.0) -> bool:
 	if not unlocked or not Prefs.sfx_on or Prefs.sfx_volume <= 0.0 or not _pools.has(cue):
 		return false
 	var now := Time.get_ticks_msec()
@@ -79,7 +81,7 @@ func play(cue: String) -> bool:
 		return false
 	_last_msec[cue] = now
 	var player := _pick(cue, now)
-	last_pitch = 1.0 + _rng.randf_range(-PITCH_JITTER, PITCH_JITTER)
+	last_pitch = pitch if pitch > 0.0 else 1.0 + _rng.randf_range(-PITCH_JITTER, PITCH_JITTER)
 	player.pitch_scale = last_pitch
 	_busy_until[player] = now + int(player.stream.get_length() / last_pitch * 1000.0)
 	if not _silent:
