@@ -29,6 +29,8 @@ func _ready() -> void:
 	row.add_child(_up)
 	_note = Label.new()
 	_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_note.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS  # 큰 배율(×2308극)이 왼쪽 열을 넓히지 않게
+	_note.custom_minimum_size = Vector2(1.0, 0.0)
 	_note.add_theme_font_size_override("font_size", NOTE_FONT_SIZE)
 	_note.add_theme_color_override("font_color", NOTE_COLOR)
 	add_child(_note)
@@ -51,4 +53,4 @@ func _refresh() -> void:
 	_up.disabled = level >= Night.best_level
 	var hp := Balance.crop_hp(0, level) / Balance.crop_hp(0, 1)
 	var vitality := Balance.crop_vitality(0, level) / Balance.crop_vitality(0, 1)
-	_note.text = "작물 체력 %s  ·  생기 %s  ·  열린 단계 %d" % [Num.multiplier(hp), Num.multiplier(vitality), Night.best_level]
+	_note.text = "체력 %s  ·  생기 %s  ·  %d단계까지 열림" % [Num.multiplier(hp), Num.multiplier(vitality), Night.best_level]

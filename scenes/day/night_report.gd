@@ -1,7 +1,9 @@
 extends PanelContainer
 ## 밤이 끝나 낮으로 돌아오면 오른쪽(어둠의 나무) 위쪽 가운데에 잠깐 뜨는 결과 (왼쪽 위의 이야기·소리 버튼을 가리지 않게): "지난 밤 · 생기 +120 · 작물 98 / 120 시듦", 정복했으면 둘째 줄에 "밭 3단계 정복! 4단계가 열렸다".
-## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 "겨울잠이 열렸다", 일꾼이 합류했으면 "아지트가 열렸다"나 "일꾼 합류: 이름"을 덧붙인다.
+## 겨울잠을 한 번도 안 했는데 이번 밤에 겨울잠 단계가 열렸으면 "겨울잠이 열렸다", 일꾼이 합류했으면 "아지트가 열렸다"나 "일꾼 합류: 이름"을, 수확일 밤을 정복했으면 "풍년의 여신을 이겼다"처럼 그 밤의 가장 센 지키는 이를 덧붙인다.
 ## Game.night_finished·Night.field_cleared를 받아 Night의 기록을 읽기만 한다. 누르면 바로 닫힌다. 상수는 배치·연출용이다.
+
+const KoreanText := preload("res://scenes/ui/korean_text.gd")
 
 const TOP: float = 20.0
 const LEFT_SPAN: float = 468.0  # 낮 화면 왼쪽 열(여백 24 + 폭 420 + 사이 24). 그 오른쪽에 띄운다
@@ -46,6 +48,19 @@ func _on_night_started() -> void:
 	_workers_before = Workers.worker_count()
 
 
+## 수확일 밤(보스 밤)을 정복했을 때: 그 밤의 가장 센 지키는 이를 이겼다는 한 줄
+func _harvest_line() -> String:
+	var top := -1
+	for kind in Night.farmer_kinds:
+		top = maxi(top, kind)
+	match top:
+		Balance.Guardian.GODDESS:
+			return "수확일 정복  ·  풍년의 여신을 이겼다"
+		-1:
+			return "수확일 정복"
+	return "수확일 정복  ·  %s%s 따돌렸다" % [Balance.guardian_name(top), KoreanText.particle(Balance.guardian_name(top), "을", "를")]
+
+
 func _line(color: Color) -> Label:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -59,6 +74,8 @@ func _show_report(haul: float) -> void:
 	_clear.text = "밭 %d단계 정복!" % _cleared_level
 	if Night.best_level > _best_before:
 		_clear.text += "  %d단계가 열렸다" % Night.best_level
+	if _cleared_level > 0 and Balance.is_harvest(_cleared_level):
+		_clear.text += "\n" + _harvest_line()
 	if Winter.sleeps == 0 and _best_before < Balance.WINTER_MIN_LEVEL and Balance.can_winter(Night.best_level):
 		_clear.text += "\n겨울잠이 열렸다  ·  오른쪽 위 꿈의 상점"  # 첫 겨울잠 전에 한 번
 	if Workers.worker_count() > _workers_before:
