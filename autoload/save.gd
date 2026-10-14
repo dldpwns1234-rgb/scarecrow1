@@ -47,6 +47,7 @@ func to_dict() -> Dictionary:
 		"upgrades": Upgrades.to_dict(),
 		"night": Night.to_dict(),
 		"winter": Winter.to_dict(),
+		"workers": Workers.to_dict(),
 		"prefs": Prefs.to_dict(),
 		"story": Story.to_dict(),
 	}
@@ -58,6 +59,7 @@ func from_dict(data: Dictionary) -> void:
 	Game.from_dict(_section(data, "game"))
 	Winter.from_dict(_section(data, "winter"))
 	Night.from_dict(_section(data, "night"))
+	Workers.from_dict(_section(data, "workers"))  # Winter 뒤에 (까마귀 일꾼 수가 겨울잠 횟수를 따른다)
 	Prefs.from_dict(_section(data, "prefs"))
 	Story.from_dict(_section(data, "story"))  # Game 뒤에 (옛 저장은 밤 수로 첫 장면을 정한다)
 
@@ -112,6 +114,7 @@ func reset_data() -> void:
 	Game.reset()
 	Night.reset()
 	Winter.reset()
+	Workers.reset()
 	Prefs.reset()
 	Story.reset()
 	save_game()

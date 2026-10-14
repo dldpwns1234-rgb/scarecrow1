@@ -110,6 +110,15 @@ func add_vitality(amount: float) -> void:
 	_emit_vitality()
 
 
+## 낮에 받는 생기 (아지트의 생기 나르기). 이번 밤 생기에는 안 든다
+func add_day_vitality(amount: float) -> void:
+	if amount <= 0.0 or is_night():
+		return
+	vitality = Balance.cap(vitality + amount)
+	offered = Balance.cap(offered + amount)
+	_emit_vitality()
+
+
 ## 생기를 치른다. 모자라면 false
 func spend(cost: float) -> bool:
 	if cost < 0.0 or vitality < cost:

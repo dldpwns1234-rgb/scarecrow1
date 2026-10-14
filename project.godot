@@ -23,6 +23,8 @@ Game="*res://autoload/game.gd"
 Night="*res://autoload/night.gd"
 ; 겨울잠(회귀)과 꿈의 상점. Night·Game·Upgrades를 새 철로 되돌리고, Night·Game이 꿈의 효과를 묻는다
 Winter="*res://autoload/winter.gd"
+; 아지트 일꾼. Night의 밭 단계·Winter의 겨울잠을 받아 일꾼을 늘리고, Night가 효과를 묻는다
+Workers="*res://autoload/workers.gd"
 ; 이야기(첫 실행 장면·조각)는 Game을 읽고 Save가 불러오므로 그 사이에
 Story="*res://autoload/story.gd"
 ; 소리 설정은 Save가 불러오므로 그 앞에

@@ -69,9 +69,9 @@ func cloud_radius() -> float:
 	return Balance.cloud_radius(Upgrades.level(Balance.Upgrade.RADIUS))
 
 
-## 독한 포자 × 깊은 잠(꿈의 상점)
+## 독한 포자 × 깊은 잠(꿈의 상점) × 포자 말리기(아지트)
 func cloud_dps() -> float:
-	return Balance.cap(Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN)) * Winter.damage_multiplier())
+	return Balance.cap(Balance.cloud_dps(Upgrades.level(Balance.Upgrade.TOXIN)) * Winter.damage_multiplier() * Workers.dry_multiplier())
 
 
 ## 이 칸이 지금 구름 안인지
@@ -131,7 +131,23 @@ func _plant() -> void:
 	for i in cell_count():
 		if rng.randf() < fill:
 			_grow(i)
+	_add_goldens(Workers.watch_goldens())
 	first_planted = crops_total
+
+
+## 밭 망보기(아지트): 심긴 작물 중 n개를 황금 이삭으로 바꾼다
+func _add_goldens(n: int) -> void:
+	for _i in n:
+		var picks: Array[int] = []
+		for i in cell_count():
+			if is_alive(i) and kinds[i] != Balance.Crop.GOLDEN:
+				picks.append(i)
+		if picks.is_empty():
+			return
+		var cell := picks[rng.randi_range(0, picks.size() - 1)]
+		kinds[cell] = Balance.Crop.GOLDEN
+		max_hp[cell] = Balance.crop_hp(Balance.Crop.GOLDEN, field_level, Upgrades.level(Balance.Upgrade.FERTILE)) * Balance.harvest_hp(field_level)
+		hp[cell] = max_hp[cell]
 
 
 ## 칸 하나에 작물을 심는다 (밤 시작과 다시 자라기). 체력은 밭 단계와 비옥한 어둠대로

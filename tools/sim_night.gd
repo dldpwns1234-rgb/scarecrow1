@@ -1,4 +1,4 @@
-extends Node
+extends "res://tools/sim_day.gd"
 ## 밤 시뮬레이션 (GDD 4절, 밸런스용). 실제 Balance·Upgrades·Game·Night 코드를 화면 없이 그대로 돌린다.
 ##
 ##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6]
@@ -14,7 +14,7 @@ const DT: float = 0.05
 const RETARGET: float = 0.25
 
 var _speed: float = 12.0
-var _day: float = 15.0
+
 var _log: bool = true
 var _retry: int = 2
 var _farm_left: int = 0  # 가장 높은 단계에서 진 뒤 아래에서 더 모을 밤 수
@@ -38,6 +38,7 @@ func _ready() -> void:
 	Game.reset()
 	Night.reset()
 	Winter.reset()
+	Workers.reset()
 	var clock := 0.0
 	var season_start := 0.0
 	var since_new := 0
@@ -45,6 +46,7 @@ func _ready() -> void:
 	print("밤 | 단계 | 생기 | 시든/전체 | 정복 | 누적 분 | 산 것")
 	var firsts: Dictionary = {}
 	for n in nights:
+		_day_work()
 		var bought := _shop()
 		_pick_level()
 		var level := Night.field_level
@@ -142,37 +144,6 @@ func _best_spot() -> Vector2:
 			best = score
 			spot = center
 	return spot
-
-
-## 살 수 있는 업그레이드를 싼 것부터 다 산다. 산 것의 이름 목록
-func _shop() -> String:
-	var names: Array[String] = []
-	while true:
-		var pick := -1
-		for i in Balance.UPGRADES.size():
-			if Upgrades.can_buy(i) and (pick < 0 or Upgrades.cost(i) < Upgrades.cost(pick)):
-				pick = i
-		if pick < 0 or not Upgrades.buy(pick):
-			break
-		names.append(Balance.upgrade_name(pick))
-	return ",".join(names)
-
-
-## 꿈의 상점을 싼 것부터 다 산다
-func _dream_shop() -> String:
-	var names: Array[String] = []
-	while true:
-		var pick := -1
-		for i in Balance.DREAMS.size():
-			if Winter.can_buy(i) and (pick < 0 or Winter.cost(i) < Winter.cost(pick)):
-				pick = i
-		if pick < 0 or not Winter.buy(pick):
-			break
-		names.append(Balance.dream_name(pick))
-	var parts: Array[String] = []
-	for i in Balance.DREAMS.size():
-		parts.append("%s %d" % [Balance.dream_name(i), Winter.level(i)])
-	return ", ".join(parts)
 
 
 func _firsts_text(firsts: Dictionary) -> String:
