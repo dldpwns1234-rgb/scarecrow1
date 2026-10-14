@@ -1,6 +1,7 @@
 extends Control
 ## 밤 화면 위의 글 (GDD 4절): 왼쪽 위 이번 밤 생기, 가운데 밭 단계와 시든 작물 막대(정복 90% 표시), 오른쪽 남은 시간, 오른쪽 아래 '새벽까지 쉬기'(밤을 일찍 끝낸다).
-## Night·Game의 시그널을 받아 표시만 한다. 밤 스킬은 저절로 터지므로 칸을 두지 않는다 (방장 2026-10-15). 상수는 배치용이다
+## Night·Game의 시그널을 받아 표시만 한다. 시그널은 '다시 써야 함'만 표시하고 프레임당 한 번 쓴다 (연쇄로 한 프레임에 수십 개가 시든다).
+## 밤 스킬은 저절로 터지므로 칸을 두지 않는다 (방장 2026-10-15). 상수는 배치용이다
 
 const MARGIN: int = 20
 const BIG_FONT: int = 30
@@ -19,6 +20,7 @@ var _field: Label
 var _bar: ProgressBar
 var _mark: ColorRect
 var _stop: Button
+var _dirty: bool = true
 
 
 func _ready() -> void:
@@ -47,13 +49,23 @@ func _ready() -> void:
 	_stop.pressed.connect(Night.stop)
 	add_child(_stop)
 	Night.time_changed.connect(_on_time_changed)
-	Night.night_started.connect(_refresh)
-	Night.wave_started.connect(_refresh.unbind(1))
-	Night.crop_withered.connect(_refresh.unbind(2))
-	Game.vitality_changed.connect(_refresh.unbind(1))
+	Night.night_started.connect(_queue)
+	Night.wave_started.connect(_queue.unbind(1))
+	Night.crop_withered.connect(_queue.unbind(2))
+	Game.vitality_changed.connect(_queue.unbind(1))
 	resized.connect(_layout)
 	_layout()
 	_refresh()
+
+
+func _queue() -> void:
+	_dirty = true
+
+
+func _process(_delta: float) -> void:
+	if _dirty and is_visible_in_tree():
+		_dirty = false
+		_refresh()
 
 
 ## 휴식 카운터의 화면 자리 (알갱이가 날아가는 곳)

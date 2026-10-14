@@ -26,6 +26,7 @@ const LIFT := Vector2(0.0, -22.0)    # 작물 몸통께 (밑동보다 조금 위
 var field: Node2D  # field_view.gd (cell_local)
 var _effects: Array[Dictionary] = []  # {"kind", "t", "seconds", ...}
 var _clock: float = 0.0
+var _drawn: bool = false  # 지난 프레임에 무언가 그렸다 (다 사라진 뒤 한 번 더 지운다)
 var _drops: PackedVector2Array = PackedVector2Array()  # 빗방울의 격자 자리 (0~1 비율)와 박자
 
 
@@ -71,7 +72,10 @@ func _process(delta: float) -> void:
 	for effect in _effects:
 		effect["t"] = float(effect["t"]) + delta / float(effect["seconds"])
 	_effects = _effects.filter(func(effect: Dictionary) -> bool: return float(effect["t"]) < 1.0)
-	queue_redraw()
+	var busy := Night.active and (not _effects.is_empty() or Night.is_skill_active(Balance.Skill.VEIL) or Night.is_skill_active(Balance.Skill.RAIN))
+	if busy or _drawn:
+		queue_redraw()  # 그릴 것이 있을 때만 (없는데 매 프레임 다시 그리면 헛일)
+	_drawn = busy
 
 
 func _draw() -> void:

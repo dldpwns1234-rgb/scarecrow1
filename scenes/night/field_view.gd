@@ -35,11 +35,13 @@ const HIT_SQUASH := Vector2(1.08, 0.9)
 const WITHER_DROP: float = 4.0
 const REGROW_START: float = 0.2
 const REGROW_DURATION: float = 0.35
+const BACK: float = 1.70158             # 솟아날 때 조금 넘치는 정도 (Tween.TRANS_BACK과 같은 값)
 
 var _ground: FieldGround
 var _crops: Node2D
 var _sprites: Array[Sprite2D] = []  # 칸 번호 순서
 var _tweens: Array[Tween] = []
+var _sprout: float = 1.0  # 새 물결이 솟아나는 진행 (0 → 1). 칸마다 트윈을 만들면 324칸이 한 프레임에 몰려 끊겼다
 
 
 func _ready() -> void:
@@ -71,7 +73,11 @@ func cell_screen(index: int) -> Vector2:
 func rebuild() -> void:
 	if _sprites.size() != Night.cell_count():
 		_make_sprites()
+	_sprout = 1.0
 	for i in _sprites.size():
+		if _tweens[i] != null:
+			_tweens[i].kill()
+			_tweens[i] = null
 		var sprite := _sprites[i]
 		var kind := Night.kinds[i]
 		sprite.visible = kind != Night.EMPTY
@@ -155,12 +161,22 @@ func _on_withered(index: int, _rest: float) -> void:
 	_ground.queue_redraw()
 
 
-## 정복 뒤 새 물결: 밭 전체가 작게 솟아난다
+## 정복 뒤 새 물결: 밭 전체가 작게 솟아난다 (_process가 모두 같은 비율로 키운다)
 func _on_wave() -> void:
 	rebuild()
+	_sprout = 0.0
+
+
+## 새 물결 솟아나기: TRANS_BACK·EASE_OUT과 같은 꼴 (조금 넘쳤다가 제자리). 맞은 작물은 제 트윈을 따른다
+func _process(delta: float) -> void:
+	if _sprout >= 1.0:
+		return
+	_sprout = minf(_sprout + delta / REGROW_DURATION, 1.0)
+	var u := _sprout - 1.0
+	var grown := Vector2.ONE * CROP_SCALE * lerpf(REGROW_START, 1.0, 1.0 + (BACK + 1.0) * u * u * u + BACK * u * u)
 	for i in _sprites.size():
-		if _sprites[i].visible:
-			_on_regrown(i)
+		if _sprites[i].visible and _tweens[i] == null:
+			_sprites[i].scale = grown
 
 
 ## 다시 자라는 뿌리: 새 작물이 작게 솟아난다
