@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 저장·불러오기·내보내기·가져오기·초기화와 옛·망가진 저장 (CLAUDE.md 저장 규칙)
+## 저장·불러오기·내보내기·가져오기·초기화와 옛·망가진 저장 (CLAUDE.md 저장 규칙), 이야기(첫 실행 장면) 저장
 
 
 func run() -> void:
@@ -39,4 +39,17 @@ func run() -> void:
 	_close(Game.rest, 50.0, "파일의 휴식")
 	Save.reset_data()
 	_close(Game.rest, 0.0, "데이터 초기화")
+
+	# 이야기: 첫 실행 장면은 한 번만, 옛 저장(이야기 절 없음)은 밤을 나간 적이 있으면 본 것으로
+	_equal(Story.intro_seen, false, "초기화하면 첫 장면을 다시 본다")
+	Story.mark_intro_seen()
+	data = Save.to_dict()
+	Story.reset()
+	Save.from_dict(data)
+	_equal(Story.intro_seen, true, "첫 장면을 본 것도 저장")
+	Save.from_dict({"save_version": 1, "game": {"nights": 3}})
+	_equal(Story.intro_seen, true, "이야기 절 없는 옛 저장: 밤을 나갔으면 본 것으로")
+	Save.from_dict({"save_version": 1})
+	_equal(Story.intro_seen, false, "이야기 절 없는 새 저장: 첫 장면을 보여 준다")
+	Story.reset()
 	_fresh()
