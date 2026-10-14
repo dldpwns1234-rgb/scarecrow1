@@ -55,7 +55,7 @@ func cost(index: int) -> float:
 
 
 func can_buy(index: int) -> bool:
-	return is_unlocked(index) and not is_maxed(index) and Game.rest >= cost(index)
+	return is_unlocked(index) and not is_maxed(index) and Game.vitality >= cost(index)
 
 
 func buy(index: int) -> bool:

@@ -4,7 +4,6 @@ extends Node
 
 signal phase_changed(phase: int)
 signal vitality_changed(vitality: float)
-signal rest_changed(vitality: float)  # 옛 이름 (낮 화면이 vitality_changed로 옮기면 지운다). vitality_changed와 늘 함께 난다
 signal night_finished(haul: float)    # 이번 밤에 거둔 생기. 결과 창용
 
 enum Phase { DAY, NIGHT }
@@ -16,7 +15,7 @@ var nights: int = 0          # 지난 밤 수
 var night_haul: float = 0.0  # 지금 밤에 거둔 생기
 var last_haul: float = 0.0   # 지난 밤에 거둔 생기
 var best_haul: float = 0.0   # 가장 많이 거둔 밤
-## 옛 이름 (낮 화면이 vitality로 옮기면 지운다)
+## 옛 이름 (tests/test_save.gd가 vitality로 옮기면 지운다)
 var rest: float:
 	get:
 		return vitality
@@ -104,11 +103,6 @@ func add_vitality(amount: float) -> void:
 	_emit_vitality()
 
 
-## 옛 이름 (지운다)
-func add_rest(amount: float) -> void:
-	add_vitality(amount)
-
-
 ## 생기를 치른다. 모자라면 false
 func spend(cost: float) -> bool:
 	if cost < 0.0 or vitality < cost:
@@ -120,7 +114,6 @@ func spend(cost: float) -> bool:
 
 func _emit_vitality() -> void:
 	vitality_changed.emit(vitality)
-	rest_changed.emit(vitality)
 
 
 func _read(data: Dictionary, key: String, fallback: float) -> float:

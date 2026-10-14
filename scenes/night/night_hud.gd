@@ -1,5 +1,5 @@
 extends Control
-## 밤 화면 위의 글 (GDD 4절): 왼쪽 이번 밤 휴식, 가운데 밭 단계와 시든 작물 막대(정복 90% 표시), 오른쪽 남은 시간, 오른쪽 아래 '새벽까지 쉬기'(밤을 일찍 끝낸다).
+## 밤 화면 위의 글 (GDD 4절): 왼쪽 이번 밤 생기, 가운데 밭 단계와 시든 작물 막대(정복 90% 표시), 오른쪽 남은 시간, 오른쪽 아래 '새벽까지 쉬기'(밤을 일찍 끝낸다).
 ## Night·Game의 시그널을 받아 표시만 한다. 상수는 배치용이다
 
 const MARGIN: int = 20
@@ -49,7 +49,7 @@ func _ready() -> void:
 	Night.time_changed.connect(_on_time_changed)
 	Night.night_started.connect(_refresh)
 	Night.crop_withered.connect(_refresh.unbind(2))
-	Game.rest_changed.connect(_refresh.unbind(1))
+	Game.vitality_changed.connect(_refresh.unbind(1))
 	resized.connect(_layout)
 	_layout()
 	_refresh()
@@ -87,7 +87,7 @@ func _on_time_changed(seconds_left: float) -> void:
 
 
 func _refresh() -> void:
-	_rest.text = "휴식 +%s" % Num.format(Game.night_haul)
+	_rest.text = "생기 +%s" % Num.format(Game.night_haul)
 	_field.text = "밭 %d단계  ·  시든 작물 %d / %d" % [Night.field_level, Night.withered, Night.crops_total]
 	_bar.max_value = maxf(float(Night.crops_total), 1.0)
 	_bar.value = Night.withered

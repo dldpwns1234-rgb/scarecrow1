@@ -60,11 +60,6 @@ func crop_vitality(crop: int, field_level: int, fertile_level: int = 0, pumpkin_
 	return cap(value)
 
 
-## 옛 이름 (낮 화면이 crop_vitality로 옮기면 지운다)
-func crop_rest(crop: int, field_level: int) -> float:
-	return crop_vitality(crop, field_level)
-
-
 func crop_name(crop: int) -> String:
 	return CROPS[crop]["name"]
 
