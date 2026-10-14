@@ -32,6 +32,19 @@ static func tile_polygon(origin: Vector2, x: int, y: int) -> PackedVector2Array:
 	])
 
 
+## 뒤(화면 위쪽)부터 앞으로 그리는 칸 순서 (한 변 n칸 밭, 칸 번호 = y × n + x): x + y가 작은 칸이 먼저, 같으면 x가 작은 칸
+@warning_ignore("integer_division")
+static func draw_order(n: int) -> Array[int]:
+	var order: Array[int] = []
+	for i in n * n:
+		order.append(i)
+	order.sort_custom(func(a: int, b: int) -> bool:
+		var sa := a % n + a / n
+		var sb := b % n + b / n
+		return sa < sb or (sa == sb and a % n < b % n))
+	return order
+
+
 ## 밭 전체가 차지하는 화면 크기 (마름모의 폭과 높이)
 static func field_size(cells: int) -> Vector2:
 	return Vector2(cells * TILE_W, cells * TILE_H)

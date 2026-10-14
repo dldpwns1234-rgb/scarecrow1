@@ -5,6 +5,7 @@ extends Node2D
 
 const Iso := preload("res://scenes/night/iso.gd")
 const FieldGround := preload("res://scenes/night/field_ground.gd")
+const CROP_SHADER := preload("res://scenes/night/crop_sway.gdshader")  # 바람 흔들림·달빛 (작물 그림 모두가 부모의 것을 같이 쓴다)
 const TEXTURES: Array[Texture2D] = [  # Balance.Crop 순서
 	preload("res://assets/sprites/crops/wheat.svg"),
 	preload("res://assets/sprites/crops/corn.svg"),
@@ -48,6 +49,8 @@ func _ready() -> void:
 	_ground = FieldGround.new()
 	add_child(_ground)
 	_crops = Node2D.new()
+	_crops.material = ShaderMaterial.new()
+	(_crops.material as ShaderMaterial).shader = CROP_SHADER
 	add_child(_crops)
 	Night.night_started.connect(rebuild)
 	Night.wave_started.connect(_on_wave.unbind(1))
@@ -99,9 +102,10 @@ func _make_sprites() -> void:
 	_tweens.clear()
 	_sprites.resize(Night.cell_count())
 	_tweens.resize(Night.cell_count())
-	for index in _draw_order():
+	for index in Iso.draw_order(Night.field_size):
 		var sprite := Sprite2D.new()
 		sprite.centered = false
+		sprite.use_parent_material = true
 		sprite.scale = Vector2.ONE * CROP_SCALE
 		_crops.add_child(sprite)
 		_sprites[index] = sprite
@@ -115,18 +119,6 @@ func _place(index: int) -> void:
 	sprite.offset = -sprite.texture.get_size() * CROP_BASE
 	sprite.position = cell_local(index)
 	sprite.scale = Vector2.ONE * CROP_SCALE
-
-
-## 뒤(화면 위쪽)부터 앞으로 그리는 칸 순서: x + y가 작은 칸이 먼저
-func _draw_order() -> Array[int]:
-	var order: Array[int] = []
-	for i in Night.cell_count():
-		order.append(i)
-	order.sort_custom(func(a: int, b: int) -> bool:
-		var pa := Night.cell_position(a)
-		var pb := Night.cell_position(b)
-		return pa.x + pa.y < pb.x + pb.y or (is_equal_approx(pa.x + pa.y, pb.x + pb.y) and pa.x < pb.x))
-	return order
 
 
 func _health_color(index: int) -> Color:
