@@ -46,6 +46,7 @@ func to_dict() -> Dictionary:
 		"game": Game.to_dict(),
 		"upgrades": Upgrades.to_dict(),
 		"night": Night.to_dict(),
+		"prefs": Prefs.to_dict(),
 	}
 
 
@@ -54,6 +55,7 @@ func from_dict(data: Dictionary) -> void:
 	Upgrades.from_dict(_section(data, "upgrades"))
 	Game.from_dict(_section(data, "game"))
 	Night.from_dict(_section(data, "night"))
+	Prefs.from_dict(_section(data, "prefs"))
 
 
 func save_game() -> void:
@@ -105,6 +107,7 @@ func reset_data() -> void:
 	Upgrades.reset()
 	Game.reset()
 	Night.reset()
+	Prefs.reset()
 	save_game()
 
 

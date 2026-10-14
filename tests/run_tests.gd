@@ -3,7 +3,7 @@ extends Node
 ##
 ##   godot --headless --path . res://tests/run_tests.tscn
 ##
-## 메인 씬 대신 이 씬을 띄우면 오토로드(Balance, Num, Upgrades, Game, Night, Save)가 그대로 뜬다.
+## 메인 씬 대신 이 씬을 띄우면 오토로드(Balance, Num, Upgrades, Game, Night, Prefs, Save, Sfx)가 그대로 뜬다.
 ## --script 모드는 오토로드를 띄우지 않으므로 쓰지 않는다. 실패하면 종료 코드 1. 테스트 안의 SCRIPT ERROR는 CI가 로그를 grep한다.
 
 ## 테스트 중 저장은 전부 이 파일로 간다. 실제 저장 파일을 건드리면 다음 실행의 시작 상태가 오염된다
@@ -15,6 +15,7 @@ const SUITES: Array[GDScript] = [
 	preload("res://tests/test_upgrades.gd"),
 	preload("res://tests/test_night.gd"),
 	preload("res://tests/test_save.gd"),
+	preload("res://tests/test_sound.gd"),
 ]
 
 

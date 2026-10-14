@@ -21,8 +21,12 @@ Upgrades="*res://autoload/upgrades.gd"
 Game="*res://autoload/game.gd"
 ; 밤 한 판의 규칙(밭·구름·번짐·까마귀). Game의 낮·밤 전환을 받고 Game.add_rest()를 부른다
 Night="*res://autoload/night.gd"
-; 저장은 위 오토로드를 모두 불러오므로 맨 뒤에
+; 소리 설정은 Save가 불러오므로 그 앞에
+Prefs="*res://autoload/prefs.gd"
+; 저장은 위 오토로드를 모두 불러오므로 그 뒤에
 Save="*res://autoload/save.gd"
+; 효과음은 위 오토로드들의 시그널만 받고 음량은 Prefs에서 읽는다. Save가 불러온 뒤라 시작 음량이 저장대로 정해진다
+Sfx="*res://autoload/sfx.gd"
 
 [display]
 

@@ -18,11 +18,13 @@ const REST_COLOR := Color("9ad14f")
 const NOTE_COLOR := Color("b8bcc8")
 const REST_FONT_SIZE: int = 40
 const TITLE_FONT_SIZE: int = 28
+const SOUND_BUTTON_SIZE := Vector2(110, 48)
 
 var _gate: RefreshGate  # 시그널이 오면 표시만, 보일 때 프레임당 한 번 갱신
 var _rest: Label
 var _record: Label
 var _night_button: Button
+var _sound: Button  # 효과음 켬/끔 (Prefs)
 
 
 func _ready() -> void:
@@ -41,6 +43,7 @@ func _ready() -> void:
 	Game.night_finished.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)
 	Night.field_level_changed.connect(_gate.queue)
+	Prefs.audio_changed.connect(_gate.queue)
 	_refresh()
 
 
@@ -48,8 +51,15 @@ func _make_left() -> VBoxContainer:
 	var column := VBoxContainer.new()
 	column.custom_minimum_size = Vector2(LEFT_WIDTH, 0.0)
 	column.add_theme_constant_override("separation", GAP / 2)
+	var top := HBoxContainer.new()
+	column.add_child(top)
 	var title := _label("낮 · 짚돌이의 헛간", TITLE_FONT_SIZE, TITLE_COLOR)
-	column.add_child(title)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	_sound = Button.new()
+	_sound.custom_minimum_size = SOUND_BUTTON_SIZE
+	_sound.pressed.connect(func() -> void: Prefs.set_sfx_on(not Prefs.sfx_on))
+	top.add_child(_sound)
 	var portrait := TextureRect.new()
 	portrait.texture = PORTRAIT
 	portrait.custom_minimum_size = PORTRAIT_SIZE
@@ -89,4 +99,5 @@ func _refresh() -> void:
 		_record.text = "아직 밤에 나가 본 적이 없다.\n밭이 망하면 나도 쉴 수 있겠지…"
 	else:
 		_record.text = "밤 %d번 지남\n지난 밤 +%s  ·  최고 +%s" % [Game.nights, Num.format(Game.last_haul), Num.format(Game.best_haul)]
+	_sound.text = "소리 켬" if Prefs.sfx_on else "소리 끔"
 	_night_button.text = "밤으로 나가기  ·  밭 %d단계  (%d초)" % [Night.field_level, roundi(Game.night_seconds())]
