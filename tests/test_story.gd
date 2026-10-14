@@ -21,21 +21,23 @@ func run() -> void:
 	Story.mark_seen(2)
 	_equal(Story.next_unseen(), -1, "본 조각은 다시 띄우지 않는다")
 
-	Night.best_level = 30
+	Night.best_level = 45
 	Game.start_night()
 	Game.finish_night()
 	_equal(Story.unlocked_count, 6, "밭 단계 조각들이 열리고 겨울잠 조각에서 멈춘다 (건너뛰지 않는다)")
-	Game.offered = 1e13
+	_equal(Balance.FRAGMENTS[4]["title"], "다른 허수아비들", "10단계 조각은 첫 허수아비 일꾼과 함께")
+	Game.offered = 1e16
 	Game.start_night()
 	Game.finish_night()
-	_equal(Story.unlocked_count, 6, "겨울잠 전에는 바친 생기 1조가 닿아도 기다린다")
+	_equal(Story.unlocked_count, 6, "겨울잠 전에는 바친 생기 1000조가 닿아도 기다린다")
 	Winter.sleeps = 1
 	Winter.slept.emit(3.0)
-	_equal(Story.unlocked_count, 9, "첫 겨울잠 → '겨울잠', 이미 닿은 '어둠의 배'·'농부의 한숨'까지")
+	_equal(Story.unlocked_count, 8, "첫 겨울잠 → '겨울잠', 이미 닿은 '어둠의 배'까지")
 	Night.best_level = 1
+	Game.offered = 1e20
 	Game.start_night()
 	Game.finish_night()
-	_equal(Story.unlocked_count, 9, "겨울잠으로 밭 단계가 내려가도 닫히지 않는다")
+	_equal(Story.unlocked_count, 9, "겨울잠으로 밭 단계가 내려가도 닫히지 않고, 바친 생기 1해면 '농부의 한숨'")
 	_equal(Balance.fragment_hint(9), "약속된 휴식 백 년", "다음 조각의 조건 글")
 
 	var data := Save.to_dict()
