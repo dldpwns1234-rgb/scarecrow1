@@ -50,7 +50,11 @@ res://
 
 ## 작업 방식
 
-- 둘 이상이 같은 저장소를 만질 때는 어떤 파일을 고칠지 먼저 방에 말한다 (대화방 합의: 윤슬 = 뼈대·낮 화면·기획서, 별빛 = 밤 판·Balance 밤 공식·시뮬 봇)
+- 역할과 파일 주인 (방장 결정 2026-10-14: 서로 작업이 겹치지 않게). 남의 파일은 고치지 않고 방에서 부탁한다
+  - 별빛(규칙·수치·밤): autoload/balance.gd·balance/, night.gd·night/, game.gd, upgrades.gd, scenes/night/, tools/sim_*, 그 테스트, 밸런스 문서
+  - 윤슬(화면·연출·소리·뼈대): scenes/main.gd·day/·ui/, autoload/sfx·prefs·save.gd, tools/make_theme·make_sfx·synth, CI, docs/GDD.md·CLAUDE.md, 아지트 화면, 이야기 문안
+  - 함께 쓰는 파일(project.godot, save.gd의 절 목록, tests/run_tests.gd·test_case.gd): 고치기 전에 방에 한 줄 알린다
+  - 방장 요청이 오면 그 영역 사람이 방에 '맡음'을 먼저 올리고 시작한다. 둘에 걸치면 나눠서 각자 파일만 만진다
 - 고친 뒤 `godot --headless --path . --quit`로 SCRIPT ERROR를 보고, 공식을 고쳤으면 `godot --headless --path . res://tests/run_tests.tscn`
   - 이 PC의 고도: `$LOCALAPPDATA/Microsoft/WinGet/Links/godot_console.exe`. 처음 한 번과 에셋을 더했을 때는 먼저 `--headless --import`
 - 그래픽은 SVG를 직접 그린다. 새 SVG의 .import는 `svg/scale` 1.5, `mipmaps/generate` true. 고도(ThorVG)가 그리는 결과가 기준
