@@ -139,7 +139,9 @@ func _grow(index: int) -> void:
 	var weights := Balance.crop_weights(field_level, Upgrades.level(Balance.Upgrade.PUMPKIN))
 	var roll := rng.randf()
 	var crop: int = Balance.Crop.WHEAT
-	if roll >= weights[0] + weights[1]:
+	if rng.randf() < Balance.golden_chance(Upgrades.level(Balance.Upgrade.GOLDEN)):
+		crop = Balance.Crop.GOLDEN
+	elif roll >= weights[0] + weights[1]:
 		crop = Balance.Crop.PUMPKIN
 	elif roll >= weights[0]:
 		crop = Balance.Crop.CORN

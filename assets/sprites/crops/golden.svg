@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 황금 이삭: 빛나는 금빛 이삭 셋과 반짝임. 밑동이 (48, 90)에 선다 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="24" ry="6" fill="#ffe08a" stroke="none" opacity="0.45"/>
+    <path d="M48 88 Q42 60 32 30 M48 88 Q48 56 48 18 M48 88 Q54 60 64 30" fill="none" stroke="#d9a520" stroke-width="4.5"/>
+    <ellipse cx="31" cy="27" rx="6" ry="12" fill="#ffd23f" transform="rotate(-20 31 27)"/>
+    <ellipse cx="48" cy="16" rx="6.5" ry="13" fill="#ffe36e"/>
+    <ellipse cx="65" cy="27" rx="6" ry="12" fill="#ffd23f" transform="rotate(20 65 27)"/>
+    <path d="M18 14 L20 8 L22 14 L28 16 L22 18 L20 24 L18 18 L12 16 Z" fill="#fff6c8" stroke-width="2"/>
+    <path d="M74 44 L75.5 40 L77 44 L81 45.5 L77 47 L75.5 51 L74 47 L70 45.5 Z" fill="#fff6c8" stroke-width="2"/>
+  </g>
+</svg>

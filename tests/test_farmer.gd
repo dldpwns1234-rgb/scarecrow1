@@ -1,5 +1,6 @@
 extends "res://tests/test_case.gd"
-## 농부와 수확일 (GDD 8절 M3): 농부 수, 수확일 배율, 농부 둘레의 약(피해 절반·번짐 씻기), 다시 심기, 걸음, 수확일 정복 보너스
+## 농부와 수확일 (GDD 8절 M3): 농부 수, 수확일 배율, 농부 둘레의 약(피해 절반·번짐 씻기), 다시 심기, 걸음, 수확일 정복 보너스,
+## 맞수(스며드는 독·까마귀 소란), 황금 이삭
 
 
 func run() -> void:
@@ -7,6 +8,7 @@ func run() -> void:
 	_test_guard_and_spray()
 	_test_replant_and_walk()
 	_test_harvest()
+	_test_counters()
 	_fresh()
 	Night.reset()
 
@@ -104,3 +106,38 @@ func _test_harvest() -> void:
 	Night._damage(last, 1e30)
 	_equal(Night.cleared, true, "수확일 정복")
 	_close(Game.last_haul, harvest * (1.0 + Balance.HARVEST_CLEAR_BONUS), "정복하면 이번 밤 생기 +50%")
+
+
+func _test_counters() -> void:
+	_close(Balance.farmer_guard(2), Balance.FARMER_GUARD + 0.2, "스며드는 독 2레벨: 약 친 작물 피해 ×0.7")
+	_close(Balance.farmer_guard(9), 1.0, "약이 안 듣는 데서 멈춘다")
+	_start(7)
+	var spot := Night.cell_position(5 * Balance.FIELD_SIZE + 5)
+	Night.farmers[0] = spot
+	Night._farmer_targets[0] = spot
+	var near := 5 * Balance.FIELD_SIZE + 5
+	Upgrades.levels[Balance.Upgrade.SEEP] = 3
+	_close(Night.guard(near), Balance.FARMER_GUARD + 0.3, "밤에도 스며드는 독이 든다")
+	# 까마귀 소란: 쪼면 농부가 멈추고, 멈춘 농부는 약을 못 친다
+	Upgrades.levels[Balance.Upgrade.RACKET] = 5
+	Night._peck()
+	_equal(Night.is_stunned(0), true, "까마귀가 쪼면 농부가 멈춘다")
+	_close(Night.guard(near), 1.0, "멈춘 농부 둘레는 약이 없다")
+	Night.set_cloud(Vector2(-99.0, -99.0))
+	Night.tick(Balance.racket_stun(5) + 0.05)
+	_equal(Night.is_stunned(0), false, "시간이 지나면 다시 걷는다")
+	# 황금 이삭
+	_close(Balance.golden_chance(4), Balance.GOLDEN_BASE_CHANCE + 0.02, "황금 이삭 레벨당 +0.5%p")
+	_fresh()
+	Night.reset()
+	Upgrades.levels[Balance.Upgrade.DENSE] = Balance.upgrade_max_level(Balance.Upgrade.DENSE)
+	Upgrades.levels[Balance.Upgrade.GOLDEN] = 10
+	var golden := 0
+	for seed in 20:
+		Game.start_night()
+		Night.begin(seed)
+		for i in Night.cell_count():
+			golden += 1 if Night.kinds[i] == Balance.Crop.GOLDEN else 0
+		Night.stop()
+	_equal(golden > 20 * 144 * 0.03 and golden < 20 * 144 * 0.09, true, "황금 이삭 6%% 안팎 (%d / 2880)" % golden)
+	_close(Balance.crop_vitality(Balance.Crop.GOLDEN, 1) / Balance.crop_vitality(Balance.Crop.PUMPKIN, 1), 8.0, "황금 이삭은 호박의 8배 생기")

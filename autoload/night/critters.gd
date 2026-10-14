@@ -9,6 +9,7 @@ var active: bool = false           # 밤이 도는 중
 var farmers: Array[Vector2] = []   # 농부 자리 (격자 단위). 화면이 매 프레임 읽는다
 var _farmer_targets: Array[Vector2] = []
 var _replant_left: Array[float] = []
+var _stun_left: Array[float] = []  # 까마귀 소란으로 멈춘 남은 초
 var _crow_left: Array[float] = []
 
 
@@ -21,12 +22,14 @@ func _setup_critters() -> void:
 	farmers.clear()
 	_farmer_targets.clear()
 	_replant_left.clear()
+	_stun_left.clear()
 	var size := float(Balance.FIELD_SIZE)
 	for i in Balance.farmer_count(field_level):
 		var edge := rng.randf() * size
 		farmers.append(Vector2(edge, 0.0) if i % 2 == 0 else Vector2(size, edge))
 		_farmer_targets.append(_next_target())
 		_replant_left.append(Balance.FARMER_REPLANT_INTERVAL)
+		_stun_left.append(0.0)
 
 
 ## 까마귀와 농부의 시간을 흘린다 (night.gd의 tick이 부른다)
@@ -39,6 +42,9 @@ func _tick_critters(dt: float) -> void:
 	for f in farmers.size():
 		if not active:
 			return
+		if _stun_left[f] > 0.0:
+			_stun_left[f] -= dt
+			continue
 		_walk(f, dt)
 		_spray(f)
 		_replant_left[f] -= dt
@@ -47,13 +53,18 @@ func _tick_critters(dt: float) -> void:
 			_replant(f)
 
 
-## 농부 둘레 안의 작물이 받는 피해 배율 (약을 쳤다)
+## 농부 둘레 안의 작물이 받는 피해 배율 (약을 쳤다, 스며드는 독). 멈춘 농부는 약을 못 친다
 func guard(index: int) -> float:
 	var at := cell_position(index)
-	for spot in farmers:
-		if spot.distance_to(at) <= Balance.FARMER_RADIUS:
-			return Balance.FARMER_GUARD
+	for f in farmers.size():
+		if _stun_left[f] <= 0.0 and farmers[f].distance_to(at) <= Balance.FARMER_RADIUS:
+			return Balance.farmer_guard(Upgrades.level(Balance.Upgrade.SEEP))
 	return 1.0
+
+
+## 이 농부가 까마귀 소란으로 멈춰 있는지 (화면용)
+func is_stunned(f: int) -> bool:
+	return f < _stun_left.size() and _stun_left[f] > 0.0
 
 
 ## 까마귀 한 마리가 살아 있는 작물 하나를 쫀다 (아무 칸이나, 약은 안 듣는다). 검은 깃털이면 쪼인 작물이 번짐에 걸릴 수 있다
@@ -67,11 +78,21 @@ func _peck() -> void:
 			continue
 		if pick == 0:
 			crow_pecked.emit(i)
+			_stun_farmer()
 			_damage(i, Balance.crow_damage(cloud_dps(), Upgrades.level(Balance.Upgrade.BEAK)))
 			if is_alive(i) and infected[i] == 0 and rng.randf() < Balance.feather_chance(Upgrades.level(Balance.Upgrade.FEATHER)):
 				_infect(i)
 			return
 		pick -= 1
+
+
+## 까마귀 소란: 농부 하나(무작위)를 멈춘다. 이미 멈춰 있으면 더 긴 쪽
+func _stun_farmer() -> void:
+	var stun := Balance.racket_stun(Upgrades.level(Balance.Upgrade.RACKET))
+	if stun <= 0.0 or farmers.is_empty():
+		return
+	var f := rng.randi_range(0, farmers.size() - 1)
+	_stun_left[f] = maxf(_stun_left[f], stun)
 
 
 ## 농부가 노리던 자리에 닿으면 다음 자리 (살아 있는 작물 하나, 없으면 밭 가운데)

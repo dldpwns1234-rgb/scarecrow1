@@ -7,6 +7,8 @@ const FARMER_MORE_LEVELS: Array[int] = [15, 30]  # 이 단계부터 한 명씩 �
 const FARMER_SPEED: float = 1.5          # 칸/초
 const FARMER_RADIUS: float = 1.5         # 약을 치는 둘레 (칸)
 const FARMER_GUARD: float = 0.5          # 둘레 안 작물이 받는 구름·번짐 피해 배율
+const SEEP_PER_LEVEL: float = 0.1        # 스며드는 독: 레벨당 그 배율 +0.1 (5레벨이면 약이 안 듣는다)
+const RACKET_STUN_PER_LEVEL: float = 0.4 # 까마귀 소란: 쫄 때마다 농부 하나가 레벨당 0.4초 멈춘다
 const FARMER_REPLANT_INTERVAL: float = 4.0  # 이만큼(초)마다 둘레 안의 시든 칸 하나에 다시 심는다
 const HARVEST_INTERVAL: int = 5          # 5의 배수 단계가 수확일
 const HARVEST_HP: float = 3.0            # 수확일 작물 체력 ×3
@@ -23,6 +25,16 @@ func farmer_count(field_level: int) -> int:
 		if field_level >= level:
 			count += 1
 	return count + (1 if is_harvest(field_level) else 0)
+
+
+## 농부 둘레 안 작물이 받는 피해 배율 (스며드는 독)
+func farmer_guard(seep_level: int) -> float:
+	return minf(FARMER_GUARD + SEEP_PER_LEVEL * seep_level, 1.0)
+
+
+## 까마귀가 한 번 쫄 때 농부가 멈추는 초
+func racket_stun(racket_level: int) -> float:
+	return RACKET_STUN_PER_LEVEL * racket_level
 
 
 ## 수확일(보스 밤)인지

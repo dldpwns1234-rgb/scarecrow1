@@ -7,11 +7,13 @@ const TEXTURES: Array[Texture2D] = [  # Balance.Crop 순서
 	preload("res://assets/sprites/crops/wheat.svg"),
 	preload("res://assets/sprites/crops/corn.svg"),
 	preload("res://assets/sprites/crops/pumpkin.svg"),
+	preload("res://assets/sprites/crops/golden.svg"),
 ]
 const DEAD_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/crops/wheat_dead.svg"),
 	preload("res://assets/sprites/crops/corn_dead.svg"),
 	preload("res://assets/sprites/crops/pumpkin_dead.svg"),
+	preload("res://assets/sprites/crops/golden_dead.svg"),
 ]
 const CROP_SCALE: float = 0.42          # 그림(96px × 가져오기 1.5배)을 칸 폭에 맞춘다
 const CROP_BASE := Vector2(0.5, 0.94)   # 그림 안에서 밑동 자리 (크기 비율)

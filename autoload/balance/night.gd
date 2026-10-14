@@ -9,12 +9,15 @@ const FILL_PER_LEVEL: float = 0.07     # 빽빽한 밭: 레벨당 심는 비율 
 const CLEAR_RATIO: float = 0.9         # 시든 작물이 처음 심은 수의 이만큼에 닿으면 밭 정복 (다시 자란 작물이 시든 것도 친다. 남은 수로 재면 다시 자라기가 정복을 막았다)
 const MAX_FIELD_LEVEL: int = 200
 
-enum Crop { WHEAT, CORN, PUMPKIN }
+enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN }
 const CROPS: Array[Dictionary] = [
 	{"name": "밀", "hp": 10.0, "vitality": 1.0},
 	{"name": "옥수수", "hp": 45.0, "vitality": 5.0},
 	{"name": "호박", "hp": 200.0, "vitality": 25.0},
+	{"name": "황금 이삭", "hp": 60.0, "vitality": 200.0},  # 아주 가끔 심긴다. 찾아가 시들게 하는 재미 (회귀 용사의 보물 요정)
 ]
+const GOLDEN_BASE_CHANCE: float = 0.01      # 심기는 작물 하나가 황금 이삭일 확률 1%
+const GOLDEN_CHANCE_PER_LEVEL: float = 0.005  # 황금 이삭(업그레이드): 레벨당 +0.5%p
 ## 밭 단계 1의 작물 비율 (밀·옥수수·호박). 단계가 오를 때마다 밀에서 CROP_SHIFT씩 덜어 옥수수·호박에 반씩 준다
 const CROP_WEIGHTS: Array[float] = [0.7, 0.25, 0.05]
 const CROP_SHIFT: float = 0.04
@@ -70,6 +73,11 @@ func crop_weights(field_level: int, pumpkin_level: int = 0) -> Array[float]:
 	var wheat := CROP_WEIGHTS[0] - moved
 	var pumpkin_extra := minf(PUMPKIN_WEIGHT_PER_LEVEL * pumpkin_level, wheat - MIN_WHEAT_WEIGHT * 0.5)
 	return [wheat - pumpkin_extra, CROP_WEIGHTS[1] + moved * 0.5, CROP_WEIGHTS[2] + moved * 0.5 + pumpkin_extra]
+
+
+## 심기는 작물 하나가 황금 이삭일 확률
+func golden_chance(golden_level: int) -> float:
+	return GOLDEN_BASE_CHANCE + GOLDEN_CHANCE_PER_LEVEL * golden_level
 
 
 ## 칸에 작물이 심길 확률: 0.3 + 0.07 × 빽빽한 밭

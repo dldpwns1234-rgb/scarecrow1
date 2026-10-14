@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 시든 황금 이삭: 빛을 잃고 늘어진 잿금빛 줄기 -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="88" rx="22" ry="6" fill="#3a3326" stroke="none" opacity="0.5"/>
+    <path d="M48 88 Q40 70 26 66 M48 88 Q50 66 62 56 M48 88 Q56 74 72 74" fill="none" stroke="#8f8257" stroke-width="4"/>
+    <ellipse cx="24" cy="68" rx="5" ry="9" fill="#b0a06a" transform="rotate(70 24 68)"/>
+    <ellipse cx="64" cy="55" rx="5" ry="9" fill="#b0a06a" transform="rotate(-50 64 55)"/>
+    <ellipse cx="74" cy="75" rx="5" ry="9" fill="#b0a06a" transform="rotate(-80 74 75)"/>
+  </g>
+</svg>
