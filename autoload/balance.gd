@@ -1,6 +1,6 @@
 extends "res://autoload/balance/story.gd"
 ## Balance (오토로드): 모든 수치와 공식. 바깥에서는 Balance.만 쓴다. 200줄 규칙 때문에 balance/ 아래 부분 스크립트를 상속으로 이어 붙인다.
-## 사슬: core(한계) → upgrades(어둠의 나무) → night(밭·작물·구름·번짐·까마귀·다시 자라기) → winter(겨울잠·꿈의 상점) → story(이야기 조각, 윤슬) → balance.gd(밤 길이, 약속된 휴식). 앞 스크립트는 뒤 스크립트의 것을 못 본다
+## 사슬: core(한계) → upgrades(어둠의 나무) → night(밭·작물·구름·번짐·까마귀·다시 자라기) → farmer(농부·수확일) → winter(겨울잠·꿈의 상점) → story(이야기 조각, 윤슬) → balance.gd(밤 길이, 약속된 휴식). 앞 스크립트는 뒤 스크립트의 것을 못 본다
 
 const NIGHT_BASE_SECONDS: float = 20.0      # 밤 한 판의 길이. 짧게 시작한다 (방장 2026-10-14)
 const NIGHT_SECONDS_PER_LEVEL: float = 3.0  # 긴 밤 레벨당

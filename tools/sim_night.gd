@@ -5,7 +5,8 @@ extends Node
 ##
 ## 사람 흉내: 밤에는 구름을 '값어치가 가장 몰린 자리'로 옮긴다 (원 안 작물의 생기 ÷ 남은 체력 합이 가장 큰 작물 자리, 0.25초마다 다시 고름).
 ## 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
-## 가장 높은 단계를 못 깼으면 사람처럼 한 단계 아래에서 retry밤 동안 모은 뒤 다시 도전한다 (못 깨는 밭만 붙들면 수입이 바닥이라 벽이 실제보다 가팔라 보였다).
+## 못 깨면 사람처럼 한 단계씩 내려가 모으고, 깨면 한 단계씩 올라가 다시 도전한다 (못 깨는 밭만 붙들면 수입이 바닥이라 벽이 실제보다 가팔라 보였고,
+## 겨울 씨앗으로 높은 단계에서 맨손으로 시작한 철에는 영영 못 벗어났다). 가장 높은 단계에서 못 깨면 retry밤 동안 아래에서 모은 뒤 다시 간다.
 ## 겨울잠(winter=1): 열린 단계가 stall밤 동안 오르지 않고 겨울잠에 들 수 있으면 들고, 꿈 조각을 싼 것부터 다 쓴다. 철마다 한 줄씩 찍는다.
 ## 낮에 쓰는 시간(day초)을 밤 길이에 더해 실제 시간을 어림한다. 결과는 docs/BALANCE_SIM.md에 적는다
 
@@ -16,7 +17,8 @@ var _speed: float = 12.0
 var _day: float = 15.0
 var _log: bool = true
 var _retry: int = 2
-var _farm_left: int = 0  # 한 단계 아래에서 더 모을 밤 수
+var _farm_left: int = 0  # 가장 높은 단계에서 진 뒤 아래에서 더 모을 밤 수
+var _play_level: int = 1  # 다음 밤에 나갈 단계
 var _winter: bool = false
 var _stall: int = 6
 
@@ -51,8 +53,7 @@ func _ready() -> void:
 		var seconds := _play()
 		clock += seconds + _day
 		var cleared := Night.cleared
-		if not cleared and level == Night.best_level and level > 1:
-			_farm_left = _retry
+		_after_night(level, cleared)
 		if cleared and not firsts.has(level):
 			firsts[level] = [n + 1, clock / 60.0]
 		since_new = 0 if Night.best_level > best_seen else since_new + 1
@@ -66,6 +67,7 @@ func _ready() -> void:
 			print("== 겨울잠 %d: %.1f분 철 (누적 %.1f분), 밭 %d단계, 꿈 조각 +%s, 산 꿈: %s" % [Winter.sleeps, (clock - season_start) / 60.0, clock / 60.0,
 				reached, Num.format(Winter.shards), _dream_shop()])
 			season_start = clock
+			_play_level = Night.best_level
 			since_new = 0
 			best_seen = Night.best_level
 			firsts.clear()
@@ -75,13 +77,21 @@ func _ready() -> void:
 	get_tree().quit()
 
 
-## 못 깬 뒤 retry밤은 한 단계 아래, 그 밖에는 가장 높은 단계
 func _pick_level() -> void:
-	if _farm_left > 0:
+	Night.choose_level(clampi(_play_level, 1, Night.best_level))
+
+
+## 깨면 올라가고(가장 높은 단계에서 진 뒤에는 retry밤 동안 그 아래에 머문다), 못 깨면 한 단계 내려간다
+func _after_night(level: int, cleared: bool) -> void:
+	if not cleared:
+		if level == Night.best_level:
+			_farm_left = _retry
+		_play_level = maxi(level - 1, 1)
+	elif _farm_left > 0 and level == Night.best_level - 1:
 		_farm_left -= 1
-		Night.choose_level(Night.best_level - 1)
+		_play_level = level
 	else:
-		Night.choose_level(Night.best_level)
+		_play_level = Night.best_level
 
 
 ## 밤 한 판을 끝까지 돈다. 걸린 시간(초)을 돌려준다

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <!-- 농부: 밀짚모자와 멜빵바지, 등에 약통과 분무기. 발끝이 (48, 92)에 선다. 지친 눈 (농부도 쉬고 싶다) -->
+  <g stroke="#2b2416" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="48" cy="91" rx="18" ry="4" fill="#000000" stroke="none" opacity="0.3"/>
+    <rect x="58" y="40" width="14" height="24" rx="4" fill="#9aa8b8"/>
+    <path d="M38 88 L40 70 L56 70 L58 88 Z" fill="#4f6d8f"/>
+    <path d="M36 52 Q48 46 60 52 L58 72 L38 72 Z" fill="#c9784b"/>
+    <path d="M40 54 L44 70 M56 54 L52 70" fill="none" stroke="#4f6d8f" stroke-width="5"/>
+    <path d="M36 56 Q24 62 22 72" fill="none" stroke="#e0b48a" stroke-width="6"/>
+    <path d="M22 72 L14 66 M14 66 L10 64" fill="none" stroke="#5b6470" stroke-width="4"/>
+    <circle cx="48" cy="36" r="12" fill="#e8c39e"/>
+    <path d="M42 36 Q44 34 46 36 M50 36 Q52 34 54 36" fill="none" stroke-width="2.5"/>
+    <path d="M45 42 Q48 41 51 42" fill="none" stroke-width="2"/>
+    <ellipse cx="48" cy="26" rx="22" ry="5" fill="#e9c46a"/>
+    <path d="M38 26 Q40 14 48 13 Q56 14 58 26 Z" fill="#e9c46a"/>
+  </g>
+</svg>

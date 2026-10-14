@@ -117,10 +117,11 @@ func _unlock_next() -> void:
 		field_level_changed.emit(field_level, best_level)
 
 
-## 이 칸의 작물을 시들게 하면 받는 생기 (썩은 냄새·꿈속 수확 배율 포함)
+## 이 칸의 작물을 시들게 하면 받는 생기 (수확일·썩은 냄새·꿈속 수확 배율 포함)
 func crop_vitality(index: int) -> float:
 	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(Balance.Upgrade.PUMPKIN))
-	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * Winter.vitality_multiplier())
+	value *= Balance.harvest_vitality(field_level) * Winter.vitality_multiplier()
+	return Balance.cap(value * Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)))
 
 
 ## 밭을 새로 심는다: 칸마다 심는 비율(빽빽한 밭)만큼 작물, 종류는 밭 단계의 비율(탐스러운 호박)대로
@@ -143,7 +144,7 @@ func _grow(index: int) -> void:
 	elif roll >= weights[0]:
 		crop = Balance.Crop.CORN
 	kinds[index] = crop
-	max_hp[index] = Balance.crop_hp(crop, field_level, Upgrades.level(Balance.Upgrade.FERTILE))
+	max_hp[index] = Balance.crop_hp(crop, field_level, Upgrades.level(Balance.Upgrade.FERTILE)) * Balance.harvest_hp(field_level)
 	hp[index] = max_hp[index]
 	infected[index] = 0
 	regrow_left[index] = 0.0

@@ -88,6 +88,7 @@ func _on_time_changed(seconds_left: float) -> void:
 
 func _refresh() -> void:
 	_rest.text = "생기 +%s" % Num.format(Game.night_haul)
-	_field.text = "밭 %d단계  ·  시든 작물 %d / %d" % [Night.field_level, Night.withered, Night.crops_total]
-	_bar.max_value = maxf(float(Night.crops_total), 1.0)
+	var harvest := "  ·  수확일" if Balance.is_harvest(Night.field_level) else ""
+	_field.text = "밭 %d단계%s  ·  시든 작물 %d / %d" % [Night.field_level, harvest, Night.withered, Night.first_planted]
+	_bar.max_value = maxf(float(Night.first_planted), 1.0)  # 정복 표시(90%)는 처음 심은 수 기준
 	_bar.value = Night.withered

@@ -1,4 +1,4 @@
-extends "res://autoload/balance/night.gd"
+extends "res://autoload/balance/farmer.gd"
 ## Balance 3부: 겨울잠 (회귀, GDD 8절 M4). 열린 밭 단계가 WINTER_MIN_LEVEL 이상이면 겨울잠에 들어 생기·어둠의 나무·밭 단계를 내려놓고 꿈 조각을 받는다.
 ## 꿈 조각으로 꿈의 상점(영구 강화)을 산다. 비용 = 내림(기본 × 성장^레벨). 수치는 시뮬레이션으로 맞춘다 (docs/BALANCE_SIM.md)
 ## 비용 1·2·3…에 ×2 배율이면 첫 겨울잠의 199조각으로 피해·생기가 ×4천씩 붙어 둘째 철이 78단계까지 내달렸다
