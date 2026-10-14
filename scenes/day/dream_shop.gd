@@ -6,6 +6,7 @@ signal sleep_requested()
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const TapScroll := preload("res://scenes/ui/tap_scroll.gd")
+const KoreanText := preload("res://scenes/ui/korean_text.gd")
 
 const GAP: int = 12
 const COLUMNS: int = 1  # 한 줄에 하나 (두 칸이면 이름·효과가 잘리고 낱말 중간에서 줄이 바뀌었다)
@@ -16,6 +17,7 @@ const SHARD_COLOR := Color("c9a2ff")
 const NOTE_COLOR := Color("b8bcc8")
 const SHARD_FONT_SIZE: int = 30
 const NOTE_FONT_SIZE: int = 20
+const NOTE_CHARS: int = 34  # 꿈 설명 한 줄의 글자 수
 
 var _gate: RefreshGate
 var _shards: Label
@@ -91,7 +93,8 @@ func _make_card(index: int) -> PanelContainer:
 	column.add_child(title)
 	_titles.append(title)
 	var note := _label(NOTE_FONT_SIZE, NOTE_COLOR)
-	note.text = Balance.dream_note(index)
+	note.text = KoreanText.wrap(Balance.dream_note(index), NOTE_CHARS)
+	note.autowrap_mode = TextServer.AUTOWRAP_OFF
 	note.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(note)
 	var buy := Button.new()

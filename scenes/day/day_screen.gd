@@ -1,6 +1,6 @@
 extends MarginContainer
 ## 낮: 허수아비의 헛간 (GDD 5절). 왼쪽에 짚돌이·생기·약속된 휴식·밤 기록·밭 단계 고르기(field_picker.gd)와 '밤으로 나가기',
-## 오른쪽에 칩 [어둠의 나무](upgrade_tree.gd) [꿈의 상점](dream_shop.gd, 겨울잠이 열리면). 칩이 하나뿐이면 칩 줄은 숨는다 (sub_tabs.gd).
+## 오른쪽에 칩 [어둠의 나무](upgrade_tree.gd) [꿈의 상점](dream_shop.gd, 겨울잠이 열리면) [아지트](hideout.gd, 밭 기록 10단계부터). 칩이 하나뿐이면 칩 줄은 숨는다 (sub_tabs.gd).
 ## Game·Upgrades의 시그널을 받아 표시만 하고, 버튼은 Game.start_night()를 부른다. 왼쪽 위 '이야기 N / 10'은 book_requested로 다시 읽기를, '설정'은 settings_requested로 설정 창을 연다(main.gd). 상수는 배치용이다.
 
 signal book_requested()
@@ -10,6 +10,7 @@ signal winter_requested()  # 꿈의 상점의 '겨울잠에 들기'. main.gd가 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const UpgradeTree := preload("res://scenes/day/upgrade_tree.gd")
 const DreamShop := preload("res://scenes/day/dream_shop.gd")
+const Hideout := preload("res://scenes/day/hideout.gd")
 const SubTabs := preload("res://scenes/ui/sub_tabs.gd")
 const FieldPicker := preload("res://scenes/day/field_picker.gd")
 const PORTRAIT := preload("res://icon.svg")
@@ -56,6 +57,7 @@ func _ready() -> void:
 	var shop := DreamShop.new()
 	shop.sleep_requested.connect(winter_requested.emit)
 	tabs.add_page("꿈의 상점", shop, DreamShop.is_open, DreamShop.has_dot)
+	tabs.add_page("아지트", Hideout.new(), Hideout.is_open, Hideout.has_dot)
 	Game.vitality_changed.connect(_gate.queue)
 	Game.night_finished.connect(_gate.queue)
 	Upgrades.upgrade_changed.connect(_gate.queue)

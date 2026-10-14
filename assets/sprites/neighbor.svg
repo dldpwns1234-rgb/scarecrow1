@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- 이웃 밭의 지친 허수아비 (아지트 일꾼, 이야기 조각 6): 짚돌이와 같은 그림체에 고개를 떨구고 팔이 처졌다. 낡은 털모자와 풀빛 셔츠 -->
+  <g stroke="#2b2416" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- 장대 -->
+    <rect x="120" y="150" width="16" height="100" fill="#7a5530"/>
+    <!-- 처진 팔 막대와 짚 -->
+    <path d="M30 168 L128 140 L226 168" fill="none" stroke="#2b2416" stroke-width="22"/>
+    <path d="M30 168 L128 140 L226 168" fill="none" stroke="#7a5530" stroke-width="14"/>
+    <path d="M32 168 L14 160 M32 168 L18 180 M32 168 L28 188 M224 168 L242 160 M224 168 L238 180 M224 168 L228 188" fill="none" stroke="#d9b45a" stroke-width="7"/>
+    <!-- 풀빛 셔츠, 기운 자국 둘 -->
+    <path d="M74 134 L182 134 L172 212 L84 212 Z" fill="#6f8a4f"/>
+    <rect x="138" y="162" width="22" height="20" fill="#b9a46a"/>
+    <path d="M100 176 L114 190 M114 176 L100 190" fill="none" stroke-width="4"/>
+    <!-- 고개 떨군 자루 머리 (조금 아래, 조금 기울게) -->
+    <g transform="rotate(-10 128 104)">
+      <ellipse cx="128" cy="104" rx="46" ry="42" fill="#cfae78"/>
+      <!-- 감은 눈과 처진 입 -->
+      <path d="M102 100 Q112 106 122 100 M134 100 Q144 106 154 100" fill="none" stroke-width="5"/>
+      <path d="M110 126 Q128 120 146 126" fill="none" stroke-width="4"/>
+      <!-- 낡은 털모자: 둥근 몸통과 접힌 챙, 꼭대기 방울 -->
+      <path d="M84 80 Q86 38 128 36 Q170 38 172 80 Z" fill="#8d6e8f"/>
+      <rect x="80" y="74" width="96" height="16" rx="7" fill="#6e5370"/>
+      <circle cx="128" cy="32" r="10" fill="#e8e0d0"/>
+    </g>
+  </g>
+</svg>

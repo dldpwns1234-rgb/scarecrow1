@@ -21,6 +21,7 @@ const SUITES: Array[GDScript] = [
 	preload("res://tests/test_sound.gd"),
 	preload("res://tests/test_story.gd"),
 	preload("res://tests/test_tree_layout.gd"),
+	preload("res://tests/test_ui_text.gd"),
 ]
 
 
