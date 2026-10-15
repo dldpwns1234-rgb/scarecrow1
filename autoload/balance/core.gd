@@ -11,3 +11,6 @@ func cap(value: float) -> float:
 	if is_nan(value):
 		return 0.0
 	return clampf(value, -MAX_NUMBER, MAX_NUMBER)
+
+## 나무 '최대' 단추가 한 번에 사는 레벨 수 상한 (상한 없는 칸이 생기가 넘칠 때 끝없이 돌지 않게, 윤슬 #628)
+const BUY_MAX_LIMIT: int = 1000

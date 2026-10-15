@@ -30,6 +30,16 @@ func run() -> void:
 	_equal(Balance.upgrade_max_level(T), 0, "독한 포자는 상한 없음")
 	_equal(Upgrades.is_maxed(T), false, "상한이 없으면 다 차지 않는다")
 	_equal(is_inf(Balance.upgrade_cost(T, 100000)), false, "비용은 무한대가 되지 않는다")
+	Upgrades.levels[T] = 0
+	Game.vitality = Balance.upgrade_cost(T, 0) + Balance.upgrade_cost(T, 1) + Balance.upgrade_cost(T, 2) + 0.5
+	_equal(Upgrades.buy_max(T), 3, "최대: 생기로 살 수 있는 만큼 (세 레벨)")
+	_equal(Upgrades.level(T) == 3 and Game.vitality < Balance.upgrade_cost(T, 3), true, "남은 생기로는 다음 레벨을 못 산다")
+	_equal(Upgrades.buy_max(T), 0, "못 사면 0")
+	Upgrades.levels[R] = Balance.upgrade_max_level(R) - 2
+	Game.vitality = 1e30
+	_equal(Upgrades.buy_max(R), 2, "최대: 상한까지만")
+	Game.vitality = 1e300
+	_equal(Upgrades.buy_max(T), Balance.BUY_MAX_LIMIT, "상한 없는 칸은 한 번에 BUY_MAX_LIMIT까지")
 	var branches: Array[String] = []
 	for i in Balance.UPGRADES.size():
 		var need := Balance.upgrade_requires(i)

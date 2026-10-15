@@ -75,6 +75,14 @@ func buy(index: int) -> bool:
 	return true
 
 
+## 지금 생기로 살 수 있는 만큼 산다 (나무 '최대' 단추, 윤슬 #628). 산 레벨 수. 한 번에 Balance.BUY_MAX_LIMIT까지
+func buy_max(index: int) -> int:
+	var bought := 0
+	while bought < Balance.BUY_MAX_LIMIT and buy(index):
+		bought += 1
+	return bought
+
+
 ## 살 수 있는 업그레이드가 하나라도 있는지 (낮 화면 표시용)
 func any_affordable() -> bool:
 	for i in levels.size():
