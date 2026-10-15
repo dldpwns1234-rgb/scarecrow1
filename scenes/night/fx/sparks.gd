@@ -17,9 +17,11 @@ const SPEED := Vector2(80.0, 220.0)       # 픽셀/초
 const BURST_SPEED := Vector2(220.0, 560.0)
 const GRAVITY: float = 520.0
 const RADIUS := Vector2(2.0, 4.5)
-const COLORS: Array[Color] = [Color("f2d27a"), Color("9ad14f"), Color("fff3c4"), Color("c8f08a"), Color("e8505b"), Color("ff8a8f")]
-const GOLD_COLORS: int = 4               # 앞의 넷이 생기 알갱이 색, 그다음 둘이 수박 즙
+const COLORS: Array[Color] = [Color("f2d27a"), Color("9ad14f"), Color("fff3c4"), Color("c8f08a"), Color("e8505b"), Color("ff8a8f"), Color("bfeeff"), Color("ffffff")]
+const GOLD_COLORS: int = 4               # 앞의 넷이 생기 알갱이 색, 그다음 둘이 수박 즙, 그다음 둘이 얼음 조각
 const JUICE_COLOR_FROM: int = 4
+const ICE_COLOR_FROM: int = 6
+const PER_ICE: int = 5                   # 얼거나 깨지는 칸마다 얼음 조각 수
 
 var field: Node2D                         # field_view.gd (cell_screen)
 var _data := PackedFloat32Array()
@@ -39,6 +41,13 @@ func _ready() -> void:
 	Night.night_started.connect(_clear)
 	if Night.has_signal("crop_burst"):
 		Night.connect("crop_burst", _on_burst_crop)
+	if Night.has_signal("crops_frozen"):  # 얼음꽃이 둘레를 얼렸다 (별빛 season_crops)
+		Night.connect("crops_frozen", func(index: int, targets: PackedInt32Array) -> void:
+			_ice(index)
+			for target in targets:
+				_ice(target))
+	if Night.has_signal("frost_shattered"):  # 언 작물이 시들며 깨졌다 (서리 철)
+		Night.connect("frost_shattered", _ice)
 
 
 func _clear() -> void:
@@ -58,6 +67,12 @@ func _on_burst_crop(index: int, radius: float) -> void:
 		return
 	var scale := clampf(radius, 1.0, 3.0)
 	_spawn(field.call("cell_screen", index), roundi(PER_JUICE * scale), SPEED * scale, 0.0, TAU, JUICE_COLOR_FROM, 2)
+
+
+## 얼음꽃이 얼리거나 언 작물이 깨진 칸: 하얗고 푸른 얼음 조각이 튄다
+func _ice(index: int) -> void:
+	if field != null:
+		_spawn(field.call("cell_screen", index), PER_ICE, SPEED, 0.0, TAU, ICE_COLOR_FROM, 2)
 
 
 ## 풍작: 한 점에서 사방으로 크게. scale은 알갱이 수 배율 (그 밤의 풍작이 거듭될수록 커진다)

@@ -43,7 +43,7 @@ res://
   assets/fonts/  한글 글꼴: 주아체 Jua(기본, OFL, 라이선스 Jua-OFL.txt)와 주아체에 없는 글자를 대신 그리는 Noto Sans KR. 테마(tools/theme_art.gd)가 정한다
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
-  tools/make_sfx.gd, make_music.gd  효과음 29개(레시피 2부 sfx_recipes.gd)·배경음 3곡(day·harvest, 밤 곡은 겹 다섯 night_*.wav를 night_layers.tres가 묶는다) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
+  tools/make_sfx.gd, make_music.gd  효과음 31개(레시피 2부 sfx_recipes.gd)·배경음 3곡(day·harvest, 밤 곡은 겹 다섯 night_*.wav를 night_layers.tres가 묶는다) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
   tests/run_tests.tscn  헤드리스 테스트 러너. test_case.gd를 상속한 스위트를 돌린다
   icon.svg       짚돌이 (아이콘이자 헛간 초상화)
 ```

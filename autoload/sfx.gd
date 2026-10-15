@@ -1,7 +1,7 @@
 extends "res://autoload/sfx/layers.gd"
 ## 효과음 (GDD 9절). 게임 오토로드의 시그널만 받아 소리를 낸다. 게임 상태는 바꾸지 않는다. 재생·버스·웹 잠금은 sfx/player.gd(1부), 밤 곡의 겹은 sfx/layers.gd(2부)에 있다.
 ## 밤: 구름이 칠 때 '쿵'(pulse), 작물이 시들 때 바스락과 동전(wither), 번질 때 보글(spread), 까마귀가 쫄 때 까악(crow), 밭 정복(clear).
-## 낮·밤 전환: 밤이 시작될 때(night_start), 새벽이 올 때(dawn). 배경음도 낮(day)·밤(night)·수확일 밤(harvest) 곡으로 바꾼다. 겨울잠(sleep). 역병 폭풍의 큰 박자(storm), 농부가 약을 침(spray), 작물이 다시 자람(sprout), 밤 스킬 여덟(skill_*), 수박 터짐(burst)·해바라기 씨앗(seeds)·덩굴 번개(zap), 도깨비불이 뜸·잡힘·꺼짐(wisp·wisp_catch·wisp_fade). 업적 소리(feat)는 업적 알림(scenes/ui/feat_toast.gd)이 낸다. 업그레이드 구매(buy)는 버튼을 누른 그 프레임에 오른 레벨에만 낸다
+## 낮·밤 전환: 밤이 시작될 때(night_start), 새벽이 올 때(dawn). 배경음도 낮(day)·밤(night)·수확일 밤(harvest) 곡으로 바꾼다. 겨울잠(sleep). 역병 폭풍의 큰 박자(storm), 농부가 약을 침(spray), 작물이 다시 자람(sprout), 밤 스킬 여덟(skill_*), 수박 터짐(burst)·해바라기 씨앗(seeds)·덩굴 번개(zap), 도깨비불이 뜸·잡힘·꺼짐(wisp·wisp_catch·wisp_fade), 얼음꽃이 얼림(freeze)·언 작물이 깨짐(shatter). 업적 소리(feat)는 업적 알림(scenes/ui/feat_toast.gd)이 낸다. 업그레이드 구매(buy)는 버튼을 누른 그 프레임에 오른 레벨에만 낸다
 ## (불러오기·데이터 초기화가 레벨을 바꿀 때는 조용하다). 버튼은 트리에 들어올 때 pressed를 잇는다 (화면 파일을 고치지 않는다)
 
 var _levels: Dictionary = {}   # 업그레이드 번호 → 마지막으로 본 레벨
@@ -24,7 +24,7 @@ func _ready() -> void:
 	Night.crop_regrown.connect(func(_index: int) -> void: play("sprout"))
 	Night.skill_used.connect(_on_skill_used)
 	for pair: Array in [["crop_burst", "burst"], ["seeds_flung", "seeds"], ["chain_struck", "zap"],
-			["wisp_appeared", "wisp"], ["wisp_caught", "wisp_catch"], ["wisp_faded", "wisp_fade"]]:
+			["wisp_appeared", "wisp"], ["wisp_caught", "wisp_catch"], ["wisp_faded", "wisp_fade"], ["crops_frozen", "freeze"], ["frost_shattered", "shatter"]]:
 		if Night.has_signal(pair[0]):  # 수박 터짐·해바라기 씨앗·덩굴 번개·도깨비불 (인자는 쓰지 않는다)
 			Night.connect(pair[0], func(_a: Variant = null, _b: Variant = null) -> void: play(pair[1]))
 	if Night.has_signal("wisp_caught"):  # 도깨비불을 잡으면 밤 곡의 반딧불 종도 부푼다
