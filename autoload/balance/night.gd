@@ -29,7 +29,7 @@ const REGROW_DELAY_STEP: float = 0.9
 const FRENZY_BASE_SECONDS: float = 5.0  # 새벽 전 몰아치기: 밤 끝 5초 (레벨마다 +1초) 동안
 const FRENZY_SECONDS_PER_LEVEL: float = 1.0
 const FRENZY_MULTIPLIER: float = 2.0
-const VITALITY_PER_LEVEL: float = 0.2  # 썩은 냄새: 레벨당 생기 +20% (더하기. 복리로 두면 독한 포자와 함께 수입이 비용을 앞질러 벽이 사라졌다)
+const VITALITY_PER_LEVEL: float = 0.06  # 썩은 냄새: 레벨당 생기 +6% (더하기. 복리로 두면 독한 포자와 함께 수입이 비용을 앞질러 벽이 사라졌다. +20%였다가 숫자 곡선 맞추며 0.3배로)
 
 
 ## 칸에 작물이 심길 확률: 0.3 + 0.07 × 빽빽한 밭

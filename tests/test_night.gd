@@ -51,7 +51,7 @@ func _test_plant() -> void:
 	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 2), 12.0 * Balance.FIELD_VITALITY_GROWTH, "밭 단계마다 생기 ×성장")
 	_close(Balance.crop_hp(Balance.Crop.WHEAT, 1, 2), 10.0 * pow(Balance.FERTILE_HP, 2), "비옥한 어둠: 체력 ×배율씩")
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 2), pow(Balance.FERTILE_VITALITY, 2), "비옥한 어둠: 생기 ×배율씩")
-	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 12.0 * 2.0, "탐스러운 호박: 호박 생기 +25%씩")
+	_close(Balance.crop_vitality(Balance.Crop.PUMPKIN, 1, 0, 4), 12.0 * (1.0 + 4.0 * float(Balance.CROPS[Balance.Crop.PUMPKIN]["bonus_step"])), "탐스러운 호박: 호박 생기 +몫씩")
 	_close(Balance.crop_vitality(Balance.Crop.WHEAT, 1, 0, 4), 1.0 + float(Balance.CROPS[Balance.Crop.WHEAT]["bonus_step"]) * 4, "누런 밀은 밀 생기를 올린다")
 	_equal(Balance.crop_bonus_upgrade(Balance.Crop.PUMPKIN), Balance.Upgrade.PUMPKIN, "호박 생기는 탐스러운 호박")
 	_equal(Balance.crop_bonus_upgrade(Balance.Crop.SUNFLOWER), -1, "해바라기 칸은 생기가 아니라 씨앗을 키운다")
@@ -92,7 +92,7 @@ func _test_cloud() -> void:
 	var before := Game.vitality
 	Night._damage(wheat, 1e9)
 	_equal(Night.is_alive(wheat), false, "체력이 다하면 시든다")
-	_close(Game.vitality - before, Balance.crop_vitality(Balance.Crop.WHEAT, 1) * 2.0, "생기 × (1 + 0.2 × 5)")
+	_close(Game.vitality - before, Balance.crop_vitality(Balance.Crop.WHEAT, 1) * Balance.vitality_multiplier(5), "썩은 냄새 5레벨: 생기 × (1 + 몫 × 5)")
 	_close(Game.night_haul, Game.vitality - before, "이번 밤 생기에 든다")
 	_close(Game.offered, Game.vitality, "바친 생기 합에도 든다")
 	_equal(Night.withered, 1, "시든 수")

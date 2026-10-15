@@ -5,13 +5,13 @@ extends "res://autoload/balance/skills.gd"
 const ECHO_SHARE_PER_LEVEL: float = 0.15     # 메아리 포자: 구름 둘레 한 칸 띠의 작물이 받는 구름 피해의 몫
 const ECHO_WIDTH: float = 1.0                # 띠 너비 (칸)
 const DOUBLE_CHANCE_PER_LEVEL: float = 0.08  # 두 번 치는 구름: 박자마다 한 번 더 칠 확률
-const STICKY_PER_LEVEL: float = 0.25         # 끈적한 포자: 번진 채 시든 작물의 생기 +25%씩
+const STICKY_PER_LEVEL: float = 0.075         # 끈적한 포자: 번진 채 시든 작물의 생기 +7.5%씩 (숫자 곡선 맞추며 0.3배로, 방장 2026-10-15 #555)
 const DAWN_SECONDS_PER_LEVEL: float = 1.0    # 새벽 미루기: 정복할 때마다 밤 +1초씩
-const ROOTS_PER_LEVEL: float = 0.25          # 무성한 뿌리: 다시 자란 작물의 생기 +25%씩
-const WAVES_PER_LEVEL: float = 0.1           # 물결의 기세: 물결 하나마다 생기 +10%씩 (물결 수만큼 쌓인다)
+const ROOTS_PER_LEVEL: float = 0.075          # 무성한 뿌리: 다시 자란 작물의 생기 +7.5%씩
+const WAVES_PER_LEVEL: float = 0.03           # 물결의 기세: 물결 하나마다 생기 +3%씩 (물결 수만큼 쌓인다)
 const FRENZY_POWER_PER_LEVEL: float = 0.5    # 광란: 몰아치기 피해 배율 +0.5씩
 const HARVEST_MOON_PER_LEVEL: float = 0.25   # 수확의 달: 수확일 정복 보너스 +25%p씩
-const CARRION_PER_LEVEL: float = 0.3         # 썩은 고기: 까마귀가 쪼아 시든 작물의 생기 +30%씩
+const CARRION_PER_LEVEL: float = 0.09         # 썩은 고기: 까마귀가 쪼아 시든 작물의 생기 +9%씩
 const SCARE_PER_LEVEL: float = 0.08          # 노려보는 허수아비: 지키는 이 걸음 −8%씩
 const ROTTEN_SPRAY_PER_LEVEL: float = 0.08   # 썩은 약통: 약 친 둘레 −8%씩
 const LATE_SLEEPER_PER_LEVEL: float = 0.2    # 늦잠: 다시 심는 간격 +20%씩

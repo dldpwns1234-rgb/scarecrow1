@@ -147,7 +147,7 @@ func _test_frenzy() -> void:
 
 
 func _test_bounty_and_king() -> void:
-	_close(Balance.harvest_vitality(10, 2), Balance.HARVEST_VITALITY * 2.0, "풍요의 저주 2레벨: 수확일 생기 +100%")
+	_close(Balance.harvest_vitality(10, 2), Balance.HARVEST_VITALITY * (1.0 + 2.0 * Balance.BOUNTY_PER_LEVEL), "풍요의 저주 2레벨: 수확일 생기 +몫×2")
 	_close(Balance.harvest_vitality(11, 2), 1.0, "보통 밤엔 안 든다")
 	_start()
 	Upgrades.levels[Balance.Upgrade.CROW] = 1

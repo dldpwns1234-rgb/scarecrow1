@@ -10,16 +10,17 @@ const FIELD_MAX_SIZE: int = 18         # 31단계에 18 × 18칸 (화면은 칸�
 enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN, TURNIP, SUNFLOWER, WATERMELON, GRAPE }
 ## from: 섞여 들기 시작하는 밭 단계 (0이면 처음부터 비율 표대로, 황금 이삭은 확률로만). weight: 다 섞여 든 뒤의 몫 (밀·옥수수·호박과 함께 나눈다).
 ## cluster: blob이면 위·왼쪽 이웃이 같은 작물일 때 그대로 따라 심기고(무더기), line이면 왼쪽 이웃만 따라 심긴다(덩굴).
-## bonus: 그 작물의 생기를 레벨마다 bonus_step씩 올리는 어둠의 나무 칸 (방장 2026-10-15 #529: 작물마다 칸. 해바라기·수박의 칸은 버릇을 키운다)
+## bonus: 그 작물의 생기를 레벨마다 bonus_step씩 올리는 어둠의 나무 칸 (방장 2026-10-15 #529: 작물마다 칸. 해바라기·수박의 칸은 버릇을 키운다).
+## 몫은 숫자 곡선을 맞추며 처음의 0.3배로 줄였다 (#555: 칸이 한꺼번에 팔리면 생기 배율이 곱해져 10~20분에 10만 배가 뛰었다)
 const CROPS: Array[Dictionary] = [
-	{"name": "밀", "hp": 10.0, "vitality": 1.0, "bonus": Upgrade.WHEAT, "bonus_step": 0.3},
-	{"name": "옥수수", "hp": 30.0, "vitality": 3.5, "bonus": Upgrade.CORN, "bonus_step": 0.25},
-	{"name": "호박", "hp": 90.0, "vitality": 12.0, "bonus": Upgrade.PUMPKIN, "bonus_step": 0.25},       # 처음엔 200이라 너무 오래 때려야 했다 (방장 2026-10-14)
-	{"name": "황금 이삭", "hp": 60.0, "vitality": 120.0, "bonus": Upgrade.GOLDEN_RUSH, "bonus_step": 0.25},  # 아주 가끔 심긴다. 찾아가 시들게 하는 재미 (회귀 용사의 보물 요정)
-	{"name": "순무", "hp": 14.0, "vitality": 1.6, "from": 3, "weight": 0.1, "cluster": "blob", "bonus": Upgrade.TURNIP, "bonus_step": 0.2},
+	{"name": "밀", "hp": 10.0, "vitality": 1.0, "bonus": Upgrade.WHEAT, "bonus_step": 0.09},
+	{"name": "옥수수", "hp": 30.0, "vitality": 3.5, "bonus": Upgrade.CORN, "bonus_step": 0.075},
+	{"name": "호박", "hp": 90.0, "vitality": 12.0, "bonus": Upgrade.PUMPKIN, "bonus_step": 0.075},       # 처음엔 200이라 너무 오래 때려야 했다 (방장 2026-10-14)
+	{"name": "황금 이삭", "hp": 60.0, "vitality": 120.0, "bonus": Upgrade.GOLDEN_RUSH, "bonus_step": 0.075},  # 아주 가끔 심긴다. 찾아가 시들게 하는 재미 (회귀 용사의 보물 요정)
+	{"name": "순무", "hp": 14.0, "vitality": 1.6, "from": 3, "weight": 0.1, "cluster": "blob", "bonus": Upgrade.TURNIP, "bonus_step": 0.06},
 	{"name": "해바라기", "hp": 45.0, "vitality": 5.5, "from": 6, "weight": 0.1},
 	{"name": "수박", "hp": 150.0, "vitality": 21.0, "from": 10, "weight": 0.07},
-	{"name": "포도", "hp": 55.0, "vitality": 7.0, "from": 16, "weight": 0.1, "cluster": "line", "bonus": Upgrade.GRAPE, "bonus_step": 0.2},
+	{"name": "포도", "hp": 55.0, "vitality": 7.0, "from": 16, "weight": 0.1, "cluster": "line", "bonus": Upgrade.GRAPE, "bonus_step": 0.06},
 ]
 const CROP_FADE_LEVELS: float = 3.0         # 새 작물은 이만큼의 단계에 걸쳐 제 몫까지 늘어난다
 const BLOB_CHANCE: float = 0.3             # 무더기 작물 옆 칸(오른쪽·아래)이 같은 작물로 심길 확률 (0.55면 무더기가 밭을 덮었다)
@@ -40,9 +41,9 @@ const CROP_SHIFT: float = 0.04
 const MIN_WHEAT_WEIGHT: float = 0.2
 const PUMPKIN_WEIGHT_PER_LEVEL: float = 0.02  # 탐스러운 호박: 레벨당 호박 비율 +2%p (밀에서 덜어 온다)
 const FIELD_HP_GROWTH: float = 1.35  # 밭 단계마다 작물 체력 (옛 ×2.2. 독한 포자의 비용과 함께 벽을 만든다: 단계마다 비용이 수입보다 이만큼 빨리 오른다)
-const FIELD_VITALITY_GROWTH: float = 1.07  # 밭 단계마다 생기 (옛 ×1.8. 방장 2026-10-15 #529: 50단계면 조였다. 수입이 단계로 덜 오르고 업그레이드로 오른다)
-const FERTILE_HP: float = 1.2  # 비옥한 어둠(상대 스펙): 레벨당 작물 체력·생기 배율 (복리). 옛 ×1.6·×2는 다시 자라기와 겹쳐 수입이 폭발했다
-const FERTILE_VITALITY: float = 1.28
+const FIELD_VITALITY_GROWTH: float = 1.05  # 밭 단계마다 생기 (옛 ×1.8. 방장 2026-10-15 #529: 50단계면 조였다. 수입이 단계로 덜 오르고 업그레이드로 오른다)
+const FERTILE_HP: float = 1.1  # 비옥한 어둠(상대 스펙): 레벨당 작물 체력·생기 배율 (복리). 옛 ×1.6·×2는 다시 자라기와 겹쳐 수입이 폭발했다
+const FERTILE_VITALITY: float = 1.15
 
 
 ## 밭 한 변의 칸 수: 8에서 시작해 단계 3마다 한 줄씩, 18까지

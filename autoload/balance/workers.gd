@@ -19,8 +19,8 @@ const DRY_PER_SHARE: float = 0.15          # 포자 말리기: 한 몫당 구름
 const CARRY_PER_SHARE: float = 0.01        # 생기 나르기: 한 몫당 초당 지난 밤 생기의 1%
 const BASE_SLOTS: int = 1                  # 일자리마다 처음 칸 수
 const MAX_EXTRA_SLOTS: int = 3             # 헛간 확장으로 늘릴 수 있는 칸
-const EXPAND_BASE_COST: float = 38.0  # 확장 비용 = 기본 × 성장^(그 일자리의 확장 횟수) 생기 (옛 5천 × 40^n을 상한 칸처럼 눌렀다)
-const EXPAND_GROWTH: float = 1.528
+const EXPAND_BASE_COST: float = 954.0  # 확장 비용 = 기본 × 성장^(그 일자리의 확장 횟수) 생기 (옛 5천 × 40^n을 상한 칸처럼 눌렀다)
+const EXPAND_GROWTH: float = 13.226
 
 
 func job_name(job: int) -> String:

@@ -20,10 +20,10 @@ const FARMER_REPLANT_INTERVAL: float = 4.0
 const SEEP_PER_LEVEL: float = 0.1        # 스며드는 독: 레벨당 둘레 안 피해 배율 +0.1
 const RACKET_STUN_PER_LEVEL: float = 0.4 # 까마귀 소란: 쫄 때마다 지키는 이 하나가 레벨당 0.4초 멈춘다
 const HARVEST_INTERVAL: int = 5          # 5의 배수 단계가 수확일
-const HARVEST_HP: float = 1.5  # 수확일 작물 체력 배율 (옛 ×3. 단계마다 체력이 덜 오르니 줄였다)
+const HARVEST_HP: float = 2.5  # 수확일 작물 체력 배율: 5단계마다 오는 작은 벽 (방장 2026-10-15 #543: 단계가 밤마다 뚫렸다)
 const HARVEST_VITALITY: float = 2.0  # 수확일 작물 생기 배율 (보스 밤의 보상)
 const HARVEST_CLEAR_BONUS: float = 0.5   # 수확일을 정복하면 이번 밤 생기 +50%
-const BOUNTY_PER_LEVEL: float = 0.5      # 풍요의 저주: 레벨당 수확일 생기 +50% (더하기. ×1.5 복리면 첫 철에 200단계 끝까지 내달렸다)
+const BOUNTY_PER_LEVEL: float = 0.15      # 풍요의 저주: 레벨당 수확일 생기 +15% (더하기. ×1.5 복리면 첫 철에 200단계 끝까지 내달렸다. +50%였다가 0.3배로)
 
 
 ## 이 밭 단계에 나오는 지키는 이 수 (수확일이면 한 명 더)
