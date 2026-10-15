@@ -89,12 +89,20 @@ func echo(delay: float, feedback: float) -> void:
 
 ## 가장 큰 진폭을 peak로 맞춘다
 func normalize(peak: float) -> void:
+	var top := loudest()
+	if top > 0.0:
+		scale(peak / top)
+
+
+## 가장 큰 진폭 (겹으로 나눈 곡은 전체의 이 값으로 모든 겹을 같은 배율로 맞춘다)
+func loudest() -> float:
 	var top := 0.0
 	for v in data:
 		top = maxf(top, absf(v))
-	if top <= 0.0:
-		return
-	var gain := peak / top
+	return top
+
+
+func scale(gain: float) -> void:
 	for i in data.size():
 		data[i] *= gain
 

@@ -1,0 +1,20 @@
+[gd_resource type="AudioStreamSynchronized" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/music/night_bed.wav" id="1_dyh7b"]
+[ext_resource type="AudioStream" path="res://assets/music/night_harp.wav" id="2_8hv47"]
+[ext_resource type="AudioStream" path="res://assets/music/night_melody.wav" id="3_litke"]
+[ext_resource type="AudioStream" path="res://assets/music/night_counter.wav" id="4_q2uct"]
+[ext_resource type="AudioStream" path="res://assets/music/night_bells.wav" id="5_5xghq"]
+
+[resource]
+stream_count = 5
+stream_0/stream = ExtResource("1_dyh7b")
+stream_0/volume = 0.0
+stream_1/stream = ExtResource("2_8hv47")
+stream_1/volume = -60.0
+stream_2/stream = ExtResource("3_litke")
+stream_2/volume = -60.0
+stream_3/stream = ExtResource("4_q2uct")
+stream_3/volume = -60.0
+stream_4/stream = ExtResource("5_5xghq")
+stream_4/volume = -60.0

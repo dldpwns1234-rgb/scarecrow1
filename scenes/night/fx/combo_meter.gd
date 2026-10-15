@@ -96,6 +96,7 @@ func _apply_withers() -> void:
 		_since_burst = 0.0
 		_glow = 1.0
 		Sfx.play("bumper")
+		Sfx.swell()  # 밤 곡의 반딧불 종 겹이 잠깐 부푼다
 		burst.emit(level)
 	_refresh_labels()
 

@@ -1,5 +1,5 @@
-extends "res://autoload/sfx/player.gd"
-## 효과음 (GDD 9절). 게임 오토로드의 시그널만 받아 소리를 낸다. 게임 상태는 바꾸지 않는다. 재생·버스·웹 잠금은 sfx/player.gd(1부)에 있다.
+extends "res://autoload/sfx/layers.gd"
+## 효과음 (GDD 9절). 게임 오토로드의 시그널만 받아 소리를 낸다. 게임 상태는 바꾸지 않는다. 재생·버스·웹 잠금은 sfx/player.gd(1부), 밤 곡의 겹은 sfx/layers.gd(2부)에 있다.
 ## 밤: 구름이 칠 때 '쿵'(pulse), 작물이 시들 때 바스락과 동전(wither), 번질 때 보글(spread), 까마귀가 쫄 때 까악(crow), 밭 정복(clear).
 ## 낮·밤 전환: 밤이 시작될 때(night_start), 새벽이 올 때(dawn). 배경음도 낮(day)·밤(night)·수확일 밤(harvest) 곡으로 바꾼다. 겨울잠(sleep). 역병 폭풍의 큰 박자(storm), 농부가 약을 침(spray), 작물이 다시 자람(sprout), 밤 스킬 여덟(skill_*), 수박 터짐(burst)·해바라기 씨앗(seeds)·덩굴 번개(zap). 업그레이드 구매(buy)는 버튼을 누른 그 프레임에 오른 레벨에만 낸다
 ## (불러오기·데이터 초기화가 레벨을 바꿀 때는 조용하다). 버튼은 트리에 들어올 때 pressed를 잇는다 (화면 파일을 고치지 않는다)
@@ -27,6 +27,7 @@ func _ready() -> void:
 		if Night.has_signal(pair[0]):  # 수박 터짐·해바라기 씨앗·덩굴 번개 (인자는 쓰지 않는다)
 			Night.connect(pair[0], func(_a: Variant = null, _b: Variant = null) -> void: play(pair[1]))
 	Game.phase_changed.connect(_on_phase_changed)
+	Night.field_level_changed.connect(func(_level: int, _best: int) -> void: refresh_layers())
 	Upgrades.upgrade_changed.connect(_on_upgrade_changed)
 	get_tree().node_added.connect(_on_node_added)
 	set_process_input(not unlocked)
@@ -55,6 +56,8 @@ func note_button_press() -> void:
 
 func _on_phase_changed(phase: int) -> void:
 	var night := phase == Game.Phase.NIGHT
+	if night:
+		refresh_layers(true)  # 곡이 페이드로 들어오니 겹은 바로 맞춘다
 	set_music_track(_track())
 	if night:
 		play("night_start")

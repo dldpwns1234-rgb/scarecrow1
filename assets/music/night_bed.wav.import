@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://by5prp5k8kbaw"
-path="res://.godot/imported/night.wav-80498b897f3225a033a0ace066cb67e3.sample"
+uid="uid://rergjrv82i5u"
+path="res://.godot/imported/night_bed.wav-2867854e6da5da1884a594c6d2233d37.sample"
 
 [deps]
 
-source_file="res://assets/music/night.wav"
-dest_files=["res://.godot/imported/night.wav-80498b897f3225a033a0ace066cb67e3.sample"]
+source_file="res://assets/music/night_bed.wav"
+dest_files=["res://.godot/imported/night_bed.wav-2867854e6da5da1884a594c6d2233d37.sample"]
 
 [params]
 

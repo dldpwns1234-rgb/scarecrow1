@@ -28,7 +28,7 @@ res://
     story.gd     (Story) 첫 실행 장면을 봤는지, 이야기 조각의 열린 수(줄지 않는다)·본 수
     prefs.gd     (Prefs) 소리 켬/끔과 음량
     save.gd      (Save) 저장·불러오기·내보내기·가져오기·초기화. 저장할 오토로드를 늘리면 to_dict·from_dict·reset_data 세 곳을 함께 고친다. save/web_hooks.gd가 브라우저 이벤트로 저장한다
-    sfx.gd       (Sfx) 효과음·배경음. 시그널만 받는다. sfx/player.gd(버스·동시 재생 수·곡 교차 페이드·웹 첫 입력 잠금)를 상속한다
+    sfx.gd       (Sfx) 효과음·배경음. 시그널만 받는다. sfx/player.gd(버스·동시 재생 수·곡 교차 페이드·웹 첫 입력 잠금) → sfx/layers.gd(밤 곡의 겹 음량) 를 상속한다
   scenes/
     main.tscn, main.gd  화면 전체. 낮이면 day, 밤이면 night만 보이고, 그 위에 결과 알림·첫 밤 안내·이야기 다시 읽기·조각 카드·첫 실행 장면을 겹친다
     day/         day_screen(헛간: 짚돌이·생기·약속된 휴식·밤 기록·밭 단계·밤으로 나가기, 왼쪽 위 이야기·소리 버튼), upgrade_tree(어둠의 나무: tree_board·tree_layout),
@@ -39,7 +39,7 @@ res://
   assets/fonts/  한글 글꼴: 주아체 Jua(기본, OFL, 라이선스 Jua-OFL.txt)와 주아체에 없는 글자를 대신 그리는 Noto Sans KR. 테마(tools/theme_art.gd)가 정한다
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
-  tools/make_sfx.gd, make_music.gd  효과음 25개·배경음 3곡(day·night·harvest) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
+  tools/make_sfx.gd, make_music.gd  효과음 25개·배경음 3곡(day·harvest, 밤 곡은 겹 다섯 night_*.wav를 night_layers.tres가 묶는다) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
   tests/run_tests.tscn  헤드리스 테스트 러너. test_case.gd를 상속한 스위트를 돌린다
   icon.svg       짚돌이 (아이콘이자 헛간 초상화)
 ```

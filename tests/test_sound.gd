@@ -23,6 +23,7 @@ func run() -> void:
 	Game.start_night()
 	_equal(Sfx.music_track, "harvest", "수확일 밤에는 수확일 곡")
 	Game.finish_night()
+	_layers()
 	Night.reset()
 	Winter.slept.emit(1.0)
 	_equal(int(Sfx.played.get("sleep", 0)), 1, "겨울잠 소리")
@@ -66,3 +67,26 @@ func run() -> void:
 	_equal(Prefs.sfx_on, true, "기본은 켬")
 	Sfx.unlocked = not OS.has_feature("web")
 	_fresh()
+
+
+## 밤 곡의 겹: 바탕은 늘, 하프·오카리나·높은 현은 밭 단계로, 반딧불 종은 풍작 뒤 잠깐
+func _layers() -> void:
+	Night.best_level = 30
+	Night.choose_level(1)
+	Game.start_night()
+	_equal(Sfx.is_layer_on("bed"), true, "바탕 겹은 늘")
+	_equal(Sfx.is_layer_on("harp"), false, "첫 밭에는 하프가 없다")
+	Game.finish_night()
+	Night.choose_level(9)
+	_equal(Sfx.is_layer_on("harp") and Sfx.is_layer_on("melody"), true, "밭이 깊어지면 하프·오카리나가 들어온다")
+	_equal(Sfx.is_layer_on("counter"), false, "높은 현은 감독관이 오는 25단계부터")
+	Night.choose_level(26)
+	_equal(Sfx.is_layer_on("counter"), true, "25단계를 넘으면 높은 현")
+	_equal(Sfx.is_layer_on("bells"), false, "반딧불 종은 풍작 전엔 조용")
+	Sfx.swell()
+	_equal(Sfx.is_layer_on("bells"), true, "풍작이 터지면 반딧불 종")
+	for i in ceili(Sfx.SWELL_SECONDS / Balance.MAX_DELTA) + 1:  # 한 프레임은 MAX_DELTA까지만 센다
+		Sfx._process(Balance.MAX_DELTA)
+	_equal(Sfx.is_layer_on("bells"), false, "조금 지나면 다시 조용")
+	var night := (load(Sfx.MUSIC_FILES["night"]) as AudioStreamSynchronized)
+	_equal(night != null and night.stream_count == Sfx.NIGHT_LAYERS.size(), true, "밤 곡은 겹 다섯을 묶은 것")

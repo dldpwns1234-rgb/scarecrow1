@@ -5,7 +5,10 @@ extends SceneTree
 ##
 ## day: 낮의 헛간. 바장조 자장가 (F → Dm → Bb → C), 하프 분산화음과 피리 선율. 72 BPM, 26.7초. 지친 짚돌이가 꾸벅이는 따뜻한 오후
 ## night: 밤의 밭. 라 단조 (Dm → Bb → Gm → A, Dm → Eb → Cm → A), 레·라 지속음, 낮은 오카리나와 반딧불 같은 높은 종. 60 BPM, 32초.
-##   밤에는 구름이 0.5초마다 '쿵' 하므로 박이 또렷한 소리(북·빠른 분산화음)를 넣지 않는다
+##   밤에는 구름이 0.5초마다 '쿵' 하므로 박이 또렷한 소리(북·빠른 분산화음)를 넣지 않는다.
+##   겹 다섯으로 나눠 따로 저장한다 (방장 #587, Gnorp처럼 밭 단계가 오를수록 한 겹씩): night_bed(패드·베이스·지속음), night_harp(하프),
+##   night_melody(오카리나), night_counter(높은 현의 긴 대선율), night_bells(반딧불 종, 풍작 때 부푼다). 겹마다 따로 키우면 균형이 무너지므로
+##   전체 합의 최고 진폭으로 모든 겹을 같은 배율로 맞춘다. 다섯 겹은 assets/music/night_layers.tres(AudioStreamSynchronized)가 묶어 같이 튼다
 ## harvest: 수확일 밤(보스 밤). 라 단조를 빠르게, 8분음표 하프·다급한 피리·낮은 북. 84 BPM, 22.9초
 ## 회귀 용사의 make_music.gd를 옮겨 와 곡과 반딧불 종(bells)만 바꿨다. 곡은 여기 상수가 원본이다. .wav는 손으로 고치지 않는다.
 ## 고친 뒤 다시 돌리고 `--headless --import`, 함께 커밋한다. .wav.import의 edit/loop_mode는 2(앞으로 반복)여야 한다 (Sfx가 다시 확인한다)
@@ -14,6 +17,8 @@ const Synth := preload("res://tools/synth.gd")
 const OUT_DIR := "res://assets/music/"
 const BEATS_PER_BAR: int = 4
 const PEAK: float = 0.6  # 곡 전체 최고 진폭. 음량은 Music 버스와 설정이 정한다
+const ALL_PARTS: PackedStringArray = ["bed", "harp", "drums", "melody", "counter", "bells"]
+const NIGHT_LAYERS: PackedStringArray = ["bed", "harp", "melody", "counter", "bells"]  # autoload/sfx/layers.gd와 같은 순서
 
 ## 마디마다 [베이스 음, 화음 음들]. 음은 MIDI 번호
 const DAY := {
@@ -66,6 +71,12 @@ const NIGHT := {
 		[0, 2.5, 86], [1, 1.5, 82], [2, 3.0, 86], [3, 1.0, 85],
 		[4, 2.5, 89], [5, 0.5, 87], [6, 2.0, 84], [7, 3.5, 88],
 	],
+	## [마디, 박, 음, 길이(박)]: 높은 현의 긴 대선율 (밭이 깊어지면 들어오는 겹). 오카리나가 쉬는 자리를 메운다
+	"counter": [
+		[0, 0.0, 81, 4.0], [1, 0.0, 82, 4.0], [2, 0.0, 79, 4.0], [3, 0.0, 76, 2.0], [3, 2.0, 73, 2.0],
+		[4, 0.0, 77, 4.0], [5, 0.0, 79, 4.0], [6, 0.0, 75, 4.0], [7, 0.0, 76, 2.0], [7, 2.0, 81, 2.0],
+	],
+	"counter_amp": 0.07,
 	"drums": [], "drum_amp": 0.0,
 	"echo": [0.5, 0.35],
 }
@@ -101,17 +112,27 @@ const HARVEST := {
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
 	var failed := 0
-	var songs: Array = [["day", DAY], ["night", NIGHT], ["harvest", HARVEST]]
-	for entry: Array in songs:
-		var err := _render(entry[1]).save(OUT_DIR + str(entry[0]) + ".wav")
+	var files: Dictionary = {}  # 파일 이름 → Synth
+	for entry: Array in [["day", DAY], ["harvest", HARVEST]]:
+		var whole := _render(entry[1], ALL_PARTS)
+		whole.normalize(PEAK)
+		files[entry[0]] = whole
+	var gain := PEAK / _render(NIGHT, ALL_PARTS).loudest()  # 겹을 모두 더한 소리가 PEAK가 되는 배율
+	for layer in NIGHT_LAYERS:
+		var part := _render(NIGHT, PackedStringArray([layer]))
+		part.scale(gain)
+		files["night_" + layer] = part
+	for file_name: String in files:
+		var err: Error = (files[file_name] as Synth).save(OUT_DIR + file_name + ".wav")
 		if err != OK:
 			failed += 1
-			push_error("%s 저장 실패: %s" % [entry[0], error_string(err)])
-	print("배경음 %d곡 저장 (실패 %d)" % [songs.size(), failed])
+			push_error("%s 저장 실패: %s" % [file_name, error_string(err)])
+	print("배경음 %d개 저장 (실패 %d)" % [files.size(), failed])
 	quit(0 if failed == 0 else 1)
 
 
-func _render(song: Dictionary) -> Synth:
+## parts에 든 겹만 그린다 (bed·harp·drums·melody·counter·bells). 정규화는 부르는 쪽이 한다
+func _render(song: Dictionary, parts: PackedStringArray) -> Synth:
 	var beat: float = 60.0 / float(song["bpm"])
 	var bar_length := beat * BEATS_PER_BAR
 	var bars: Array = song["bars"]
@@ -119,20 +140,24 @@ func _render(song: Dictionary) -> Synth:
 	for b in bars.size():
 		var start := b * bar_length
 		var chord: Array = bars[b][1]
-		_bar_bed(s, song, start, bar_length, float(bars[b][0]), chord)
-		_arpeggio(s, song, start, beat, chord)
-		for at: Variant in song["drums"]:
+		if parts.has("bed"):
+			_bar_bed(s, song, start, bar_length, float(bars[b][0]), chord)
+		if parts.has("harp"):
+			_arpeggio(s, song, start, beat, chord)
+		for at: Variant in (song["drums"] if parts.has("drums") else []):
 			s.tone(start + float(at) * beat, 0.35, 82.0, 46.0, float(song["drum_amp"]), 0.004, 0.22)
-	for note: Array in song["melody"]:
+	for note: Array in (song["melody"] if parts.has("melody") else []):
 		var at := float(note[0]) * bar_length + float(note[1]) * beat
 		var f := Synth.midi(float(note[2]))
 		s.tone(at, float(note[3]) * beat * 0.9, f, f, float(song["melody_amp"]),
 			float(song["melody_attack"]), float(song["melody_tau"]), Synth.Wave.SOFT, 0.25)
-	for bell: Array in song["bells"]:
+	for note: Array in (song.get("counter", []) if parts.has("counter") else []):
+		var cf := Synth.midi(float(note[2]))
+		s.tone(float(note[0]) * bar_length + float(note[1]) * beat, float(note[3]) * beat, cf, cf, float(song["counter_amp"]), 0.8, 3.0, Synth.Wave.SOFT, 0.6)
+	for bell: Array in (song["bells"] if parts.has("bells") else []):
 		s.bell(float(bell[0]) * bar_length + float(bell[1]) * beat, Synth.midi(float(bell[2])), 0.09, 0.5)
 	var echo: Array = song["echo"]
 	s.echo(float(echo[0]), float(echo[1]))
-	s.normalize(PEAK)
 	return s
 
 
