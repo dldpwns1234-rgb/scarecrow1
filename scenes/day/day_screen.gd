@@ -14,6 +14,7 @@ const Hideout := preload("res://scenes/day/hideout.gd")
 const SubTabs := preload("res://scenes/ui/sub_tabs.gd")
 const FieldPicker := preload("res://scenes/day/field_picker.gd")
 const Portrait := preload("res://scenes/day/portrait.gd")
+const PromiseMarks := preload("res://scenes/day/promise_marks.gd")
 const ICON_VITALITY := preload("res://assets/sprites/ui/icon_vitality.svg")
 const ICON_BOOK := preload("res://assets/sprites/ui/icon_book.svg")
 const ICON_GEAR := preload("res://assets/sprites/ui/icon_gear.svg")
@@ -120,6 +121,7 @@ func _make_left() -> VBoxContainer:
 	_promise_bar.max_value = 1.0
 	_promise_bar.step = 0.0
 	_promise_bar.show_percentage = false
+	_promise_bar.add_child(PromiseMarks.new())  # 이야기 조각·결말 자리 눈금 (방장 #587)
 	column.add_child(_promise_bar)
 	_record = _label("", 0, NOTE_COLOR)
 	_record.custom_minimum_size = Vector2(0.0, RECORD_HEIGHT)
