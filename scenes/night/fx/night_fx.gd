@@ -1,11 +1,12 @@
 extends Control
 ## 밤 화면 연출 층 (윤슬, 방장 2026-10-14 "가득 차는 뽕맛"): 생기 알갱이(sparks.gd), 스킬 이름(skill_callout.gd), 풍작 콤보(combo_meter.gd)를 얹고,
-## 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
+## 새 밤의 이름(night_title.gd)도 띄운다. 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
 ## night_screen.gd가 field를 넘겨 붙인다. 입력은 받지 않는다. Night 시그널만 받는 연출이다. 상수는 연출용이다
 
 const Sparks := preload("res://scenes/night/fx/sparks.gd")
 const ComboMeter := preload("res://scenes/night/fx/combo_meter.gd")
 const SkillCallout := preload("res://scenes/night/fx/skill_callout.gd")
+const NightTitle := preload("res://scenes/night/fx/night_title.gd")
 
 const FLASH_ALPHA: float = 0.28
 const FLASH_SECONDS: float = 0.35
@@ -37,6 +38,7 @@ func _ready() -> void:
 	_sparks.field = field
 	add_child(_sparks)
 	add_child(SkillCallout.new())  # 저절로 터진 스킬 이름
+	add_child(NightTitle.new())  # 밭 단계 팔레트가 바뀐 밤의 이름
 	_meter = ComboMeter.new()
 	_meter.burst.connect(_on_burst)
 	add_child(_meter)

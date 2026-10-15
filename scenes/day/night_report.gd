@@ -49,6 +49,9 @@ func _ready() -> void:
 
 
 func _on_night_started() -> void:
+	if _tween != null:  # 낮 알림이 아직 떠 있는데 밤으로 나가면 밤 화면을 가리지 않게 바로 닫는다
+		_tween.kill()
+	hide()
 	_cleared_level = 0
 	_best_before = Night.best_level
 	_workers_before = Workers.worker_count()

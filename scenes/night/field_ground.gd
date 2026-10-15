@@ -3,10 +3,11 @@ extends Node2D
 ## field_view가 그림이 바뀔 때 queue_redraw()를 부른다. 판(night_screen.gd) 안 좌표로 그린다. 상수는 연출용이다
 ## 칸마다 다각형·테두리를 따로 그리면 18×18 밭에서 시들 때마다 648번 그려 프레임이 반으로 떨어졌다 (2026-10-15 측정).
 ## 그래서 칸은 삼각형 묶음 한 번(칸 자리는 밭 크기가 바뀔 때만 다시 잰다), 격자선은 줄 몇 개로 그린다.
+## 풀 색은 그 밤의 밭 단계 팔레트(night_palette.gd)를 따른다 (방장 #587: 깊은 밤일수록 풀빛도 바뀐다).
 ## 칸 꼭짓점마다 밝기를 달리해 달빛(오른쪽 위)을 받은 쪽이 밝고, 칸마다 밝기를 조금씩 흩어 풀밭 결을 낸다 (그리는 비용은 같다)
 
 const Iso := preload("res://scenes/night/iso.gd")
-const GRASS := [Color("3f6b3a"), Color("44733e")]  # 달빛 아래 풀 (체크무늬)
+const NightPalette := preload("res://scenes/night/night_palette.gd")
 const BLIGHT := Color("4a4232")         # 시든 칸
 const ROT_GROUND := Color("4d3f5c")     # 번짐에 걸린 칸
 const SIDE_LEFT := Color("4b3524")      # 흙 옆면
@@ -18,6 +19,7 @@ const SCATTER: float = 0.07             # 칸마다 밝기를 ±이만큼 흩는
 const SIDE_SHADE := Color(0.0, 0.0, 0.0, 0.35)  # 흙 옆면 아래쪽 그늘
 
 var _size: int = -1
+var _theme_index: int = -1
 var _points := PackedVector2Array()   # 칸마다 꼭짓점 넷 (위·오른쪽·아래·왼쪽)
 var _indices := PackedInt32Array()    # 칸마다 삼각형 둘
 var _colors := PackedColorArray()
@@ -29,8 +31,9 @@ func _draw() -> void:
 	var n := Night.field_size
 	if Night.kinds.size() != n * n:
 		return
-	if n != _size:
-		_build(n)
+	var theme_index := NightPalette.index_for(Night.field_level)
+	if n != _size or theme_index != _theme_index:
+		_build(n, theme_index)
 	# 흙 옆면: 왼쪽 아래 모서리와 오른쪽 아래 모서리
 	var left := Iso.to_screen(Vector2.ZERO, Vector2(0, n))
 	var bottom := Iso.to_screen(Vector2.ZERO, Vector2(n, n))
@@ -57,8 +60,10 @@ func _draw() -> void:
 
 
 ## 밭 크기가 바뀌면 칸 꼭짓점·삼각형·격자선을 다시 잰다
-func _build(n: int) -> void:
+func _build(n: int, theme_index: int) -> void:
 	_size = n
+	_theme_index = theme_index
+	var grass: Array = NightPalette.THEMES[theme_index]["grass"]  # 달빛 아래 풀 (체크무늬)
 	_points.resize(n * n * 4)
 	_colors.resize(n * n * 4)
 	_indices.resize(n * n * 6)
@@ -70,7 +75,7 @@ func _build(n: int) -> void:
 	for i in n * n:
 		var shade := 1.0 + rng.randf_range(-SCATTER, SCATTER)
 		@warning_ignore("integer_division")
-		var bases: Array[Color] = [GRASS[(i % n + i / n) % 2], BLIGHT, ROT_GROUND]
+		var bases: Array[Color] = [grass[(i % n + i / n) % 2], BLIGHT, ROT_GROUND]
 		for state in 3:
 			for k in 4:
 				var light := CORNER_LIGHT[k] * shade
