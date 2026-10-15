@@ -15,6 +15,9 @@ const TEXTURES: Array[Texture2D] = [  # Balance.Crop 순서
 	preload("res://assets/sprites/crops/sunflower.svg"),
 	preload("res://assets/sprites/crops/watermelon.svg"),
 	preload("res://assets/sprites/crops/grape.svg"),
+	preload("res://assets/sprites/crops/turnip.svg"),      # 얼음꽃 (윤슬 그림 오기 전까지 빌림)
+	preload("res://assets/sprites/crops/pumpkin.svg"),     # 버섯
+	preload("res://assets/sprites/crops/sunflower.svg"),   # 달맞이꽃
 ]
 const DEAD_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/crops/wheat_dead.svg"),
@@ -25,6 +28,9 @@ const DEAD_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/sprites/crops/sunflower_dead.svg"),
 	preload("res://assets/sprites/crops/watermelon_dead.svg"),
 	preload("res://assets/sprites/crops/grape_dead.svg"),
+	preload("res://assets/sprites/crops/turnip_dead.svg"),
+	preload("res://assets/sprites/crops/pumpkin_dead.svg"),
+	preload("res://assets/sprites/crops/sunflower_dead.svg"),
 ]
 const CROP_SCALE: float = 0.42          # 그림(96px × 가져오기 1.5배)을 칸 폭에 맞춘다
 const CROP_BASE := Vector2(0.5, 0.94)   # 그림 안에서 밑동 자리 (크기 비율)

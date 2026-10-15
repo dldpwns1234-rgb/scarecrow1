@@ -1,7 +1,7 @@
-extends "res://autoload/night/weather.gd"
+extends "res://autoload/night/season_crops.gd"
 ## 밤 한 판의 흐름 (GDD 4절): 시작(밭 심기·시계), 역병 구름의 박자, 번짐, 시듦과 생기, 다시 자라기, 밭 정복(수확일 보너스), 끝.
 ## 밭 단계는 night/levels.gd, 밭(칸)은 night/field.gd, 심기는 night/planting.gd, 까마귀와 지키는 이는 night/critters.gd, 스킬은 night/skills.gd, 시듦·번짐·정복·물결은 night/waves.gd,
-## 도깨비불은 night/wisp.gd, 철마다 날씨(서리·장마·보름달)는 night/weather.gd.
+## 도깨비불은 night/wisp.gd, 철마다 날씨(서리·장마·보름달)는 night/weather.gd, 철마다 새 작물(얼음꽃·버섯·달맞이꽃)과 남은 시간은 night/season_crops.gd.
 ## 화면(scenes/night/)은 시그널을 받아 그리고 set_cloud()로 구름 자리만 넘긴다. 화면 없이도 돈다: 시뮬레이션 봇이 set_cloud()와 tick()을 직접 부른다.
 ## 수치는 Balance, 생기는 Game.add_vitality(), 밤 끝은 Game.finish_night(). 상태 변경은 이 오토로드의 함수로만 한다
 
@@ -9,7 +9,6 @@ signal night_started()
 signal pulsed()                                        # 구름이 한 번 쳤다 (박자 연출)
 signal time_changed(seconds_left: float)
 
-var time_left: float = 0.0
 var _pulse_left: float = 0.0
 var _tick: float = Balance.CLOUD_TICK  # 이번 밤의 박자 간격 (어스름)
 
@@ -54,6 +53,7 @@ func begin(seed: int = -1) -> void:
 	_wave_withered = 0
 	_wave_haul = 0.0
 	time_left = Game.night_seconds()
+	night_length = time_left
 	_tick = Balance.cloud_tick(Upgrades.level(Balance.Upgrade.DUSK))
 	_pulse_left = _tick
 	_reset_skills()

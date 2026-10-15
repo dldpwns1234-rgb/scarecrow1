@@ -1,14 +1,17 @@
 extends "res://autoload/balance/upgrades.gd"
 ## Balance 1.5부: 밭 크기와 작물 (GDD 4절). 밭은 단계가 오르면 한 줄씩 넓어지고, 작물은 단계마다 새 종류가 섞여 든다 (방장 2026-10-14: 작물 종류 더, 농지가 점점 크게).
 ## 새 작물은 저마다 버릇이 있다: 순무는 무더기로, 포도는 덩굴로 줄지어 심기고, 해바라기는 시들면 씨앗이 튀어 번지고, 수박은 터져 둘레를 친다.
+## 철마다 새 작물 (방장 #626 '알아서 개선', 장르 조사 '겨울잠 뒤에 새로 열리는 것'): 얼음꽃(첫 겨울잠 뒤)은 시들면 둘레를 얼리고, 버섯(둘째)은 번진 채 심겨
+## 저절로 썩어 가다 시들면 상하좌우를 다 번지게 하고, 달맞이꽃(셋째)은 새벽이 가까울수록 생기가 커진다. 버릇은 night/season_crops.gd
 ## 체력·생기는 모든 작물이 밭 단계마다 같은 비율로 자란다. 수치는 시뮬레이션으로 맞춘다 (docs/BALANCE_SIM.md)
 
 const FIELD_BASE_SIZE: int = 8         # 첫 밭 8 × 8칸
 const FIELD_GROW_LEVELS: int = 3       # 밭 단계 3마다 한 줄씩 넓어진다
 const FIELD_MAX_SIZE: int = 18         # 31단계에 18 × 18칸 (화면은 칸을 줄여 그린다)
 
-enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN, TURNIP, SUNFLOWER, WATERMELON, GRAPE }
+enum Crop { WHEAT, CORN, PUMPKIN, GOLDEN, TURNIP, SUNFLOWER, WATERMELON, GRAPE, ICEFLOWER, MUSHROOM, MOONFLOWER }
 ## from: 섞여 들기 시작하는 밭 단계 (0이면 처음부터 비율 표대로, 황금 이삭은 확률로만). weight: 다 섞여 든 뒤의 몫 (밀·옥수수·호박과 함께 나눈다).
+## season: 겨울잠을 이만큼 잔 뒤부터 섞여 든다 (철마다 새 작물. 그 철 첫 밭부터)
 ## cluster: blob이면 위·왼쪽 이웃이 같은 작물일 때 그대로 따라 심기고(무더기), line이면 왼쪽 이웃만 따라 심긴다(덩굴).
 ## bonus: 그 작물의 생기를 레벨마다 bonus_step씩 올리는 어둠의 나무 칸 (방장 2026-10-15 #529: 작물마다 칸. 해바라기·수박의 칸은 버릇을 키운다).
 ## 몫은 숫자 곡선을 맞추며 처음의 0.3배로 줄였다 (#555: 칸이 한꺼번에 팔리면 생기 배율이 곱해져 10~20분에 10만 배가 뛰었다)
@@ -21,7 +24,12 @@ const CROPS: Array[Dictionary] = [
 	{"name": "해바라기", "hp": 45.0, "vitality": 5.5, "from": 6, "weight": 0.1},
 	{"name": "수박", "hp": 150.0, "vitality": 21.0, "from": 10, "weight": 0.07},
 	{"name": "포도", "hp": 55.0, "vitality": 7.0, "from": 16, "weight": 0.1, "cluster": "line", "bonus": Upgrade.GRAPE, "bonus_step": 0.06},
+	{"name": "얼음꽃", "hp": 40.0, "vitality": 6.0, "from": 1, "season": 1, "weight": 0.07},
+	{"name": "버섯", "hp": 25.0, "vitality": 4.0, "from": 1, "season": 2, "weight": 0.09},
+	{"name": "달맞이꽃", "hp": 50.0, "vitality": 8.0, "from": 1, "season": 3, "weight": 0.07},
 ]
+const ICE_RADIUS: float = 1.5               # 얼음꽃: 시들면 이 둘레(칸)의 작물이 얼어붙는다 (서리와 같은 얼음: 체력 ×2.5·생기 ×4, 깨지면 옆을 친다)
+const MOONFLOWER_BLOOM: float = 2.0         # 달맞이꽃: 생기 × (1 + 2 × 밤이 지난 몫). 밤 시작 ×1, 새벽 ×3
 const CROP_FADE_LEVELS: float = 3.0         # 새 작물은 이만큼의 단계에 걸쳐 제 몫까지 늘어난다
 const BLOB_CHANCE: float = 0.3             # 무더기 작물 옆 칸(오른쪽·아래)이 같은 작물로 심길 확률 (0.55면 무더기가 밭을 덮었다)
 const LINE_CHANCE: float = 0.6             # 덩굴 작물 오른쪽 칸이 같은 작물로 심길 확률 (덩굴 길이 평균 2.5칸)
@@ -88,14 +96,19 @@ func cluster_chance(crop: int, turnip_level: int = 0) -> float:
 	return 0.0
 
 
-## 이 밭 단계에서 이 작물이 섞여 들었는지 (밀·옥수수·호박은 늘)
-func crop_unlocked(crop: int, field_level: int) -> bool:
-	return crop != Crop.GOLDEN and field_level >= int(CROPS[crop].get("from", 1))
+## 이 밭 단계(와 겨울잠 수)에서 이 작물이 섞여 들었는지 (밀·옥수수·호박은 늘)
+func crop_unlocked(crop: int, field_level: int, sleeps: int = 0) -> bool:
+	return crop != Crop.GOLDEN and field_level >= int(CROPS[crop].get("from", 1)) and sleeps >= crop_season(crop)
+
+
+## 이 작물이 섞여 드는 겨울잠 수 (0이면 첫 철부터, 밭 단계로만 정한다)
+func crop_season(crop: int) -> int:
+	return int(CROPS[crop].get("season", 0))
 
 
 ## 밭 단계의 작물 비율 (작물 순서, 합 1, 황금 이삭은 0). 밀에서 덜어 옥수수·호박에 주고(탐스러운 호박은 호박에 더),
-## 새 작물은 섞여 드는 단계부터 CROP_FADE_LEVELS에 걸쳐 제 몫까지 늘어난 뒤 전체를 다시 나눈다
-func crop_weights(field_level: int, pumpkin_level: int = 0) -> Array[float]:
+## 새 작물은 섞여 드는 단계부터 CROP_FADE_LEVELS에 걸쳐 제 몫까지 늘어난 뒤 전체를 다시 나눈다. 철 작물은 겨울잠 수(sleeps)가 차야 섞인다
+func crop_weights(field_level: int, pumpkin_level: int = 0, sleeps: int = 0) -> Array[float]:
 	var moved := minf(CROP_SHIFT * (field_level - 1), CROP_WEIGHTS[0] - MIN_WHEAT_WEIGHT)
 	var wheat := CROP_WEIGHTS[0] - moved
 	var pumpkin_extra := minf(PUMPKIN_WEIGHT_PER_LEVEL * pumpkin_level, wheat - MIN_WHEAT_WEIGHT * 0.5)
@@ -108,7 +121,7 @@ func crop_weights(field_level: int, pumpkin_level: int = 0) -> Array[float]:
 	var total := 1.0
 	for crop in CROPS.size():
 		var from := int(CROPS[crop].get("from", 0))
-		if from > 0 and field_level >= from:
+		if from > 0 and field_level >= from and sleeps >= crop_season(crop):
 			weights[crop] = float(CROPS[crop]["weight"]) * minf(float(field_level - from + 1) / CROP_FADE_LEVELS, 1.0)
 			total += weights[crop]
 	for crop in CROPS.size():

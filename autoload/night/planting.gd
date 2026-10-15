@@ -65,7 +65,7 @@ func _pick_crop(index: int) -> int:
 	var follow := _cluster_neighbor(index)
 	if follow >= 0 and rng.randf() < Balance.cluster_chance(follow, Upgrades.level(Balance.Upgrade.TURNIP)):
 		return follow
-	var weights := Balance.crop_weights(field_level, Upgrades.level(Balance.Upgrade.PUMPKIN))
+	var weights := Balance.crop_weights(field_level, Upgrades.level(Balance.Upgrade.PUMPKIN), Winter.sleeps)
 	for crop in weights.size():
 		roll -= weights[crop]
 		if roll < 0.0:

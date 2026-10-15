@@ -136,10 +136,18 @@ func _test_beyond() -> void:
 	Night.stop()
 
 
+## 날씨는 밭 rng를 굴리지 않는다 (철 작물이 섞이면 배치는 달라지니, 같은 칸을 심을 때 밭 rng가 같은 만큼 굴렀는지 본다)
 func _test_field_rng() -> void:
-	_start(0, 8, 11)
-	var calm := Night.kinds.duplicate()
-	Night.stop()
 	_start(1, 8, 11)
-	_equal(Night.kinds == calm, true, "서리가 와도 밭 배치는 같다")
+	var before := Night.rng.state
+	Night._choose_weather()
+	_equal(Night.rng.state == before, true, "날씨를 고를 때 밭 rng는 그대로")
+	var cell := 0
+	Night.rng.state = before
+	Night._grow(cell)
+	var frosty := Night.rng.state
+	Night.weathers = 0
+	Night.rng.state = before
+	Night._grow(cell)
+	_equal(Night.rng.state == frosty, true, "서리를 굴려도 밭 rng는 같은 만큼 구른다")
 	Night.stop()
