@@ -30,6 +30,12 @@ func _init() -> void:
 	add_child(_row)
 
 
+## 칩 줄 바로 아래, 모든 칸 위에 늘 보이는 띠 하나를 둔다 (낮 화면의 마을 소문)
+func add_banner(banner: Control) -> void:
+	add_child(banner)
+	move_child(banner, 1)
+
+
 ## 칸 하나를 붙인다. shown은 칸이 열렸는지(비우면 늘 열림), dot은 칩에 점을 찍을지. 먼저 이 부품을 트리에 넣고 부른다
 func add_page(title: String, page: Control, shown: Callable = Callable(), dot: Callable = Callable()) -> void:
 	var chip := Button.new()

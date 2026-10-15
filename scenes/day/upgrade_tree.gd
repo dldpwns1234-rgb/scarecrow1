@@ -1,6 +1,7 @@
 extends VBoxContainer
 ## 낮 화면 오른쪽: 어둠의 나무 (GDD 6절, 방장 2026-10-14: 사방으로 뻗고 앞 칸을 사야 다음 칸이 나타난다).
-## 위에 제목과 '전체 보기'·'가운데로'(줌은 휠·두 손가락 집기도), 가운데에 끌어서 둘러보는 판(tree_board.gd), 아래에 고른 카드의 효과와 구매 버튼 (폰에서 잘못 눌러 사지 않게 구매는 여기서만).
+## 끌어서 둘러보는 판(tree_board.gd)의 오른쪽 위 모서리에 '전체 보기'·'가운데로'(줌은 휠·두 손가락 집기도), 아래에 고른 카드의 효과와 구매 버튼 (폰에서 잘못 눌러 사지 않게 구매는 여기서만).
+## 제목 줄은 없앴다: 탭 칩이 이름을 보이고, 그 자리는 마을 소문이 쓴다 (방장 #587).
 ## 카드는 Balance.UPGRADES로 만든다. Upgrades의 함수만 부르고 표시만 한다. 상수는 배치용이다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -9,8 +10,8 @@ const TreeBoard := preload("res://scenes/day/tree_board.gd")
 const GAP: int = 12
 const DETAIL_HEIGHT: float = 96.0
 const BUY_SIZE := Vector2(240, 64)
-const CENTER_BUTTON_SIZE := Vector2(130, 44)
-const HEADER_COLOR := Color("e9c46a")
+const CORNER_BUTTON_SIZE := Vector2(116, 42)
+const CORNER_MARGIN: float = 10.0  # 판 모서리에서 단추까지
 const NOTE_COLOR := Color("b8bcc8")
 const NOTE_FONT_SIZE: int = 20
 const LOCKED_TINT := Color(0.6, 0.6, 0.66)
@@ -28,23 +29,14 @@ func _ready() -> void:
 	_gate = RefreshGate.new(_refresh, self)
 	add_child(_gate)
 	add_theme_constant_override("separation", GAP)
-	var top := HBoxContainer.new()
-	add_child(top)
-	var header := Label.new()
-	header.text = "어둠의 나무"
-	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_theme_color_override("font_color", HEADER_COLOR)
-	top.add_child(header)
 	var fit := Button.new()  # 나무가 커지면 한눈에 (방장 2026-10-15). 휠·두 손가락으로도 줌
 	fit.text = "전체 보기"
-	fit.custom_minimum_size = CENTER_BUTTON_SIZE
+	fit.custom_minimum_size = CORNER_BUTTON_SIZE
 	fit.pressed.connect(func() -> void: _board.fit_all())
-	top.add_child(fit)
 	var recenter := Button.new()
 	recenter.text = "가운데로"
-	recenter.custom_minimum_size = CENTER_BUTTON_SIZE
+	recenter.custom_minimum_size = CORNER_BUTTON_SIZE
 	recenter.pressed.connect(_recenter)
-	top.add_child(recenter)
 	var frame := PanelContainer.new()  # 나무 틀 안 밤하늘: 헛간 벽과 갈라 보이게 (방장 2026-10-15)
 	frame.theme_type_variation = "DarkBoard"
 	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -52,6 +44,12 @@ func _ready() -> void:
 	_board = TreeBoard.new()
 	_board.selected.connect(_select)
 	frame.add_child(_board)
+	var corner := HBoxContainer.new()  # 판 위에 떠 있는 단추: 단추가 누름을 받고, 나머지 자리는 판이 끌기·누름을 받는다
+	corner.add_child(fit)
+	corner.add_child(recenter)
+	_board.add_child(corner)
+	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, int(CORNER_MARGIN))
+	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_selected = _board.center_index  # 데이터에 어둠의 계약이 있으면 그 줄, 없으면 -1
 	add_child(_make_detail())
 	Game.vitality_changed.connect(_gate.queue)

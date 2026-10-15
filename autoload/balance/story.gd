@@ -1,5 +1,5 @@
 extends "res://autoload/balance/winter.gd"
-## Balance 4부: 이야기 조각 10개 (docs/STORY.md, 윤슬). 게임 수치에는 영향이 없다.
+## Balance 4부: 이야기 조각 10개 (docs/STORY.md, 윤슬)와 마을 소문(문안은 balance/rumors.gd). 게임 수치에는 영향이 없다.
 ## 문안은 카드 폭(한 줄 36자 안팎)에 맞춰 문장마다 줄을 바꿨다 (한글은 낱자 사이에서도 줄이 바뀌어 낱말이 갈라지므로).
 ## 기록(StoryStat)이 목표에 닿고 앞 조각이 열려 있으면 열린다. 순서가 곧 이야기 순서라 건너뛰지 않는다. 열림과 카드는 autoload/story.gd.
 ## 목표는 봇의 시간표(docs/BALANCE_SIM.md 2026-10-15, 별빛 f80b9b1 곡선 Z1: 단계마다 생기 ×1.05, 휴식 지수 0.45)에 맞춰 조각 사이가 점점 벌어지게 잡았다:
@@ -33,6 +33,7 @@ const FRAGMENTS: Array[Dictionary] = [
 		"text": "약속된 휴식이 백 년에 닿았다.\n나는 마지막 생기를 어둠이 아니라 밭에 돌려주었다.\n어둠은 배를 움켜쥐고 작아지더니, 그냥 까마귀가 되었다.\n농부는 밭을 묵히고 도시로 떠났다. 아무도 이 밭을 지키라고 하지 않는다.\n나는 휴경지에 처음으로 누웠다. 별이 많다.\n까마귀가 내 옆에 내려앉았다. 오늘은 쫓아내지 않기로 했다."},
 ]
 const INTRO_FRAGMENTS: int = 2  # 첫 실행 장면이 앞의 두 조각을 보여 준다 (장면을 보면 본 것으로 친다)
+const RUMORS := preload("res://autoload/balance/rumors.gd")
 const STORY_REST_GOAL: float = 100.0 * 365.25 * 86400.0  # 약속된 휴식 백 년 (balance.gd의 HUNDRED_YEARS_SECONDS와 같다. 사슬 뒤라 여기서는 못 본다)
 
 
@@ -67,3 +68,14 @@ func fragment_hint(index: int) -> String:
 		StoryStat.REST:
 			return "약속된 휴식 백 년"
 	return ""
+
+
+## 지금 들리는 마을 소문 (낮 화면 rumor_line). 기록이 from 이상이고 until(있으면) 미만인 것. field는 겨울잠을 넘어 가장 높이 연 밭 단계
+func rumors_now(nights: int, field: int, winters: int, offered: float) -> PackedStringArray:
+	var stats := {"any": 0.0, "nights": float(nights), "field": float(field), "winters": float(winters), "offered": offered}
+	var result := PackedStringArray()
+	for entry: Dictionary in RUMORS.LINES:
+		var value: float = stats[entry["stat"]]
+		if value >= float(entry["from"]) and value < float(entry.get("until", INF)):
+			result.append(entry["text"])
+	return result

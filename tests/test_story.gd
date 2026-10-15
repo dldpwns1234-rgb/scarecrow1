@@ -1,5 +1,5 @@
 extends "res://tests/test_case.gd"
-## 이야기 조각: 처음 두 조각은 첫 장면이 보여 준다, 기록이 닿으면 앞에서부터 차례로 열린다, 겨울잠으로 밭 단계가 내려가도 닫히지 않는다, 저장과 옛 저장
+## 이야기 조각: 처음 두 조각은 첫 장면이 보여 준다, 기록이 닿으면 앞에서부터 차례로 열린다, 겨울잠으로 밭 단계가 내려가도 닫히지 않는다, 저장과 옛 저장. 마을 소문
 
 
 func run() -> void:
@@ -54,3 +54,19 @@ func run() -> void:
 	Winter.reset()
 	Story.reset()
 	_fresh()
+	_rumors()
+
+
+## 마을 소문 (낮 화면 rumor_line): 진행에 따라 늘고, until을 넘으면 사라지고, 한 줄에 들어간다
+func _rumors() -> void:
+	var first := Balance.rumors_now(0, 1, 0, 0.0)
+	_equal(first.has("윗마을 밀밭에 밤새 잿빛 곰팡이가 피었대."), true, "첫날에도 소문이 들린다")
+	_equal(first.has("마을에서 밭 감독관을 불렀대. 등불 들고 밤새 돈다나."), false, "감독관 소문은 25단계 전엔 없다")
+	var later := Balance.rumors_now(50, 30, 2, 2e12)
+	_equal(later.has("마을에서 밭 감독관을 불렀대. 등불 들고 밤새 돈다나."), true, "25단계를 넘으면 감독관 소문")
+	_equal(later.has("윗마을 밀밭에 밤새 잿빛 곰팡이가 피었대."), false, "처음 며칠 소문은 밤 20번이 지나면 들리지 않는다")
+	_equal(later.has("구름도 없는데 달이 반쯤 가려진 밤이 잦아졌어."), true, "바친 생기 1조면 어둠의 배 무렵 소문")
+	_equal(later.size() > first.size(), true, "진행할수록 들리는 소문이 늘어난다")
+	for entry: Dictionary in Balance.RUMORS.LINES:
+		_equal(entry["stat"] in ["any", "nights", "field", "winters", "offered"], true, "소문 조건 이름 %s" % entry["stat"])
+		_equal(String(entry["text"]).length() <= 36, true, "소문은 한 줄 36자 안쪽: %s" % entry["text"])
