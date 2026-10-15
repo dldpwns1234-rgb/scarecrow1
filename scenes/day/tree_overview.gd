@@ -1,7 +1,8 @@
 extends Control
 ## 어둠의 나무를 멀리 볼 때(줌 FAR_ZOOM 아래)의 모습 (장르 조사의 공통 불만 '나무 화면이 복잡하고 아이콘을 구분하기 어렵다', 방장 #587 뒤).
 ## 글이 뭉개지는 카드 위에 갈래 색 판을 덮는다: 위 역병 구름은 보라, 왼쪽 밤의 시간은 파랑, 오른쪽 밭 살찌우기는 초록, 아래 까마귀는 주황.
-## 산 칸은 짙게, 아직 0레벨이면 옅게, 다 산 칸은 흰 테, 살 수 있는 칸은 금빛 테. 왼쪽 위에 갈래 이름표. 판(tree_board)이 자리를 바꿀 때 다시 그린다. 상수는 연출용이다
+## 산 칸은 짙게, 아직 0레벨이면 옅게, 다 산 칸은 흰 테, 살 수 있는 칸은 금빛 테. 왼쪽 위에 갈래 이름표.
+## 가까이 볼 때는 카드 윗변 가운데에 같은 갈래 색 짧은 띠만 얹는다 (어느 갈래 칸인지). 판(tree_board)이 자리를 바꿀 때 다시 그린다. 상수는 연출용이다
 
 const TreeLayout := preload("res://scenes/day/tree_layout.gd")
 const FAR_ZOOM: float = 0.5
@@ -21,6 +22,9 @@ const LEGEND_AT := Vector2(14, 14)   # 판 왼쪽 위에서
 const LEGEND_SWATCH: float = 12.0
 const LEGEND_LINE: float = 22.0
 const LEGEND_BACK := Color(0.05, 0.04, 0.09, 0.7)
+const BAND_WIDTH: float = 0.42     # 가까이 볼 때 띠 폭 (카드 폭 비율)
+const BAND_HEIGHT: float = 6.0    # 줌 1일 때 띠 두께
+const BAND_TOP: float = 3.0       # 카드 윗변에서 띠까지 (줌 1)
 
 var _board: Control                  # tree_board.gd (card_rect·zoom)
 var _cards: Array[Button] = []
@@ -55,7 +59,9 @@ static func _branch_of(index: int, cells: Array[Vector2i]) -> int:
 
 
 func _draw() -> void:
-	if float(_board.get("zoom")) >= FAR_ZOOM:
+	var zoom := float(_board.get("zoom"))
+	if zoom >= FAR_ZOOM:
+		_draw_bands(zoom)
 		return
 	for i in _cards.size():
 		if not _cards[i].visible:
@@ -67,6 +73,18 @@ func _draw() -> void:
 		_box.set_border_width_all(int(EDGE_WIDTH) if _cards[i].theme_type_variation == "AccentButton" or Upgrades.is_maxed(i) else 0)
 		draw_style_box(_box, rect)
 	_draw_legend()
+
+
+## 가까이 볼 때: 카드 윗변 가운데의 갈래 색 짧은 띠
+func _draw_bands(zoom: float) -> void:
+	for i in _cards.size():
+		if not _cards[i].visible:
+			continue
+		var rect: Rect2 = _board.call("card_rect", i)
+		var width := rect.size.x * BAND_WIDTH
+		_box.bg_color = BRANCHES[_branch[i]][2]
+		_box.set_border_width_all(0)
+		draw_style_box(_box, Rect2(rect.position + Vector2((rect.size.x - width) * 0.5, BAND_TOP * zoom), Vector2(width, BAND_HEIGHT * zoom)))
 
 
 func _draw_legend() -> void:
