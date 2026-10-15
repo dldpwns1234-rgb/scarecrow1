@@ -72,8 +72,8 @@ func _test_chance() -> void:
 			dry += 1
 			longest = maxi(longest, dry)
 		Night.stop()
-	_equal(longest <= Balance.WISP_DROUGHT, true, "뜰 수 있는 밤을 셋 넘게 거르지 않는다")
-	_equal(count > 12 and count < 40, true, "60밤에 스물 남짓 뜬다 (%d)" % count)
+	_equal(longest <= Balance.WISP_DROUGHT, true, "뜰 수 있는 밤을 가뭄 수 넘게 거르지 않는다")
+	_equal(count > 5 and count < 22, true, "60밤에 열 남짓 뜬다 (%d)" % count)
 
 
 func _test_appear_and_fade() -> void:
