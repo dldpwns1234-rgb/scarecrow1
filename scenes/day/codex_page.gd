@@ -1,6 +1,7 @@
 extends VBoxContainer
 ## 낮 화면 오른쪽 [도감] 칸 (방장 #587, 장르 조사 제안 4·8): 둘째 겨울잠 뒤에 열린다 (숙련과 그 생기 배율은 처음부터 쌓인다).
-## 작물마다 그림·이름·숙련·그 작물 생기 배율, 다음 숙련까지 시든 수와 막대. 아직 밭에 나온 적 없는 작물은 그림자와 '???', 나오는 밭 단계.
+## 작물마다 그림·이름·숙련·그 작물 생기 배율, 다음 숙련까지 시든 수와 막대. 아직 밭에 나온 적 없는 작물은 그림자와 '???', 나오는 밭 단계(철 작물은 겨울잠 횟수).
+## 작물이 늘어 그림 배열보다 많으면 밀 그림을 대신 쓴다 (그림이 올 때까지).
 ## Feats·Balance의 조회 함수만 쓰고 표시만 한다. 상수는 배치용이다
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
@@ -76,7 +77,7 @@ func _make_row(crop: int) -> PanelContainer:
 	row.add_theme_constant_override("separation", GAP)
 	margin.add_child(row)
 	var icon := TextureRect.new()
-	icon.texture = ICONS[crop] if crop < ICONS.size() else null
+	icon.texture = ICONS[crop] if crop < ICONS.size() else ICONS[0]
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.custom_minimum_size = ICON_SIZE
@@ -111,12 +112,13 @@ func _refresh() -> void:
 	for crop in Balance.CROPS.size():
 		var count: float = Feats.withered[crop]
 		var from := int(Balance.CROPS[crop].get("from", 1))
-		var seen := count > 0.0 or reached >= from
+		var season: int = Balance.call("crop_season", crop) if Balance.has_method("crop_season") else 0  # 철 작물 (별빛: 겨울잠 횟수)
+		var seen := count > 0.0 or (Winter.sleeps >= season if season > 0 else reached >= from)
 		_icons[crop].modulate = Color.WHITE if seen else HIDDEN_TINT
 		if not seen:
 			_titles[crop].text = "???"
 			_titles[crop].add_theme_color_override("font_color", NOTE_COLOR)
-			_notes[crop].text = "밭 %d단계에서 나타난다" % from
+			_notes[crop].text = "겨울잠 %d번 뒤에 나타난다" % season if season > 0 else "밭 %d단계에서 나타난다" % from
 			_bars[crop].value = 0.0
 			continue
 		var level := Feats.mastery(crop)
