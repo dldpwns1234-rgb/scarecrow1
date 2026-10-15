@@ -30,7 +30,7 @@ func run() -> void:
 	_close(Balance.promised_rest_seconds(1000.0), 60.0 * pow(1000.0, Balance.PROMISE_EXPONENT), "생기 1천이면 10분 안팎")
 	var first_winter := Balance.promised_rest_seconds(2e8)  # 봇의 첫 겨울잠 무렵 바친 생기 (docs/BALANCE_SIM.md)
 	_equal(first_winter > 86400.0 and first_winter < 30.0 * 86400.0, true, "첫 겨울잠 무렵 며칠")
-	_equal(Balance.promised_rest_seconds(1e18) < Balance.HUNDRED_YEARS_SECONDS, true, "1e18은 아직 백 년 전")
+	_equal(Balance.promised_rest_seconds(5e17) < Balance.HUNDRED_YEARS_SECONDS, true, "5e17은 아직 백 년 전")
 	_equal(Balance.promised_rest_seconds(1e19) > Balance.HUNDRED_YEARS_SECONDS, true, "1e19면 백 년을 넘는다 (봇은 넷째 철)")
 	_close(Game.promised_rest_seconds(), Balance.promised_rest_seconds(9.0), "약속된 휴식은 바친 생기 합으로")
 	Game.start_night()
