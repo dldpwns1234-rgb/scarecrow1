@@ -4,6 +4,7 @@ extends Control
 const DayScreen := preload("res://scenes/day/day_screen.gd")
 const NightScreen := preload("res://scenes/night/night_screen.gd")
 const NightReport := preload("res://scenes/day/night_report.gd")
+const FeatToast := preload("res://scenes/ui/feat_toast.gd")
 const NightHint := preload("res://scenes/ui/night_hint.gd")
 const IntroCard := preload("res://scenes/ui/intro_card.gd")
 const StoryBook := preload("res://scenes/ui/story_book.gd")
@@ -34,6 +35,7 @@ func _ready() -> void:
 		screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		add_child(screen)
 	add_child(NightReport.new())  # 밤이 끝나면 낮 화면 위에 잠깐 뜨는 결과
+	add_child(FeatToast.new())  # 업적이 열리면 화면 아래에 잠깐 (업적 칸이 열린 뒤부터)
 	add_child(NightHint.new())  # 첫 밤에만: 구름을 끌어 보라는 안내
 	var confirm := WinterConfirm.new()  # 겨울잠 확인 창 (꿈의 상점 버튼으로 연다)
 	add_child(confirm)

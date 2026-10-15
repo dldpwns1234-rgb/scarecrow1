@@ -1,14 +1,19 @@
 extends Control
 ## 밤 화면 연출 층 (윤슬, 방장 2026-10-14 "가득 차는 뽕맛"): 생기 알갱이(sparks.gd), 스킬 이름(skill_callout.gd), 풍작 콤보(combo_meter.gd)를 얹고,
-## 새 밤의 이름(night_title.gd)도 띄운다. 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
+## 새 밤의 이름(night_title.gd)도 띄운다. 도깨비불을 잡으면 그 자리에서 알갱이가 터지고 화면이 옅게 푸르게 번쩍인다. 풍작이 터지면 밭 가운데에서 알갱이를 크게 터뜨리고, 화면을 하얗게 번쩍이고, 밤 화면을 잠깐 흔들고, '풍작!'을 띄운다.
 ## night_screen.gd가 field를 넘겨 붙인다. 입력은 받지 않는다. Night 시그널만 받는 연출이다. 상수는 연출용이다
 
 const Sparks := preload("res://scenes/night/fx/sparks.gd")
 const ComboMeter := preload("res://scenes/night/fx/combo_meter.gd")
 const SkillCallout := preload("res://scenes/night/fx/skill_callout.gd")
 const NightTitle := preload("res://scenes/night/fx/night_title.gd")
+const Iso := preload("res://scenes/night/iso.gd")
 
 const FLASH_ALPHA: float = 0.28
+const FLASH_TINT := Color(1.0, 0.97, 0.85)
+const WISP_TINT := Color(0.6, 0.88, 1.0)   # 도깨비불의 푸른 빛
+const WISP_FLASH: float = 0.22
+const WISP_BURST: float = 1.4             # 알갱이 수 배율
 const FLASH_SECONDS: float = 0.35
 const SHAKE_PIXELS: float = 7.0
 const SHAKE_STEPS: int = 6
@@ -58,6 +63,8 @@ func _ready() -> void:
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.modulate.a = 0.0
 	add_child(_banner)
+	if Night.has_signal("wisp_caught"):
+		Night.connect("wisp_caught", _on_wisp_caught.unbind(2))
 
 
 func _on_burst(level: int) -> void:
@@ -66,7 +73,7 @@ func _on_burst(level: int) -> void:
 		center = field.call("field_center")
 	var grow := minf(1.0 + GROW_PER_LEVEL * (level - 1), MAX_GROW)
 	_sparks.burst_at(center, grow)
-	_flash.color.a = minf(FLASH_ALPHA * sqrt(grow), 0.5)
+	_flash.color = Color(FLASH_TINT, minf(FLASH_ALPHA * sqrt(grow), 0.5))
 	create_tween().tween_property(_flash, "color:a", 0.0, FLASH_SECONDS)
 	_banner.text = "풍작!" if level == 1 else "풍작 ×%d!" % level
 	_banner.modulate.a = 1.0
@@ -93,3 +100,15 @@ func _shake_screen() -> void:
 		var offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * SHAKE_PIXELS * fade
 		_shake.tween_property(screen, "position", home + offset, SHAKE_STEP_SECONDS)
 	_shake.tween_property(screen, "position", home, SHAKE_STEP_SECONDS)
+
+
+## 도깨비불을 잡은 자리 (판의 격자 → 화면). 판이나 자리를 모르면 화면 가운데
+func _on_wisp_caught() -> void:
+	var at := size * 0.5
+	var board := field.get_parent() as Node2D if field != null else null
+	var cell: Variant = Night.get("wisp")
+	if board != null and cell is Vector2:
+		at = board.transform * Iso.to_screen(Vector2.ZERO, cell)
+	_sparks.burst_at(at, WISP_BURST)
+	_flash.color = Color(WISP_TINT, WISP_FLASH)
+	create_tween().tween_property(_flash, "color:a", 0.0, FLASH_SECONDS * 1.5)

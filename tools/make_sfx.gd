@@ -35,6 +35,10 @@ const SOUNDS: Dictionary = {
 	"burst": [0.5, 0.5],
 	"seeds": [0.35, 0.3],
 	"zap": [0.25, 0.3],
+	"wisp": [1.0, 0.45],
+	"wisp_catch": [1.2, 0.6],
+	"wisp_fade": [0.9, 0.35],
+	"feat": [1.2, 0.5],
 }
 
 const TAIL_FADE: float = 0.25  # 소리 길이의 마지막 이만큼을 서서히 줄인다 (잘린 꼬리가 딸깍하지 않게)

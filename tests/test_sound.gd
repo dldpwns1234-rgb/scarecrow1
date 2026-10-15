@@ -71,6 +71,7 @@ func run() -> void:
 
 ## 밤 곡의 겹: 바탕은 늘, 하프·오카리나·높은 현은 밭 단계로, 반딧불 종은 풍작 뒤 잠깐
 func _layers() -> void:
+	Sfx._swell_left = 0.0  # 앞 스위트(도깨비불)가 부풀린 반딧불 종을 비운다
 	Night.best_level = 30
 	Night.choose_level(1)
 	Game.start_night()
