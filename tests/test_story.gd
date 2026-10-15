@@ -34,10 +34,10 @@ func run() -> void:
 	Winter.slept.emit(3.0)
 	_equal(Story.unlocked_count, 8, "첫 겨울잠 → '겨울잠', 이미 닿은 '어둠의 배'까지")
 	Night.best_level = 1
-	Game.offered = 1e16
+	Game.offered = 3e15
 	Game.start_night()
 	Game.finish_night()
-	_equal(Story.unlocked_count, 9, "겨울잠으로 밭 단계가 내려가도 닫히지 않고, 바친 생기 1경이면 '농부의 한숨'")
+	_equal(Story.unlocked_count, 9, "겨울잠으로 밭 단계가 내려가도 닫히지 않고, 바친 생기 3000조면 '농부의 한숨'")
 	_equal(Balance.fragment_hint(9), "약속된 휴식 백 년", "다음 조각의 조건 글")
 
 	var data := Save.to_dict()
