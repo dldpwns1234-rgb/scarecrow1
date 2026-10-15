@@ -29,3 +29,4 @@ func _close(actual: float, expected: float, what: String) -> void:
 func _fresh() -> void:
 	Upgrades.reset()
 	Game.reset()
+	Feats.reset()

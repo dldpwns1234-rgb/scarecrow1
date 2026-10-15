@@ -1,6 +1,6 @@
 extends Control
-## 밤: 밭 (GDD 4절). 아래부터 배경(하늘·달·언덕·들판 night_backdrop), 판(밭 field_view·공기 night_ambience·농부 farmer_view·역병 구름 cloud_view·까마귀 crow_view·
-## 스킬과 작물 연출 skill_fx), 생기 연출(rest_fx), 풍작 콤보(윤슬 fx/), 가장자리 어둡게, 위쪽 글(night_hud).
+## 밤: 밭 (GDD 4절). 아래부터 배경(하늘·달·언덕·들판 night_backdrop), 판(밭 field_view·공기 night_ambience·날씨 weather_view·농부 farmer_view·역병 구름 cloud_view·까마귀 crow_view·
+## 스킬과 작물 연출 skill_fx·도깨비불 wisp_view), 생기 연출(rest_fx), 풍작 콤보(윤슬 fx/), 가장자리 어둡게, 위쪽 글(night_hud).
 ## 판은 격자 (0, 0) 꼭짓점을 원점으로 그리는 Node2D다. 밭이 넓어지면(밭 단계, 방장 2026-10-14) 밤마다 판의 배율을 줄여 화면에 맞춘다.
 ## 마우스는 커서 자리로 구름을 옮기고, 손가락은 아무 데나 대고 끌면 끈 만큼 구름이 따라온다 (손가락이 구름을 가리지 않게, 방장 2026-10-14).
 ## 규칙은 Night 오토로드가 돌리고 이 화면은 입력과 그림만 맡는다. 상수는 배치·연출용이다
@@ -13,6 +13,8 @@ const CloudView := preload("res://scenes/night/cloud_view.gd")
 const FarmerView := preload("res://scenes/night/farmer_view.gd")
 const CrowView := preload("res://scenes/night/crow_view.gd")
 const SkillFx := preload("res://scenes/night/skill_fx.gd")
+const WispView := preload("res://scenes/night/wisp_view.gd")
+const WeatherView := preload("res://scenes/night/weather_view.gd")
 const RestFx := preload("res://scenes/night/rest_fx.gd")
 const NightHud := preload("res://scenes/night/night_hud.gd")
 const NightFx := preload("res://scenes/night/fx/night_fx.gd")
@@ -44,6 +46,7 @@ func _ready() -> void:
 	_field = FieldView.new()
 	_board.add_child(_field)
 	_board.add_child(NightAmbience.new())
+	_board.add_child(WeatherView.new())  # 달빛·빗줄기·얼음 조각 (구름·농부 뒤)
 	_farmers = FarmerView.new()
 	_farmers.field = _field
 	_board.add_child(_farmers)
@@ -55,6 +58,7 @@ func _ready() -> void:
 	var skill_fx := SkillFx.new()
 	skill_fx.field = _field
 	_board.add_child(skill_fx)
+	_board.add_child(WispView.new())  # 구름 위에 (잡히는 순간이 보이게)
 	_fx = RestFx.new()
 	_fx.field = _field
 	add_child(_fx)

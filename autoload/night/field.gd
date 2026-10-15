@@ -94,12 +94,13 @@ func neighbors(index: int) -> Array[int]:
 
 
 ## 이 칸의 작물을 시들게 하면 받는 생기 (그 작물의 칸·수확일·썩은 냄새·꿈속 수확 배율 포함).
-## rotten이면 번진 채 시들었다 (끈적한 포자). 다시 자란 작물(무성한 뿌리), 까마귀가 쪼아 시든 작물(썩은 고기), 물결의 기세도 곱한다
+## rotten이면 번진 채 시들었다 (끈적한 포자). 다시 자란 작물(무성한 뿌리), 까마귀가 쪼아 시든 작물(썩은 고기), 물결의 기세, 도깨비 잔치, 업적, 작물 숙련도 곱한다
 func crop_vitality(index: int, rotten: bool = false) -> float:
 	var bonus := Balance.crop_bonus_upgrade(kinds[index])
 	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(bonus) if bonus >= 0 else 0)
 	value *= Balance.harvest_vitality(field_level, Upgrades.level(Balance.Upgrade.BOUNTY)) * Winter.vitality_multiplier()
-	value *= Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * _kill_bonus * _wave_multiplier()
+	value *= Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * _kill_bonus * _wave_multiplier() * _boon_multiplier()
+	value *= Feats.vitality_multiplier() * Feats.mastery_multiplier(kinds[index])  # 업적·작물 숙련 (겨울잠을 넘어 남는다)
 	if rotten:
 		value *= Balance.sticky_multiplier(Upgrades.level(Balance.Upgrade.STICKY))
 	if index < regrown.size() and regrown[index] == 1:
@@ -109,6 +110,11 @@ func crop_vitality(index: int, rotten: bool = false) -> float:
 
 ## night/waves.gd가 채운다 (물결의 기세)
 func _wave_multiplier() -> float:
+	return 1.0
+
+
+## night/wisp.gd가 채운다 (도깨비 잔치)
+func _boon_multiplier() -> float:
 	return 1.0
 
 

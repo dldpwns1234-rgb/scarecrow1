@@ -77,6 +77,14 @@ func perform() -> bool:
 	return true
 
 
+## 겨울잠 밖에서 받는 꿈 조각 (도깨비불의 꿈 부스러기)
+func add_shards(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	shards = Balance.cap(shards + amount)
+	shards_changed.emit(shards)
+
+
 func is_maxed(index: int) -> bool:
 	var cap := Balance.dream_max_level(index)
 	return cap > 0 and dream_levels[index] >= cap

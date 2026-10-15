@@ -1,6 +1,7 @@
-extends "res://autoload/night/waves.gd"
+extends "res://autoload/night/weather.gd"
 ## 밤 한 판의 흐름 (GDD 4절): 시작(밭 심기·시계), 역병 구름의 박자, 번짐, 시듦과 생기, 다시 자라기, 밭 정복(수확일 보너스), 끝.
-## 밭 단계는 night/levels.gd, 밭(칸)은 night/field.gd, 심기는 night/planting.gd, 까마귀와 지키는 이는 night/critters.gd, 스킬은 night/skills.gd, 시듦·번짐·정복·물결은 night/waves.gd.
+## 밭 단계는 night/levels.gd, 밭(칸)은 night/field.gd, 심기는 night/planting.gd, 까마귀와 지키는 이는 night/critters.gd, 스킬은 night/skills.gd, 시듦·번짐·정복·물결은 night/waves.gd,
+## 도깨비불은 night/wisp.gd, 철마다 날씨(서리·장마·보름달)는 night/weather.gd.
 ## 화면(scenes/night/)은 시그널을 받아 그리고 set_cloud()로 구름 자리만 넘긴다. 화면 없이도 돈다: 시뮬레이션 봇이 set_cloud()와 tick()을 직접 부른다.
 ## 수치는 Balance, 생기는 Game.add_vitality(), 밤 끝은 Game.finish_night(). 상태 변경은 이 오토로드의 함수로만 한다
 
@@ -28,6 +29,9 @@ func reset() -> void:
 	active = false
 	cleared = false
 	time_left = 0.0
+	wisp_left = 0.0
+	feast_left = 0.0
+	_drought = 0
 	super()
 
 
@@ -42,6 +46,7 @@ func begin(seed: int = -1) -> void:
 		rng.seed = seed
 	else:
 		rng.randomize()
+	_choose_weather()
 	_plant()
 	active = true
 	cleared = false
@@ -54,6 +59,7 @@ func begin(seed: int = -1) -> void:
 	_reset_skills()
 	_setup_critters()
 	set_cloud(Vector2.ONE * field_size * 0.5)
+	_reset_wisp()
 	night_started.emit()
 	time_changed.emit(time_left)
 
@@ -70,6 +76,8 @@ func tick(dt: float) -> void:
 	_tick_skills(dt)
 	_tick_regrow(dt)
 	_tick_critters(dt)
+	_tick_wisp(dt)
+	_tick_weather(dt)
 	if not active:
 		return
 	time_changed.emit(maxf(time_left, 0.0))

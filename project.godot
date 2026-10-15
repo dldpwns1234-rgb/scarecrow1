@@ -25,6 +25,8 @@ Night="*res://autoload/night.gd"
 Winter="*res://autoload/winter.gd"
 ; 아지트 일꾼. Night의 밭 단계·Winter의 겨울잠을 받아 일꾼을 늘리고, Night가 효과를 묻는다
 Workers="*res://autoload/workers.gd"
+; 작물 숙련과 업적. Night·Game·Winter의 시그널로 기록을 세고, Night가 생기 배율을 묻는다
+Feats="*res://autoload/feats.gd"
 ; 이야기(첫 실행 장면·조각)는 Game을 읽고 Save가 불러오므로 그 사이에
 Story="*res://autoload/story.gd"
 ; 소리 설정은 Save가 불러오므로 그 앞에

@@ -1,5 +1,5 @@
-extends "res://autoload/balance/branches.gd"
-## Balance 2.7부: 아지트 일꾼 (GDD 8절 M2, 대화방 #419). 까마귀와 지친 허수아비를 일자리 칸에 놓는다.
+extends "res://autoload/balance/weather.gd"
+## Balance 2.7부 (날씨 뒤): 아지트 일꾼 (GDD 8절 M2, 대화방 #419). 까마귀와 지친 허수아비를 일자리 칸에 놓는다.
 ## 일꾼은 밭 기록(겨울잠을 넘어 가장 높이 연 단계)과 겨울잠 횟수로 늘고, 일자리 칸은 헛간 확장(생기, 영구)으로 는다. 수치는 시뮬레이션으로 맞춘다
 
 enum Worker { CROW, SCARECROW }

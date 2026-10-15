@@ -1,10 +1,10 @@
 extends "res://tools/sim_day.gd"
 ## 밤 시뮬레이션 (GDD 4절, 밸런스용). 실제 Balance·Upgrades·Game·Night 코드를 화면 없이 그대로 돌린다.
 ##
-##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6 --waves=1]
+##   godot --headless --path . res://tools/sim_night.tscn [-- --nights=60 --speed=12 --day=15 --seed=1 --log=1 --retry=2 --winter=1 --stall=6 --waves=1 --wisp=1(쫓음)|0(안 쫓음)|off(안 뜸)]
 ##
 ## 사람 흉내: 밤에는 구름을 '값어치가 가장 몰린 자리'로 옮긴다 (원 안 작물의 생기 ÷ 남은 체력 합이 가장 큰 작물 자리, 0.25초마다 다시 고름).
-## 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
+## 도깨비불이 뜨면 그쪽으로 구름을 옮긴다(wisp=1). 커서는 초당 speed칸까지 움직인다. 낮에는 살 수 있는 업그레이드를 싼 것부터 다 사고, 열린 가장 높은 밭 단계로 나간다.
 ## 못 깨면 사람처럼 한 단계씩 내려가 모으고, 깨면 한 단계씩 올라가 다시 도전한다 (못 깨는 밭만 붙들면 수입이 바닥이라 벽이 실제보다 가팔라 보였고,
 ## 겨울 씨앗으로 높은 단계에서 맨손으로 시작한 철에는 영영 못 벗어났다). 가장 높은 단계에서 못 깨면 retry밤 동안 아래에서 모은 뒤 다시 간다.
 ## 겨울잠(winter=1): 열린 단계가 stall밤 동안 오르지 않고 겨울잠에 들 수 있으면 들고, 꿈 조각을 싼 것부터 다 쓴다. 철마다 한 줄씩 찍는다.
@@ -21,6 +21,7 @@ var _farm_left: int = 0  # 가장 높은 단계에서 진 뒤 아래에서 더 �
 var _play_level: int = 1  # 다음 밤에 나갈 단계
 var _winter: bool = false
 var _stall: int = 6
+var _wisp: bool = true  # 도깨비불을 쫓는다
 var _waves: int = 1  # 이만큼 정복하면 '새벽까지 쉬기'로 밤을 끝낸다 (0이면 밤 끝까지 물결을 쓸어 담는다)
 
 
@@ -35,6 +36,8 @@ func _ready() -> void:
 	_winter = args.get("winter", "0") == "1"
 	_stall = int(args.get("stall", "6"))
 	_waves = int(args.get("waves", "1"))
+	_wisp = args.get("wisp", "1") == "1"
+	Night.wisp_enabled = args.get("wisp", "1") != "off"
 	var seed := int(args.get("seed", "1"))
 	Upgrades.reset()
 	Game.reset()
@@ -110,7 +113,7 @@ func _play() -> float:
 		if retarget <= 0.0:
 			retarget = RETARGET
 			target = _best_spot()
-		var step := target - Night.cloud
+		var step := (Night.wisp if _wisp and Night.is_wisp_up() else target) - Night.cloud
 		var reach := _speed * DT
 		Night.set_cloud(Night.cloud + (step if step.length() <= reach else step.normalized() * reach))
 		Night.tick(DT)
