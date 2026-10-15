@@ -6,12 +6,14 @@ extends VBoxContainer
 
 const RefreshGate := preload("res://scenes/ui/refresh_gate.gd")
 const TapScroll := preload("res://scenes/ui/tap_scroll.gd")
-## 작물 그림 (Balance.CROPS 순서: 밀·옥수수·호박·황금 이삭·순무·해바라기·수박·포도. 밤 밭 field_view.gd와 같은 그림)
+## 작물 그림 (Balance.CROPS 순서: 밀·옥수수·호박·황금 이삭·순무·해바라기·수박·포도·얼음꽃·버섯·달맞이꽃. 밤 밭 field_view.gd와 같은 그림)
 const ICONS: Array[Texture2D] = [
 	preload("res://assets/sprites/crops/wheat.svg"), preload("res://assets/sprites/crops/corn.svg"),
 	preload("res://assets/sprites/crops/pumpkin.svg"), preload("res://assets/sprites/crops/golden.svg"),
 	preload("res://assets/sprites/crops/turnip.svg"), preload("res://assets/sprites/crops/sunflower.svg"),
 	preload("res://assets/sprites/crops/watermelon.svg"), preload("res://assets/sprites/crops/grape.svg"),
+	preload("res://assets/sprites/crops/iceflower.svg"), preload("res://assets/sprites/crops/mushroom.svg"),
+	preload("res://assets/sprites/crops/moonflower.svg"),
 ]
 
 const GAP: int = 10
