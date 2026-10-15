@@ -8,6 +8,7 @@ signal selected(index: int)  # -1이면 가운데 (어둠의 계약)
 
 const TreeLayout := preload("res://scenes/day/tree_layout.gd")
 const CardFx := preload("res://scenes/day/card_fx.gd")
+const TreeOverview := preload("res://scenes/day/tree_overview.gd")
 const CARD_SIZE := TreeLayout.CARD
 const STEP := TreeLayout.STEP     # 격자 한 칸의 간격 (배치가 선이 카드를 지나는지 따질 때도 쓴다)
 const CENTER_RADIUS: float = 58.0
@@ -29,6 +30,7 @@ var _cards: Array[Button] = []
 var _shown: Array[bool] = []
 var _center_label: Label
 var _marks: Control  # 카드 위층: 판 밖 살 수 있는 카드를 가리키는 세모
+var _overview: Control  # 카드 위층: 멀리 볼 때 갈래 색 판 (tree_overview.gd)
 
 
 func _ready() -> void:
@@ -56,6 +58,8 @@ func _ready() -> void:
 		add_child(card)
 		_cards.append(card)
 		_shown.append(false)
+	_overview = TreeOverview.new(self, _cards, _cells)
+	add_child(_overview)
 	_marks = Control.new()
 	_marks.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_marks.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -116,6 +120,12 @@ func _place() -> void:
 			_cards[i].scale = Vector2.ONE * zoom
 	queue_redraw()
 	_marks.queue_redraw()
+	_overview.queue_redraw()
+
+
+## 카드가 지금 차지한 자리 (줌을 곱한 크기)
+func card_rect(index: int) -> Rect2:
+	return Rect2(_card_center(index) - CARD_SIZE * 0.5 * zoom, CARD_SIZE * zoom)
 
 
 func _card_center(index: int) -> Vector2:
@@ -137,7 +147,7 @@ func _draw() -> void:
 	if selected_index < 0 or selected_index == center_index:
 		draw_arc(center, radius + SELECT_MARGIN * 1.5, 0.0, TAU, 48, SELECT_COLOR, LINE_WIDTH)
 	elif _cards[selected_index].visible:
-		draw_rect(Rect2(_card_center(selected_index) - CARD_SIZE * 0.5 * zoom, CARD_SIZE * zoom).grow(SELECT_MARGIN), SELECT_COLOR, false, LINE_WIDTH)
+		draw_rect(card_rect(selected_index).grow(SELECT_MARGIN), SELECT_COLOR, false, LINE_WIDTH)
 
 
 ## 판 밖에 있는 살 수 있는 카드(금칠) 쪽 가장자리에 금빛 세모: 64칸 나무를 당겨 보고 있어도 살 것을 놓치지 않게 (방장 #529)
@@ -160,7 +170,7 @@ func _tap(point: Vector2) -> void:
 		_choose(center_index)
 		return
 	for i in _cards.size():
-		if _cards[i].visible and Rect2(_card_center(i) - CARD_SIZE * 0.5 * zoom, CARD_SIZE * zoom).has_point(point):
+		if _cards[i].visible and card_rect(i).has_point(point):
 			_choose(i)
 			return
 

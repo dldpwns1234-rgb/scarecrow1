@@ -9,6 +9,7 @@ const MIN_ZOOM: float = 0.2     # 나무가 64칸을 넘어도 전체 보기에 
 const MAX_ZOOM: float = 1.25
 const WHEEL_STEP: float = 1.12    # 휠 한 칸에 줌이 이만큼 곱해진다
 const FIT_MARGIN: float = 40.0    # 전체 보기에서 가장자리 여백
+const FIT_TOP: float = 56.0       # 전체 보기에서 위를 더 비운다 (판 오른쪽 위 모서리의 단추가 카드를 가리지 않게)
 
 var pan: Vector2 = Vector2.ZERO   # 가운데 노드가 판 가운데에서 얼마나 옮겨졌는지
 var zoom: float = 1.0
@@ -40,9 +41,9 @@ func set_zoom(value: float, anchor: Vector2 = Vector2.INF) -> void:
 ## 보이는 카드가 모두 들어가게: 카드들을 감싼 상자에 줌을 맞추고 그 상자 가운데를 판 가운데로 (나무는 위로 더 길다)
 func fit_all() -> void:
 	var box := _bounds().grow(FIT_MARGIN)
-	var fit := minf(size.x / maxf(box.size.x, 1.0), size.y / maxf(box.size.y, 1.0))
+	var fit := minf(size.x / maxf(box.size.x, 1.0), (size.y - FIT_TOP) / maxf(box.size.y, 1.0))
 	zoom = clampf(fit, MIN_ZOOM, 1.0)
-	pan = _clamp_pan(-box.get_center() * zoom)
+	pan = _clamp_pan(-box.get_center() * zoom + Vector2(0.0, FIT_TOP * 0.5))
 	_place()
 
 
@@ -117,7 +118,7 @@ func _touch_center() -> Vector2:
 ## 보이는 카드들이 화면 밖으로 다 나가지 않게: 가장 바깥 카드 너머로 PAN_MARGIN까지만
 func _clamp_pan(wanted: Vector2) -> Vector2:
 	var limit := (_reach() + Vector2.ONE * PAN_MARGIN) * zoom - size * 0.5
-	limit = limit.max(Vector2.ZERO)
+	limit = limit.max(Vector2.ZERO) + Vector2(0.0, FIT_TOP)  # 전체 보기가 단추 자리만큼 아래로 내린 것을 되돌리지 않게
 	return wanted.clamp(-limit, limit)
 
 
