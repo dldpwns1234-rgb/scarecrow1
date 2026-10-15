@@ -2,7 +2,8 @@ extends Control
 ## 밤: 밭 (GDD 4절). 아래부터 배경(하늘·달·언덕·들판 night_backdrop), 판(밭 field_view·공기 night_ambience·날씨 weather_view·농부 farmer_view·역병 구름 cloud_view·까마귀 crow_view·
 ## 스킬과 작물 연출 skill_fx·도깨비불 wisp_view), 생기 연출(rest_fx), 풍작 콤보(윤슬 fx/), 가장자리 어둡게, 위쪽 글(night_hud).
 ## 판은 격자 (0, 0) 꼭짓점을 원점으로 그리는 Node2D다. 밭이 넓어지면(밭 단계, 방장 2026-10-14) 밤마다 판의 배율을 줄여 화면에 맞춘다.
-## 마우스는 커서 자리로 구름을 옮기고, 손가락은 아무 데나 대고 끌면 끈 만큼 구름이 따라온다 (손가락이 구름을 가리지 않게, 방장 2026-10-14).
+## 마우스는 커서 자리로 구름을 옮기고, 손가락은 대는 순간부터 구름이 손가락보다 TOUCH_LIFT 위에 떠서 따라온다 (방장 2026-10-15 #639: 끈 만큼 따라오게 해도
+## 구름 위에 손가락을 대고 끌면 가려졌다). 손가락이 한 번 닿으면 밭을 TOUCH_RAISE만큼 올려 밭 맨 아래 칸을 칠 때도 손가락이 화면 안에 있게 한다.
 ## 규칙은 Night 오토로드가 돌리고 이 화면은 입력과 그림만 맡는다. 상수는 배치·연출용이다
 
 const Iso := preload("res://scenes/night/iso.gd")
@@ -25,6 +26,8 @@ const MAX_FIELD_WIDTH: float = 960.0  # 밭이 이보다 넓어지면 판을 줄
 const FIELD_ROOM_Y: float = 170.0     # 밭 높이로 쓰지 않는 세로 (위쪽 글·아래 여백)
 const VIGNETTE := Color(0.0, 0.0, 0.03, 0.6)  # 화면 가장자리 어둡게 (가운데는 맑게)
 const VIGNETTE_CLEAR: float = 0.55   # 가운데에서 이만큼(반지름 비율)까지는 맑다
+const TOUCH_LIFT: float = 110.0      # 손가락보다 이만큼(화면 px) 위에 구름 (1280×720 기준 손끝 너비 1cm쯤 ≈ 90px)
+const TOUCH_RAISE: float = 40.0      # 손가락으로 할 때 밭을 이만큼 올린다 (밭 아래 끝 + TOUCH_LIFT가 화면 안에)
 
 var _board: Node2D
 var _field: FieldView
@@ -33,6 +36,7 @@ var _farmers: FarmerView
 var _crows: CrowView
 var _fx: RestFx
 var _hud: NightHud
+var _touch: bool = false  # 손가락이 한 번이라도 닿았다 (밭을 올리고 구름을 손가락 위에)
 
 
 func _ready() -> void:
@@ -98,15 +102,19 @@ func _layout() -> void:
 	var field := Iso.field_size(Night.field_size) + Vector2(0.0, SIDE_DEPTH)
 	var zoom := minf(1.0, minf(MAX_FIELD_WIDTH / field.x, maxf(size.y - FIELD_ROOM_Y, 1.0) / field.y))
 	_board.scale = Vector2.ONE * zoom
-	_board.position = Vector2(size.x * 0.5, (size.y - field.y * zoom) * 0.5 + FIELD_DROP)
+	_board.position = Vector2(size.x * 0.5, (size.y - field.y * zoom) * 0.5 + FIELD_DROP - (TOUCH_RAISE if _touch else 0.0))
 	_fx.target = _hud.rest_target()
 
 
 func _gui_input(event: InputEvent) -> void:
 	if not Night.active:
 		return
-	if event is InputEventScreenDrag:  # 끈 만큼만 (가장자리에서 막혀도 되돌아올 때 바로 따라온다)
-		Night.set_cloud(Night.cloud + Iso.to_grid(Vector2.ZERO, event.relative / _board.scale.x))
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if not _touch:
+			_touch = true
+			_layout()
+		if event is InputEventScreenDrag or (event as InputEventScreenTouch).pressed:
+			_move_cloud(event.position - Vector2(0.0, TOUCH_LIFT))  # 구름은 늘 손가락 위
 	elif (event is InputEventMouseMotion or event is InputEventMouseButton) and event.device != InputEvent.DEVICE_ID_EMULATION:
 		_move_cloud(event.position)  # 터치가 흉내 낸 마우스 이벤트는 건너뛴다 (손가락 위치로 두 번 옮겨 떨린다)
 
