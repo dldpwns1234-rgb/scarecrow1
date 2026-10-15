@@ -6,7 +6,6 @@ const NightPalette := preload("res://scenes/night/night_palette.gd")
 const FONT_SIZE: int = 34
 const COLOR := Color("efe3c4")
 const TOP: float = 0.09         # 화면 높이의 이만큼 아래 (위 표시줄과 큰 밭 사이의 하늘 자리)
-const TOP_WEATHER: float = 0.15 # 날씨가 있는 밤: 위 표시줄 아래 날씨 안내(night_hud) 밑으로
 const FADE_IN: float = 0.8
 const HOLD: float = 2.2
 const FADE_OUT: float = 1.0
@@ -32,7 +31,10 @@ func _on_night_started() -> void:
 	if index == _last:
 		return
 	_last = index
-	text = "— %s —" % NightPalette.THEMES[index]["name"]
+	var name: String = NightPalette.THEMES[index]["name"]
+	if Night.has_weather(Balance.Weather.MOON):  # 보름달 철엔 하늘 달이 꽉 찬 달이라 이름도 (night_backdrop.gd)
+		name = "보름달 밤"
+	text = "— %s —" % name
 	_place()
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, FADE_IN)
@@ -42,4 +44,4 @@ func _on_night_started() -> void:
 
 func _place() -> void:
 	var parent_size := get_parent_area_size()
-	position.y = parent_size.y * (TOP_WEATHER if Night.weathers != 0 else TOP)
+	position.y = parent_size.y * TOP  # 별빛의 날씨·도깨비불 안내 줄(night_hud BOON_DROP)은 이 글 아래에 선다
