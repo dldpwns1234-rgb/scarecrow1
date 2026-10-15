@@ -9,7 +9,8 @@ const TreeBoard := preload("res://scenes/day/tree_board.gd")
 
 const GAP: int = 12
 const DETAIL_HEIGHT: float = 96.0
-const BUY_SIZE := Vector2(240, 64)
+const BUY_SIZE := Vector2(220, 64)
+const MAX_SIZE := Vector2(130, 64)  # '최대' 단추 (레벨 끝없는 칸을 한 번씩 수십 번 누르지 않게, #628)
 const CORNER_BUTTON_SIZE := Vector2(116, 42)
 const CORNER_MARGIN: float = 10.0  # 판 모서리에서 단추까지
 const NOTE_COLOR := Color("b8bcc8")
@@ -22,6 +23,7 @@ var _board: TreeBoard
 var _detail_title: Label
 var _detail_note: Label
 var _buy: Button
+var _max: Button
 var _selected: int = -1  # -1이면 가운데 (어둠의 계약)
 
 
@@ -84,6 +86,13 @@ func _make_detail() -> PanelContainer:
 		if Upgrades.buy(_selected):
 			_board.pulse(_selected))
 	row.add_child(_buy)
+	_max = Button.new()
+	_max.custom_minimum_size = MAX_SIZE
+	_max.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_max.pressed.connect(func() -> void:
+		if Upgrades.buy_max(_selected) > 0:
+			_board.pulse(_selected))
+	row.add_child(_max)
 	return panel
 
 
@@ -100,6 +109,7 @@ func _recenter() -> void:
 func _refresh() -> void:
 	_board.refresh(_texts(), _styles(), _tints())
 	_buy.visible = _selected >= 0
+	_max.visible = _selected >= 0
 	if _selected < 0:
 		_detail_title.text = "어둠의 계약"
 		_detail_note.text = CONTRACT_NOTE
@@ -109,6 +119,10 @@ func _refresh() -> void:
 	_buy.text = "최대" if Upgrades.is_maxed(_selected) else "구매 (생기 %s)" % Num.format(Upgrades.cost(_selected))
 	_buy.disabled = not Upgrades.can_buy(_selected)
 	_buy.theme_type_variation = "AccentButton" if not _buy.disabled else ""
+	var count := affordable_levels(_selected)
+	_max.text = "최대 ×%d" % count if count > 0 else "최대"
+	_max.disabled = count < 2  # 하나뿐이면 왼쪽 구매와 같다
+	_max.theme_type_variation = "AccentButton" if not _max.disabled else ""
 
 
 func _texts() -> PackedStringArray:
@@ -135,3 +149,18 @@ func _tints() -> Array[Color]:
 	for i in Balance.UPGRADES.size():
 		tints.append(Color.WHITE if Upgrades.level(i) > 0 or Upgrades.can_buy(i) else LOCKED_TINT)
 	return tints
+
+
+## 지금 생기로 그 칸을 몇 레벨까지 살 수 있는지 (최대 단추의 ×N, Upgrades.buy_max와 같은 한계)
+static func affordable_levels(index: int) -> int:
+	var left := Game.vitality
+	var level := Upgrades.level(index)
+	var cap := Balance.upgrade_max_level(index)
+	var count := 0
+	while count < Balance.BUY_MAX_LIMIT and (cap <= 0 or level + count < cap):
+		var price := Balance.upgrade_cost(index, level + count)
+		if price > left:
+			break
+		left -= price
+		count += 1
+	return count if Upgrades.is_unlocked(index) else 0
