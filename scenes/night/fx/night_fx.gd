@@ -7,6 +7,7 @@ const Sparks := preload("res://scenes/night/fx/sparks.gd")
 const ComboMeter := preload("res://scenes/night/fx/combo_meter.gd")
 const SkillCallout := preload("res://scenes/night/fx/skill_callout.gd")
 const NightTitle := preload("res://scenes/night/fx/night_title.gd")
+const FingerGuide := preload("res://scenes/night/fx/finger_guide.gd")
 const Iso := preload("res://scenes/night/iso.gd")
 
 const FLASH_ALPHA: float = 0.28
@@ -29,7 +30,10 @@ var field: Node2D:
 		field = value
 		if _sparks != null:
 			_sparks.field = value
+		if _guide != null:
+			_guide.field = value
 var _sparks: Sparks
+var _guide: FingerGuide
 var _meter: ComboMeter
 var _flash: ColorRect
 var _banner: Label
@@ -44,6 +48,9 @@ func _ready() -> void:
 	add_child(_sparks)
 	add_child(SkillCallout.new())  # 저절로 터진 스킬 이름
 	add_child(NightTitle.new())  # 밭 단계 팔레트가 바뀐 밤의 이름
+	_guide = FingerGuide.new()  # 폰: 손가락 고리와 구름까지 점선 (방장 #639)
+	_guide.field = field
+	add_child(_guide)
 	_meter = ComboMeter.new()
 	_meter.burst.connect(_on_burst)
 	add_child(_meter)
