@@ -15,31 +15,35 @@
 ```
 res://
   autoload/
-    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(어둠의 나무) → crops(작물 종류) → night(밭·구름·번짐·까마귀)
-                 → farmer(지키는 이·수확일) → skills(밤 스킬) → workers(아지트 일꾼) → winter(겨울잠·꿈의 상점) → story(이야기 조각 10개의 조건·문안, 윤슬) → balance.gd(밤 길이, 약속된 휴식).
+    balance.gd   (Balance) 모든 수치와 공식. balance/ 아래를 상속으로 이어 붙인다: core(숫자 한계, cap) → upgrades(어둠의 나무 64칸) → crops(작물 종류) → night(밭·구름·번짐·까마귀)
+                 → farmer(지키는 이·수확일) → skills(밤 스킬) → branches(나무 둘째 묶음의 효과) → wisp(도깨비불) → feats(작물 숙련·업적) → weather(철마다 날씨)
+                 → workers(아지트 일꾼) → winter(겨울잠·꿈의 상점) → story(이야기 조각 10개의 조건·문안과 마을 소문, 윤슬. 소문 문안은 balance/rumors.gd) → balance.gd(밤 길이, 약속된 휴식).
                  앞 스크립트는 뒤 스크립트의 것을 못 본다. 바깥에서는 Balance.만 쓴다
     num.gd       (Num) 한국식 숫자 표기 (회귀 용사 그대로)
     upgrades.gd  (Upgrades) 어둠의 나무 레벨, 열림(앞 업그레이드), 구매
     game.gd      (Game) 낮·밤 전환, 생기(재화)와 바친 생기 합(약속된 휴식), 밤 기록. 밤 쪽은 작물이 시들면 add_vitality(), 시간이 끝나면 finish_night()를 부른다
     night.gd     (Night) 밤 한 판의 규칙. night/ 아래를 상속으로 잇는다: levels(밭 단계·자동 넘김) → field(밭) → planting(심기) → critters(까마귀·지키는 이)
-                 → skills(밤 스킬) → crops(수박·해바라기·포도) → waves(시듦·정복·물결) → night.gd
+                 → skills(밤 스킬) → crops(수박·해바라기·포도) → waves(시듦·정복·물결) → wisp(도깨비불) → weather(서리·장마·보름달) → night.gd
     winter.gd    (Winter) 겨울잠(회귀)과 꿈 조각·꿈의 상점
     workers.gd   (Workers) 아지트 일꾼: 까마귀·지친 허수아비의 일자리 배치와 효과, 헛간 확장
+    feats.gd     (Feats) 작물 숙련과 업적 (겨울잠을 넘어 남는다)
     story.gd     (Story) 첫 실행 장면을 봤는지, 이야기 조각의 열린 수(줄지 않는다)·본 수
     prefs.gd     (Prefs) 소리 켬/끔과 음량
     save.gd      (Save) 저장·불러오기·내보내기·가져오기·초기화. 저장할 오토로드를 늘리면 to_dict·from_dict·reset_data 세 곳을 함께 고친다. save/web_hooks.gd가 브라우저 이벤트로 저장한다
-    sfx.gd       (Sfx) 효과음·배경음. 시그널만 받는다. sfx/player.gd(버스·동시 재생 수·곡 교차 페이드·웹 첫 입력 잠금) → sfx/layers.gd(밤 곡의 겹 음량) 를 상속한다
+    sfx.gd       (Sfx) 효과음·배경음. 시그널만 받는다. sfx/player.gd(버스·동시 재생 수·곡 교차 페이드·웹 첫 입력 잠금) → sfx/layers.gd(밤 곡의 겹 음량)를 상속한다
   scenes/
     main.tscn, main.gd  화면 전체. 낮이면 day, 밤이면 night만 보이고, 그 위에 결과 알림·첫 밤 안내·이야기 다시 읽기·조각 카드·첫 실행 장면을 겹친다
-    day/         day_screen(헛간: 짚돌이·생기·약속된 휴식·밤 기록·밭 단계·밤으로 나가기, 왼쪽 위 이야기·소리 버튼), upgrade_tree(어둠의 나무: tree_board·tree_layout),
-                 portrait(숨 쉬는 짚돌이와 어깨의 까마귀), field_picker(밭 단계 고르기), night_report(지난 밤 결과), dream_shop·winter_confirm(겨울잠), hideout·job_row·worker_token(아지트)
-    night/       night_screen(밤 밭)
+    day/         day_screen(헛간: 짚돌이·생기·약속된 휴식(promise_marks: 이야기 조각·결말 눈금)·밤 기록·밭 단계·밤으로 나가기, 왼쪽 위 이야기·설정 버튼, 탭 칩 아래 마을 소문 rumor_line),
+                 upgrade_tree(어둠의 나무: tree_board·tree_pan_zoom·tree_layout·card_fx), portrait(숨 쉬는 짚돌이와 어깨의 까마귀), field_picker(밭 단계 고르기), night_report(지난 밤 결과),
+                 dream_shop·winter_confirm(겨울잠), hideout·job_row·worker_token(아지트), feats_page(업적, 첫 겨울잠 뒤)·codex_page(작물 도감, 둘째 겨울잠 뒤)
+    night/       night_screen(밤 밭, 별빛). night_backdrop·field_ground는 night_palette(밭 단계마다 밤 겉모습)를 따른다. fx/(윤슬): night_fx(풍작 콤보 combo_meter·알갱이 sparks·스킬 이름·새 밤 이름 night_title)
     ui/          refresh_gate(시그널은 표시만, 보일 때 프레임당 한 번 갱신), tap_scroll(버튼 위에서도 끌어 스크롤), sub_tabs(칩 줄 하위 탭) — 회귀 용사에서 옮겨 옴.
-                 intro_card(첫 실행 장면), night_hint(첫 밤 안내), story_card(이야기 조각 카드), story_book(다시 읽기), ending_scene(엔딩), winter_scene(겨울잠 전환), settings_panel·sound_panel(설정), korean_text(한글 줄바꿈·조사)
+                 intro_card(첫 실행 장면), night_hint(첫 밤 안내), story_card(이야기 조각 카드), story_book(다시 읽기), ending_scene(엔딩), winter_scene(겨울잠 전환), settings_panel·sound_panel(설정),
+                 feat_toast(업적 알림), korean_text(한글 줄바꿈·조사)
   assets/fonts/  한글 글꼴: 주아체 Jua(기본, OFL, 라이선스 Jua-OFL.txt)와 주아체에 없는 글자를 대신 그리는 Noto Sans KR. 테마(tools/theme_art.gd)가 정한다
   assets/ui/theme.tres  전체 테마. 손으로 고치지 않는다: tools/make_theme.gd의 상수를 고치고 다시 만든다
   tools/make_theme.gd   테마 생성기 (`--headless --path . --script tools/make_theme.gd`)
-  tools/make_sfx.gd, make_music.gd  효과음 25개·배경음 3곡(day·harvest, 밤 곡은 겹 다섯 night_*.wav를 night_layers.tres가 묶는다) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
+  tools/make_sfx.gd, make_music.gd  효과음 29개(레시피 2부 sfx_recipes.gd)·배경음 3곡(day·harvest, 밤 곡은 겹 다섯 night_*.wav를 night_layers.tres가 묶는다) 생성기. 합성 도구는 tools/synth.gd. WAV는 손으로 고치지 않고 상수를 고친 뒤 다시 만들고 `--import`
   tests/run_tests.tscn  헤드리스 테스트 러너. test_case.gd를 상속한 스위트를 돌린다
   icon.svg       짚돌이 (아이콘이자 헛간 초상화)
 ```
