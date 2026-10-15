@@ -62,14 +62,14 @@ func _grow(index: int) -> void:
 		hp[index] = max_hp[index]
 
 
-## 서리 ×4, 달빛 ×3
-func crop_vitality(index: int, rotten: bool = false) -> float:
-	var value := super(index, rotten)
+## 칸 몫에 서리 ×4, 달빛 ×3
+func _cell_factor(index: int, rotten: bool) -> float:
+	var factor := super(index, rotten)
 	if is_frosted(index):
-		value *= Balance.FROST_VITALITY
+		factor *= Balance.FROST_VITALITY
 	if in_moonlight(index):
-		value *= Balance.MOON_VITALITY
-	return Balance.cap(value)
+		factor *= Balance.MOON_VITALITY
+	return factor
 
 
 ## 장마: 비 오는 동안 구름이 커진다

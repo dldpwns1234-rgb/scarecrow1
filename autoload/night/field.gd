@@ -95,17 +95,42 @@ func neighbors(index: int) -> Array[int]:
 
 ## 이 칸의 작물을 시들게 하면 받는 생기 (그 작물의 칸·수확일·썩은 냄새·꿈속 수확 배율 포함).
 ## rotten이면 번진 채 시들었다 (끈적한 포자). 다시 자란 작물(무성한 뿌리), 까마귀가 쪼아 시든 작물(썩은 고기), 물결의 기세, 도깨비 잔치, 업적, 작물 숙련도 곱한다
+## 종류 몫(kind_vitality) × 칸 몫(_cell_factor)으로 나눠 잰다: 칸마다 다 재면 까마귀 왕이 쫄 때마다 324칸 × 업그레이드 조회라 뒤쪽 철에 박자 하나가 26ms였다
 func crop_vitality(index: int, rotten: bool = false) -> float:
-	var bonus := Balance.crop_bonus_upgrade(kinds[index])
-	var value := Balance.crop_vitality(kinds[index], field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(bonus) if bonus >= 0 else 0)
+	return Balance.cap(kind_vitality(kinds[index]) * _cell_factor(index, rotten))
+
+
+## 작물 종류마다 같은 몫: 그 작물의 칸·밭 단계·비옥한 어둠·수확일·꿈속 수확·썩은 냄새·지금 치는 쪽(썩은 고기)·물결의 기세·도깨비 잔치·업적·숙련
+func kind_vitality(kind: int) -> float:
+	var bonus := Balance.crop_bonus_upgrade(kind)
+	var value := Balance.crop_vitality(kind, field_level, Upgrades.level(Balance.Upgrade.FERTILE), Upgrades.level(bonus) if bonus >= 0 else 0)
 	value *= Balance.harvest_vitality(field_level, Upgrades.level(Balance.Upgrade.BOUNTY)) * Winter.vitality_multiplier()
 	value *= Balance.vitality_multiplier(Upgrades.level(Balance.Upgrade.ROT_VALUE)) * _kill_bonus * _wave_multiplier() * _boon_multiplier()
-	value *= Feats.vitality_multiplier() * Feats.mastery_multiplier(kinds[index])  # 업적·작물 숙련 (겨울잠을 넘어 남는다)
+	return value * Feats.vitality_multiplier() * Feats.mastery_multiplier(kind)  # 업적·작물 숙련 (겨울잠을 넘어 남는다)
+
+
+## 칸마다 다른 몫: 번진 채 시듦(끈적한 포자), 다시 자람(무성한 뿌리). night/weather.gd가 서리·달빛을 더 곱한다
+func _cell_factor(index: int, rotten: bool) -> float:
+	var factor := 1.0
 	if rotten:
-		value *= Balance.sticky_multiplier(Upgrades.level(Balance.Upgrade.STICKY))
+		factor *= Balance.sticky_multiplier(Upgrades.level(Balance.Upgrade.STICKY))
 	if index < regrown.size() and regrown[index] == 1:
-		value *= Balance.roots_multiplier(Upgrades.level(Balance.Upgrade.ROOTS))
-	return Balance.cap(value)
+		factor *= Balance.roots_multiplier(Upgrades.level(Balance.Upgrade.ROOTS))
+	return factor
+
+
+## 칸마다 지금 시들면 받는 생기 (맨땅은 0, alive_only면 시든 칸도 0). 종류 몫은 종류마다 한 번만 잰다 (까마귀 왕·도깨비 주머니·봇)
+func cell_values(alive_only: bool = true) -> PackedFloat64Array:
+	var values := PackedFloat64Array()
+	values.resize(kinds.size())
+	var by_kind: Dictionary = {}
+	for i in kinds.size():
+		if kinds[i] == EMPTY or (alive_only and not is_alive(i)):
+			continue
+		if not by_kind.has(kinds[i]):
+			by_kind[kinds[i]] = kind_vitality(kinds[i])
+		values[i] = Balance.cap(float(by_kind[kinds[i]]) * _cell_factor(i, false))
+	return values
 
 
 ## night/waves.gd가 채운다 (물결의 기세)

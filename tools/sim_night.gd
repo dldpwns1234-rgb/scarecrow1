@@ -128,11 +128,10 @@ func _best_spot() -> Vector2:
 	var radius := Night.cloud_radius()
 	var size := Night.field_size
 	var reach := ceili(radius)
-	var value := PackedFloat64Array()
-	value.resize(Night.cell_count())
-	for j in Night.cell_count():
-		if Night.is_alive(j):
-			value[j] = Night.crop_vitality(j) / maxf(Night.hp[j], 1e-9)
+	var value := Night.cell_values()  # 종류 몫은 종류마다 한 번만
+	for j in value.size():
+		if value[j] > 0.0:
+			value[j] /= maxf(Night.hp[j], 1e-9)
 	var best := -1.0
 	var spot := Night.cloud
 	for i in Night.cell_count():

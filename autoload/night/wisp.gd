@@ -157,7 +157,6 @@ func _pick_boon() -> int:
 ## 밭 한 판 몫: 이번 밭에 심긴 작물을 모두 시들게 하면 받는 생기 (지금 배율로)
 func _field_value() -> float:
 	var total := 0.0
-	for i in kinds.size():
-		if kinds[i] != EMPTY:
-			total += crop_vitality(i)
+	for value in cell_values(false):
+		total += value
 	return Balance.cap(total)

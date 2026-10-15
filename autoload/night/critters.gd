@@ -103,9 +103,10 @@ func _crow_target() -> int:
 	if count <= 0:
 		return -1
 	if Upgrades.level(Balance.Upgrade.CROW_KING) > 0:
+		var values := cell_values()  # 종류 몫은 종류마다 한 번만
 		var best := -1
-		for i in kinds.size():
-			if is_alive(i) and (best < 0 or crop_vitality(i) > crop_vitality(best)):
+		for i in values.size():
+			if values[i] > 0.0 and (best < 0 or values[i] > values[best]):
 				best = i
 		return best
 	var pick := rng.randi_range(0, count - 1)
@@ -150,12 +151,18 @@ func _next_target() -> Vector2:
 	return Vector2.ONE * field_size * 0.5
 
 
-## 둘레 안의 번진 작물을 씻어 낸다
+## 둘레 안의 번진 작물을 씻어 낸다. 둘레를 감싼 네모 칸만 본다 (밭 전체를 지키는 이마다 박자마다 훑으면 324칸 밭에서 2.4ms였다)
 func _spray(f: int) -> void:
-	for i in kinds.size():
-		if infected[i] == 1 and is_alive(i) and cell_position(i).distance_to(farmers[f]) <= guard_radius(f):
-			infected[i] = 0
-			farmer_sprayed.emit(i)
+	var radius := guard_radius(f)
+	var at := farmers[f]
+	var lo := Vector2i(maxi(floori(at.x - radius), 0), maxi(floori(at.y - radius), 0))
+	var hi := Vector2i(mini(ceili(at.x + radius), field_size - 1), mini(ceili(at.y + radius), field_size - 1))
+	for y in range(lo.y, hi.y + 1):
+		for x in range(lo.x, hi.x + 1):
+			var i := y * field_size + x
+			if infected[i] == 1 and is_alive(i) and cell_position(i).distance_to(at) <= radius:
+				infected[i] = 0
+				farmer_sprayed.emit(i)
 
 
 ## 둘레 안의 시든 칸 하나에 다시 심는다 (가장 가까운 칸)
