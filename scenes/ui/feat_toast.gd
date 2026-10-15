@@ -5,6 +5,7 @@ extends PanelContainer
 const FeatsPage := preload("res://scenes/day/feats_page.gd")
 const WIDTH: float = 420.0
 const BOTTOM: float = 28.0      # 화면 아래에서
+const NIGHT_BOTTOM: float = 96.0 # 밤에는 새벽까지 쉬기 단추 위로
 const LEFT_SPAN: float = 468.0  # 낮 화면 왼쪽 열 (밤으로 나가기 단추를 가리지 않게 오른쪽 열 가운데에, night_report.gd와 같다)
 const SHOW_SECONDS: float = 2.6
 const FADE: float = 0.3
@@ -54,7 +55,7 @@ func _show_next() -> void:
 	reset_size()
 	size.x = WIDTH
 	var area := get_parent_area_size()
-	position = Vector2(LEFT_SPAN + (area.x - LEFT_SPAN - WIDTH) * 0.5, area.y - size.y - BOTTOM)
+	position = Vector2(LEFT_SPAN + (area.x - LEFT_SPAN - WIDTH) * 0.5, area.y - size.y - (NIGHT_BOTTOM if Game.is_night() else BOTTOM))
 	visible = true
 	modulate.a = 0.0
 	Sfx.play("feat")

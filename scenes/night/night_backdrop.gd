@@ -2,6 +2,7 @@ extends Control
 ## 밤 화면의 맨 아래층 (night_screen.gd): 하늘(위는 짙은 남색, 지평선은 푸르게), 반짝이는 별, 초승달과 달무리, 지평선의 먼 언덕·가까운 언덕, 그 앞의 어두운 들판.
 ## 밭은 들판 위에 놓인 두둑처럼 보인다 (별하늘에 떠 있으면 게임판 같았다, 방장 2026-10-15 '진짜 게임처럼'). 입력은 받지 않는다. 상수는 연출용이다
 ## 색·달 모양·별 수는 그 밤의 밭 단계에 맞는 팔레트(night_palette.gd)를 따른다: 밭이 깊어질수록 더 깊은 밤 (방장 #587). 밤이 시작될 때 다시 고른다.
+## 철마다 날씨(별빛 9650eda, #603): 보름달 철엔 하늘 달이 꽉 찬 달, 장마 철엔 비가 오는 동안 하늘이 어둑해진다 (서리는 땅 field_ground.gd).
 ## 모두 크기가 바뀔 때만 그린다. 별은 세 무리로 나눠 한 번 그리고, 무리마다 투명도만 바꿔 반짝인다 (별·언덕을 매 프레임 다시 그리면 1.5ms 넘게 들었다)
 
 const NightPalette := preload("res://scenes/night/night_palette.gd")
@@ -13,6 +14,10 @@ const MOON_RADIUS: float = 34.0
 const MOON_POINTS: int = 48
 const HALO_RADIUS: float = 5.0             # 달무리(가운데에서 바깥으로 사라지는 빛. 원을 겹쳐 그리면 띠가 보였다)가 달 반지름의 이만큼까지
 const ECLIPSE_RING: float = 3.0           # 검은 달의 빛 테 두께
+const FULL_MOON := Color("fff6d8")         # 보름달 철의 달
+const FULL_HALO_ALPHA: float = 0.55
+const RAIN_DIM := Color(0.5, 0.55, 0.66)   # 비가 오는 동안 배경 전체에 곱한다
+const RAIN_FADE: float = 1.2
 const HORIZON: float = 0.42                # 지평선 높이 (화면 비율)
 const HILL_POINTS: int = 48
 
@@ -21,6 +26,7 @@ var _halo: GradientTexture2D
 var _groups: Array[Control] = []  # 별 무리 (투명도로 반짝인다)
 var _clock: float = 0.0
 var _theme: Dictionary = NightPalette.THEMES[0]
+var _rain_tween: Tween
 
 
 func _ready() -> void:
@@ -48,13 +54,32 @@ func _ready() -> void:
 		_groups.append(group)
 	resized.connect(_redraw_all)
 	Night.night_started.connect(_apply_theme)
+	Night.rain_changed.connect(_on_rain)
 	_apply_theme()
 
 
 ## 그 밤의 밭 단계에 맞는 팔레트로 다시 그린다
 func _apply_theme() -> void:
-	_theme = NightPalette.theme_for(Night.field_level)
+	_theme = NightPalette.theme_for(Night.field_level).duplicate()
+	if Night.has_weather(Balance.Weather.MOON):  # 보름달 철: 어느 밤이든 꽉 찬 달
+		_theme["moon_cut"] = Vector3.ZERO
+		_theme["eclipse"] = false
+		_theme["moon"] = FULL_MOON
+		_theme["halo"] = Color(_theme["halo"], FULL_HALO_ALPHA)
+	_on_rain(Night.raining, true)
 	_redraw_all()
+
+
+## 비가 오면 하늘(배경 전체)을 어둑하게, 그치면 되돌린다
+func _on_rain(raining: bool, instant: bool = false) -> void:
+	var target := RAIN_DIM if raining else Color.WHITE
+	if _rain_tween != null:
+		_rain_tween.kill()
+	if instant:
+		modulate = target
+		return
+	_rain_tween = create_tween()
+	_rain_tween.tween_property(self, "modulate", target, RAIN_FADE)
 
 
 func _redraw_all() -> void:
